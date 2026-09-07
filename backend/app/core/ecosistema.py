@@ -22,21 +22,21 @@ class Pieza:
 
 PIEZAS: tuple[Pieza, ...] = (
     Pieza(Producto.GABAME, "GABAME", "sitio", Empresa.GABAME, "https://gabame.com",
-          (Realm.ID, Realm.PARTNERS), "Sitio ancla del grupo y origen del area medica."),
+          (Realm.ID, Realm.PARTNERS), "Sitio institucional de GABAME."),
     Pieza(Producto.MEDINTER, "Medinter", "sitio", Empresa.MEDINTER, "https://medinter.com.mx",
-          (Realm.PARTNERS,), "Publico institucional y licitaciones."),
+          (Realm.PARTNERS,), "Sector institucional y licitaciones."),
     Pieza(Producto.ORDAN, "Ordan", "sitio", Empresa.ORDAN, "https://ordan.com.mx",
           (Realm.ID, Realm.PARTNERS), "Distribucion de Babe y Sheglam."),
     Pieza(Producto.A7, "A7 Pharmaceutical Distributor", "sitio", Empresa.A7, "https://a7siete.com",
           (Realm.PARTNERS,), "Logistica y distribucion."),
     Pieza(Producto.TIENDAGABAME, "Farmacias GABAME", "tienda", Empresa.GABAME, "https://tiendagabame.com",
-          (Realm.ID, Realm.PARTNERS), "Marketplace Rx/OTC. Cuentas propias hasta la Fase 6."),
+          (Realm.ID, Realm.PARTNERS), "Farmacia en linea Rx y OTC."),
     # Pendiente 0.6 — dominio de Aurashop no documentado
     Pieza(Producto.AURASHOP, "Aurashop", "tienda", Empresa.ORDAN, None,
           (Realm.ID,), "Marketplace de belleza de Ordan."),
     # MB-V005: no existe todavia
     Pieza(Producto.APP_PACIENTE, "App de paciente", "app", None, None,
-          (Realm.ID,), "Consumira esta identidad cuando exista."),
+          (Realm.ID,), "Proximamente."),
 )
 
 
