@@ -1,0 +1,12 @@
+{
+  "comun": {
+    "nombrePortal": "Cuenta GABAME",
+    "iniciarSesion": "Iniciar sesion",
+    "crearCuenta": "Crear cuenta",
+    "cerrarSesion": "Cerrar sesion",
+    "saltarAlContenido": "Saltar al contenido",
+    "navegacionPrincipal": "Principal",
+    "menu": "Menu",
+    "abrirMenu": "Abrir menu de navegacion"
+  }
+}
