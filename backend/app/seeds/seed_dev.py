@@ -1,10 +1,11 @@
-"""Seed local: un usuario dummy por rol. Solo para desarrollo. Idempotente.
+"""Seed: un usuario dummy por rol. Idempotente. Para local y staging, nunca produccion.
 
     python -m app.seeds.seed_dev
 
-Contrasena de todos: Local123!
+Contrasena de todos: SEED_PASSWORD si esta definida; si no, Local123! (solo local).
 """
 
+import os
 from datetime import UTC, datetime
 
 from sqlalchemy import select
@@ -16,7 +17,7 @@ from app.db.session import SessionLocal
 from app.models import PerfilMedico, PerfilPartner, Usuario, UsuarioRol
 from app.services.origen import registrar_origen
 
-PASSWORD = "Local123!"
+PASSWORD = os.environ.get("SEED_PASSWORD") or "Local123!"
 
 
 def _usuario(db: Session, email: str, nombre: str, apellidos: str, realm: Realm) -> Usuario:

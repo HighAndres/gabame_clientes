@@ -27,6 +27,10 @@ class Settings(BaseSettings):
 
     SMTP_HOST: str = "localhost"
     SMTP_PORT: int = 1025
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    # STARTTLS cuando hay usuario (SMTP real); Mailhog va sin TLS
+    SMTP_TLS: bool = True
     EMAIL_FROM: str = "no-reply@localhost"
     # "smtp" en local (Mailhog); "memoria" en pruebas: los correos se guardan en una lista
     EMAIL_MODO: str = "smtp"
@@ -37,6 +41,9 @@ class Settings(BaseSettings):
 
     # Limite de intentos en auth (memoria de proceso, nunca persistido). Ver app/core/ratelimit.py
     RATE_LIMIT_ACTIVO: bool = True
+
+    # Aceptar correos @*.test (usuarios del seed). None = solo fuera de produccion; staging lo fuerza a 1
+    PERMITIR_TLD_TEST: bool | None = None
 
     @property
     def cors_origins(self) -> list[str]:
@@ -58,9 +65,16 @@ if settings.ENVIRONMENT == "production":
         raise RuntimeError("SECRET_KEY invalida para produccion: genera una de 32+ bytes")
     if "cambiar_en_local" in settings.DATABASE_URL:
         raise RuntimeError("DATABASE_URL de produccion con credenciales de ejemplo")
-else:
-    # Los correos del seed usan el TLD reservado `.test` (@local.test), que email-validator
-    # rechaza por defecto. Solo fuera de produccion.
+
+# Los correos del seed usan el TLD reservado `.test` (@local.test), que email-validator rechaza
+# por defecto. Se permite en local y, explicitamente, en staging (PERMITIR_TLD_TEST=1).
+# En produccion real no: ninguna cuenta de prueba debe poder entrar.
+_permitir_tld_test = (
+    settings.PERMITIR_TLD_TEST
+    if settings.PERMITIR_TLD_TEST is not None
+    else settings.ENVIRONMENT != "production"
+)
+if _permitir_tld_test:
     import email_validator
 
     email_validator.TEST_ENVIRONMENT = True

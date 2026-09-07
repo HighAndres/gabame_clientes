@@ -18,6 +18,8 @@ const cabecerasSeguridad = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Imagen Docker minima (frontend/Dockerfile)
+  output: "standalone",
   async headers() {
     return [{ source: "/(.*)", headers: cabecerasSeguridad }];
   },

@@ -17,6 +17,7 @@ venv/
 # Entorno y secretos (NUNCA se commitea nada real)
 .env
 .env.local
+.env.staging
 .env.*.local
 *.pem
 *.key

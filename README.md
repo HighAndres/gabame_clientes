@@ -7,6 +7,7 @@ Interno **Mirmibug IT Solutions**. Desarrollo 100% local; repo y despliegue desp
 - Arquitectura: [`docs/arquitectura.md`](docs/arquitectura.md)
 - Modelo de datos: [`docs/modelo-datos.md`](docs/modelo-datos.md)
 - Decisiones (ADR): [`docs/decisiones/`](docs/decisiones/)
+- Staging para el cliente: [`docs/staging.md`](docs/staging.md)
 - Salida de local: [`docs/despliegue.md`](docs/despliegue.md)
 
 ## Reglas duras del proyecto

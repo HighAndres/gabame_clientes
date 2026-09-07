@@ -1,0 +1,28 @@
+# Proxy inverso de staging. TLS automatico con Let's Encrypt (DNS apuntando a la VPS).
+# Variables: DOMINIO, CORREO_USUARIO, CORREO_PASSWORD_HASH (docker-compose.staging.yml).
+
+{$DOMINIO} {
+	encode gzip
+
+	# Documentos de partners: mismo limite que UPLOAD_MAX_MB del backend
+	request_body {
+		max_size 12MB
+	}
+
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+}
+
+# Buzon de pruebas para que los testers vean sus correos de verificacion.
+# Protegido con usuario y contrasena: no es publico.
+correo.{$DOMINIO} {
+	basicauth {
+		{$CORREO_USUARIO} {$CORREO_PASSWORD_HASH}
+	}
+	reverse_proxy mailhog:8025
+}

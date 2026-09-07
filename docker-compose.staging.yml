@@ -1,0 +1,92 @@
+# Staging para validacion del cliente. Un solo comando en la VPS:
+#   cp .env.staging.example .env.staging   (y llenar)
+#   ./scripts/staging.sh up
+#
+# Caddy termina TLS (Let's Encrypt) y enruta:
+#   https://$DOMINIO           -> frontend
+#   https://$DOMINIO/api/*     -> backend
+#   https://correo.$DOMINIO    -> Mailhog (buzon de pruebas, con usuario y contrasena)
+# Ningun puerto de app o BD queda expuesto a internet.
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gabame}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?define POSTGRES_PASSWORD en .env.staging}
+      POSTGRES_DB: ${POSTGRES_DB:-clientes_gabame}
+    volumes:
+      - staging-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gabame} -d ${POSTGRES_DB:-clientes_gabame}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-gabame}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-clientes_gabame}
+      SECRET_KEY: ${SECRET_KEY:?define SECRET_KEY en .env.staging}
+      BACKEND_CORS_ORIGINS: https://${DOMINIO:?define DOMINIO en .env.staging}
+      FRONTEND_URL: https://${DOMINIO}
+      SMTP_HOST: ${SMTP_HOST:-mailhog}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM: ${EMAIL_FROM:-no-reply@${DOMINIO}}
+      UPLOADS_DIR: /app/uploads
+      SEED_AL_ARRANCAR: ${SEED_AL_ARRANCAR:-1}
+      SEED_PASSWORD: ${SEED_PASSWORD:-}
+      # Staging: las cuentas de prueba usan @local.test. En produccion real esto NO se pone.
+      PERMITIR_TLD_TEST: "1"
+    volumes:
+      - staging-uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: https://${DOMINIO}
+        NEXT_PUBLIC_ENVIRONMENT: production
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      JWT_SECRET: ${SECRET_KEY}
+      NEXT_PUBLIC_API_URL: https://${DOMINIO}
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMINIO: ${DOMINIO}
+      CORREO_USUARIO: ${CORREO_USUARIO:-gabame}
+      CORREO_PASSWORD_HASH: ${CORREO_PASSWORD_HASH:?genera con ./scripts/staging.sh hash}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - staging-caddy-data:/data
+      - staging-caddy-config:/config
+    depends_on:
+      - frontend
+      - backend
+      - mailhog
+
+volumes:
+  staging-postgres:
+  staging-uploads:
+  staging-caddy-data:
+  staging-caddy-config:

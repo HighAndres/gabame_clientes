@@ -23,7 +23,11 @@ def enviar_correo(destinatario: str, asunto: str, texto: str) -> None:
     msg["To"] = destinatario
     msg["Subject"] = asunto
     msg.set_content(texto)
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10) as smtp:
+    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=15) as smtp:
+        if settings.SMTP_USER:
+            if settings.SMTP_TLS:
+                smtp.starttls()
+            smtp.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
         smtp.send_message(msg)
 
 
