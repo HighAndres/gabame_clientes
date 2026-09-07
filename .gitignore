@@ -31,3 +31,4 @@ postgres-data/
 Thumbs.db
 .vscode/
 .idea/
+*.egg-info/
