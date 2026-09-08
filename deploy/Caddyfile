@@ -26,7 +26,8 @@ www.{$DOMINIO} {
 		reverse_proxy mailhog:8025
 	}
 
-	handle /api/* {
+	# Solo el prefijo de FastAPI: las rutas propias de Next (/api/sesion, /api/perfil, /api/backend) siguen a Next
+	handle /api/v1/* {
 		reverse_proxy backend:8000
 	}
 
