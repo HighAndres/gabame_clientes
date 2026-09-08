@@ -1,0 +1,34 @@
+# Variante para VPS donde 80/443 ya los usa otro servidor web (Apache/cPanel) que NO se toca.
+# Caddy escucha en PUERTO_HTTPS con certificado interno (autofirmado). Sirve para:
+#   - poner Cloudflare (proxy) delante: Cloudflare da el HTTPS publico y habla con el origen en este puerto
+#   - o probar directo con https://<DOMINIO>:<PUERTO_HTTPS> aceptando el aviso del navegador
+# Variables: DOMINIO, CORREO_USUARIO, CORREO_PASSWORD_HASH.
+
+{
+	auto_https disable_redirects
+}
+
+{$DOMINIO}, www.{$DOMINIO} {
+	tls internal
+	encode gzip
+
+	request_body {
+		max_size 12MB
+	}
+
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+}
+
+correo.{$DOMINIO} {
+	tls internal
+	basicauth {
+		{$CORREO_USUARIO} {$CORREO_PASSWORD_HASH}
+	}
+	reverse_proxy mailhog:8025
+}

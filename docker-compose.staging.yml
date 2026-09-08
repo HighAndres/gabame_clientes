@@ -69,15 +69,17 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    # Si 80/443 ya los usa otro servidor (Apache, cPanel), cambia PUERTO_HTTP/PUERTO_HTTPS en .env.staging
+    # y usa CADDYFILE=./deploy/Caddyfile.puertos-alternos (ver docs/staging.md).
     ports:
-      - "80:80"
-      - "443:443"
+      - "${PUERTO_HTTP:-80}:80"
+      - "${PUERTO_HTTPS:-443}:443"
     environment:
       DOMINIO: ${DOMINIO}
       CORREO_USUARIO: ${CORREO_USUARIO:-gabame}
       CORREO_PASSWORD_HASH: ${CORREO_PASSWORD_HASH:?genera con ./scripts/staging.sh hash}
     volumes:
-      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${CADDYFILE:-./deploy/Caddyfile}:/etc/caddy/Caddyfile:ro
       - staging-caddy-data:/data
       - staging-caddy-config:/config
     depends_on:

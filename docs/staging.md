@@ -40,6 +40,18 @@ todos los correos (verificacion, recuperacion, decisiones), con el usuario y con
   partner subir documentos y como admin revisarlos; probar `?origen=gabame&ruta=/conocer-mas` y
   `?redirect=https://gabame.com`.
 
+## Si 80 y 443 ya estan ocupados (Apache o cPanel en la VPS)
+
+No se toca ese servidor. En `.env.staging` se ponen `PUERTO_HTTP=8080`, `PUERTO_HTTPS=8443` y
+`CADDYFILE=./deploy/Caddyfile.puertos-alternos`. Caddy ya no puede pedir certificados a Let's Encrypt
+(eso exige 80/443), asi que hay dos formas de tener HTTPS valido:
+
+1. **Cloudflare delante (recomendado).** El DNS de `<DOMINIO>` en Cloudflare con el proxy activado,
+   SSL en modo *Full*, y una regla de origen que mande el trafico al puerto 8443. El cliente entra por
+   `https://<DOMINIO>` sin puerto y con certificado valido; Apache no se entera.
+2. **Directo con puerto.** `https://<DOMINIO>:8443` con certificado interno de Caddy: el navegador
+   avisa la primera vez. Sirve para una demo interna, no para entregarselo al cliente.
+
 ## Operar
 
 ```bash
