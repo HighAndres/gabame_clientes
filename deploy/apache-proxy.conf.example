@@ -1,0 +1,14 @@
+# Include de cPanel para mandar un (sub)dominio a nuestro Caddy en 127.0.0.1:8080.
+# Se copia, sin cambios, a estas dos rutas (una para http y otra para https):
+#   /etc/apache2/conf.d/userdata/std/2_4/<usuario_cpanel>/<dominio>/proxy.conf
+#   /etc/apache2/conf.d/userdata/ssl/2_4/<usuario_cpanel>/<dominio>/proxy.conf
+# y luego: /scripts/rebuildhttpdconf && /scripts/restartsrv_httpd
+# No modifica ningun otro sitio del servidor: cPanel conserva estos includes al regenerar su config.
+
+ProxyPreserveHost On
+ProxyRequests Off
+# AutoSSL valida por aqui: nunca se manda al proxy
+ProxyPass /.well-known/ !
+ProxyPass / http://127.0.0.1:8080/
+ProxyPassReverse / http://127.0.0.1:8080/
+RequestHeader set X-Forwarded-Proto "https"

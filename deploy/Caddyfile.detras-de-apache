@@ -1,0 +1,30 @@
+# Variante para VPS con cPanel/Apache en 80/443 que NO se toca.
+# Apache termina el HTTPS (AutoSSL) y hace ProxyPass a Caddy en el puerto PUERTO_HTTP (8080).
+# Caddy solo habla HTTP interno y enruta por hostname. Variables: DOMINIO, CORREO_USUARIO, CORREO_PASSWORD_HASH.
+
+{
+	auto_https off
+}
+
+http://{$DOMINIO}, http://www.{$DOMINIO} {
+	encode gzip
+
+	request_body {
+		max_size 12MB
+	}
+
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+}
+
+http://correo.{$DOMINIO} {
+	basicauth {
+		{$CORREO_USUARIO} {$CORREO_PASSWORD_HASH}
+	}
+	reverse_proxy mailhog:8025
+}

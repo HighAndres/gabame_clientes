@@ -40,17 +40,21 @@ todos los correos (verificacion, recuperacion, decisiones), con el usuario y con
   partner subir documentos y como admin revisarlos; probar `?origen=gabame&ruta=/conocer-mas` y
   `?redirect=https://gabame.com`.
 
-## Si 80 y 443 ya estan ocupados (Apache o cPanel en la VPS)
+## Si 80 y 443 ya los usa Apache/cPanel (VPS del cliente)
 
-No se toca ese servidor. En `.env.staging` se ponen `PUERTO_HTTP=8080`, `PUERTO_HTTPS=8443` y
-`CADDYFILE=./deploy/Caddyfile.puertos-alternos`. Caddy ya no puede pedir certificados a Let's Encrypt
-(eso exige 80/443), asi que hay dos formas de tener HTTPS valido:
+No se toca Apache ni sus sitios. Apache termina el HTTPS con AutoSSL y pasa el trafico a nuestro
+Caddy en `127.0.0.1:8080` por HTTP interno.
 
-1. **Cloudflare delante (recomendado).** El DNS de `<DOMINIO>` en Cloudflare con el proxy activado,
-   SSL en modo *Full*, y una regla de origen que mande el trafico al puerto 8443. El cliente entra por
-   `https://<DOMINIO>` sin puerto y con certificado valido; Apache no se entera.
-2. **Directo con puerto.** `https://<DOMINIO>:8443` con certificado interno de Caddy: el navegador
-   avisa la primera vez. Sirve para una demo interna, no para entregarselo al cliente.
+1. En `.env.staging`: `PUERTO_HTTP=8080`, `PUERTO_HTTPS=8443`, `CADDYFILE=./deploy/Caddyfile.detras-de-apache`.
+2. `./scripts/staging.sh up` (Caddy queda escuchando en 8080 solo para Apache).
+3. En cPanel, con la cuenta que ya tiene otros subdominios de Mirmibug, crear los dominios
+   `<DOMINIO>` (con su `www`) y `correo.<DOMINIO>`. El DNS de esos nombres ya debe apuntar a la VPS.
+4. Esperar a que AutoSSL emita los certificados (SSL/TLS Status en cPanel, o "Run AutoSSL").
+5. Copiar `deploy/apache-proxy.conf.example` como `proxy.conf` en las carpetas `userdata` de cPanel de
+   cada dominio (rutas dentro del archivo), y regenerar: `/scripts/rebuildhttpdconf && /scripts/restartsrv_httpd`.
+
+Con eso `https://<DOMINIO>` y `https://correo.<DOMINIO>` sirven el portal y el buzon con certificado
+valido, y Apache sigue sirviendo lo demas como siempre.
 
 ## Operar
 
