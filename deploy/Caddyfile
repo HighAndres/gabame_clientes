@@ -1,5 +1,14 @@
 # Proxy inverso de staging. TLS automatico con Let's Encrypt (DNS apuntando a la VPS).
 # Variables: DOMINIO, CORREO_USUARIO, CORREO_PASSWORD_HASH (docker-compose.staging.yml).
+#
+# DNS necesarios (registros A hacia la IP de la VPS):
+#   {$DOMINIO}            portal
+#   www.{$DOMINIO}        redirige al portal
+#   correo.{$DOMINIO}     buzon de pruebas
+
+www.{$DOMINIO} {
+	redir https://{$DOMINIO}{uri} permanent
+}
 
 {$DOMINIO} {
 	encode gzip

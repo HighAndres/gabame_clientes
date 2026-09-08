@@ -1,6 +1,6 @@
 # Staging para validacion del cliente
 
-Ambiente de pruebas en una VPS propia de Mirmibug para que el cliente valide los flujos y cierre
+Ambiente de pruebas (en la VPS del cliente o en una de Mirmibug) para que el cliente valide los flujos y cierre
 los pendientes 0.2 a 0.5. **Datos de prueba, no reales.** Produccion va en infraestructura del
 cliente (`docs/despliegue.md`).
 
@@ -8,7 +8,10 @@ cliente (`docs/despliegue.md`).
 
 - Linux con Docker y el plugin `docker compose` (v2).
 - Puertos 80 y 443 libres y abiertos en el firewall.
-- Dos registros DNS tipo A apuntando a la VPS: `<DOMINIO>` y `correo.<DOMINIO>`.
+- Tres registros DNS tipo A apuntando a la IP de la VPS: `<DOMINIO>`, `www.<DOMINIO>` y `correo.<DOMINIO>`.
+  El dominio puede ser de Mirmibug aunque la VPS sea del cliente (por ejemplo
+  `clientesgabame.mirmiapps.com` apuntando a la IP del cliente): Let's Encrypt valida por HTTP en esa IP.
+  Cuando exista el dominio definitivo (0.6) se cambia `DOMINIO` y el DNS; BD y documentos no se tocan.
 
 ## Levantar
 
