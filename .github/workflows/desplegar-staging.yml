@@ -1,0 +1,52 @@
+name: Desplegar staging
+
+# Manual a proposito: el portal solo se actualiza cuando alguien con acceso al repo
+# da clic en "Run workflow" (o `gh workflow run desplegar-staging.yml`). Ese clic es la
+# autorizacion y queda registrado. Antes de conectarse a la VPS verifica que el CI del
+# commit a desplegar este en verde.
+#
+# Secrets necesarios (Settings -> Secrets and variables -> Actions):
+#   STAGING_SSH_KEY   llave privada ed25519 dedicada (su publica va en authorized_keys de la VPS
+#                     con forced command a scripts/desplegar.sh)
+#   STAGING_HOST      host o IP de la VPS
+#   STAGING_PORT      puerto SSH
+#   STAGING_USER      usuario SSH
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmar:
+        description: 'Escribe DESPLEGAR para actualizar el portal de staging con main'
+        required: true
+        default: ''
+
+concurrency:
+  group: desplegar-staging
+  cancel-in-progress: false
+
+jobs:
+  desplegar:
+    if: github.ref == 'refs/heads/main' && github.event.inputs.confirmar == 'DESPLEGAR'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Verificar que el CI de este commit esta en verde
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ok=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/check-runs" \
+            --jq '[.check_runs[] | select(.name=="backend" or .name=="frontend") | .conclusion] | length == 2 and all(. == "success")')
+          echo "CI en verde: $ok"
+          [ "$ok" = "true" ] || { echo "El CI de ${{ github.sha }} no esta en verde (o no ha terminado). No se despliega."; exit 1; }
+
+      - name: Preparar llave SSH
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/staging && chmod 600 ~/.ssh/staging
+          ssh-keyscan -p "${{ secrets.STAGING_PORT }}" -H "${{ secrets.STAGING_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Desplegar en la VPS
+        run: |
+          ssh -i ~/.ssh/staging -p "${{ secrets.STAGING_PORT }}" \
+            -o BatchMode=yes -o ConnectTimeout=20 \
+            "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}" desplegar

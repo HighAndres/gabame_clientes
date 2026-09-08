@@ -15,7 +15,9 @@ solo enlazan hacia ella.
 Plan de trabajo completo: `docs/plan-plataforma-clientes-gabame.md`. Arquitectura: `docs/arquitectura.md`.
 Modelo de datos: `docs/modelo-datos.md`. Decisiones cerradas: `docs/decisiones/`. Salida de local: `docs/despliegue.md`.
 Staging para validación del cliente (VPS de Mirmibug, datos de prueba): `docs/staging.md`, `docker-compose.staging.yml`,
-`deploy/Caddyfile`, `scripts/staging.sh`. Producción va en infraestructura del cliente, nunca en staging.
+`deploy/Caddyfile`, `scripts/staging.sh`. El portal se actualiza solo con autorización del usuario: workflow manual
+`Desplegar staging` (`.github/workflows/desplegar-staging.yml`) que corre `scripts/desplegar.sh` en la VPS. Nunca
+despliegues por tu cuenta ni automatices ese paso. Producción va en infraestructura del cliente, nunca en staging.
 
 ## El ecosistema: esta plataforma no vive sola
 
@@ -165,7 +167,7 @@ frontend/         Next.js 14
   src/app/api/backend/[...path]  proxy genérico al backend con el token de la cookie (lo usan los componentes cliente)
   src/types/auth.ts  espejo de los enums del backend
 docs/             plan, arquitectura, modelo de datos, ADRs
-scripts/          bootstrap.ps1 (una vez), dev.ps1 (uso diario), staging.sh (VPS)
+scripts/          bootstrap.ps1 (una vez), dev.ps1 (uso diario), staging.sh y desplegar.sh (VPS)
 ```
 
 ## Comandos

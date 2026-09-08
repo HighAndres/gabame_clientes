@@ -56,6 +56,31 @@ Caddy en `127.0.0.1:8080` por HTTP interno.
 Con eso `https://<DOMINIO>` y `https://<DOMINIO>/correo` sirven el portal y el buzon con certificado
 valido, y Apache sigue sirviendo lo demas como siempre.
 
+## Actualizar el portal cuando cambia el repo
+
+El CI corre solo con cada push a `main`. El portal **no** se actualiza solo: lo despliega el
+workflow **Desplegar staging** (Actions -> Desplegar staging -> Run workflow -> escribir `DESPLEGAR`),
+o desde una terminal con `gh workflow run desplegar-staging.yml -f confirmar=DESPLEGAR`. Ese clic es la
+autorizacion y queda registrado. El workflow se niega si el CI del commit no esta en verde, entra a la
+VPS con una llave dedicada y corre `scripts/desplegar.sh` (trae `main`, reconstruye, levanta y verifica
+que la URL publica responda 200).
+
+Configuracion (una sola vez):
+
+1. En la VPS, llave dedicada que solo puede ejecutar el script (forced command):
+
+   ```bash
+   ssh-keygen -t ed25519 -N "" -C "github-desplegar" -f /root/.ssh/github_desplegar
+   echo "command=\"/opt/gabame_clientes/scripts/desplegar.sh\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty $(cat /root/.ssh/github_desplegar.pub)" >> /root/.ssh/authorized_keys
+   chmod +x /opt/gabame_clientes/scripts/desplegar.sh
+   cat /root/.ssh/github_desplegar   # la PRIVADA va al secret STAGING_SSH_KEY
+   ```
+
+2. En GitHub, Settings -> Secrets and variables -> Actions: `STAGING_SSH_KEY` (privada completa),
+   `STAGING_HOST`, `STAGING_PORT`, `STAGING_USER`.
+3. Opcional: Settings -> Environments -> `staging` -> Required reviewers, para que ademas pida
+   aprobacion explicita en la interfaz antes de correr.
+
 ## Operar
 
 ```bash
