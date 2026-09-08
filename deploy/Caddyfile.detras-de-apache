@@ -15,7 +15,7 @@ http://{$DOMINIO}, http://www.{$DOMINIO} {
 
 	# Buzon de pruebas: los testers ven aqui sus correos. Protegido con usuario y contrasena.
 	handle /correo* {
-		basicauth {
+		basic_auth {
 			{$CORREO_USUARIO} {$CORREO_PASSWORD_HASH}
 		}
 		reverse_proxy mailhog:8025

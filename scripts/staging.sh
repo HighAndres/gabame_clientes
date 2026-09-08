@@ -19,6 +19,9 @@ case "${1:-}" in
   up)
     [ -f .env.staging ] || { echo "Falta .env.staging (copia .env.staging.example)"; exit 1; }
     $COMPOSE build --pull
+    # --force-recreate: el Caddyfile va montado como archivo suelto y git lo reemplaza por otro inode;
+    # sin recrear, el contenedor seguiria leyendo la version anterior.
+    $COMPOSE up -d --force-recreate caddy
     $COMPOSE up -d
     echo "Esperando al backend..."
     for _ in $(seq 1 30); do
