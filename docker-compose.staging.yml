@@ -5,7 +5,7 @@
 # Caddy termina TLS (Let's Encrypt) y enruta:
 #   https://$DOMINIO           -> frontend
 #   https://$DOMINIO/api/*     -> backend
-#   https://correo.$DOMINIO    -> Mailhog (buzon de pruebas, con usuario y contrasena)
+#   https://$DOMINIO/correo    -> Mailhog (buzon de pruebas, con usuario y contrasena)
 # Ningun puerto de app o BD queda expuesto a internet.
 
 services:
@@ -27,6 +27,9 @@ services:
   mailhog:
     image: mailhog/mailhog:latest
     restart: unless-stopped
+    environment:
+      # UI y API del buzon bajo https://<DOMINIO>/correo (con usuario y contrasena en Caddy)
+      MH_UI_WEB_PATH: correo
 
   backend:
     build: ./backend

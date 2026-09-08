@@ -12,7 +12,7 @@ COMPOSE="docker compose --env-file .env.staging -f docker-compose.staging.yml"
 
 case "${1:-}" in
   hash)
-    read -r -s -p "Contrasena para correo.<DOMINIO>: " pw; echo
+    read -r -s -p "Contrasena para el buzon /correo: " pw; echo
     docker run --rm caddy:2-alpine caddy hash-password --plaintext "$pw"
     echo "Pega el hash en CORREO_PASSWORD_HASH de .env.staging (entre comillas simples si tiene \$)."
     ;;
@@ -25,7 +25,7 @@ case "${1:-}" in
       if $COMPOSE exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" 2>/dev/null; then
         # shellcheck disable=SC1091
         . ./.env.staging
-        echo "Listo: https://${DOMINIO}   buzon: https://correo.${DOMINIO}"
+        echo "Listo: https://${DOMINIO}   buzon: https://${DOMINIO}/correo"
         exit 0
       fi
       sleep 3

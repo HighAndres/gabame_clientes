@@ -13,6 +13,14 @@ http://{$DOMINIO}, http://www.{$DOMINIO} {
 		max_size 12MB
 	}
 
+	# Buzon de pruebas: los testers ven aqui sus correos. Protegido con usuario y contrasena.
+	handle /correo* {
+		basicauth {
+			{$CORREO_USUARIO} {$CORREO_PASSWORD_HASH}
+		}
+		reverse_proxy mailhog:8025
+	}
+
 	handle /api/* {
 		reverse_proxy backend:8000
 	}
@@ -20,11 +28,4 @@ http://{$DOMINIO}, http://www.{$DOMINIO} {
 	handle {
 		reverse_proxy frontend:3000
 	}
-}
-
-http://correo.{$DOMINIO} {
-	basicauth {
-		{$CORREO_USUARIO} {$CORREO_PASSWORD_HASH}
-	}
-	reverse_proxy mailhog:8025
 }

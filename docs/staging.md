@@ -8,7 +8,7 @@ cliente (`docs/despliegue.md`).
 
 - Linux con Docker y el plugin `docker compose` (v2).
 - Puertos 80 y 443 libres y abiertos en el firewall.
-- Tres registros DNS tipo A apuntando a la IP de la VPS: `<DOMINIO>`, `www.<DOMINIO>` y `correo.<DOMINIO>`.
+- Un registro DNS tipo A `<DOMINIO>` apuntando a la IP de la VPS (y `www.<DOMINIO>` si se quiere).
   El dominio puede ser de Mirmibug aunque la VPS sea del cliente (por ejemplo
   `clientesgabame.mirmiapps.com` apuntando a la IP del cliente): Let's Encrypt valida por HTTP en esa IP.
   Cuando exista el dominio definitivo (0.6) se cambia `DOMINIO` y el DNS; BD y documentos no se tocan.
@@ -25,7 +25,7 @@ chmod +x scripts/staging.sh
 ./scripts/staging.sh up
 ```
 
-Al terminar: `https://<DOMINIO>` es el portal y `https://correo.<DOMINIO>` el buzon donde caen
+Al terminar: `https://<DOMINIO>` es el portal y `https://<DOMINIO>/correo` el buzon donde caen
 todos los correos (verificacion, recuperacion, decisiones), con el usuario y contrasena de
 `CORREO_USUARIO`. Caddy obtiene el certificado solo; la primera vez tarda un minuto.
 
@@ -48,12 +48,12 @@ Caddy en `127.0.0.1:8080` por HTTP interno.
 1. En `.env.staging`: `PUERTO_HTTP=8080`, `PUERTO_HTTPS=8443`, `CADDYFILE=./deploy/Caddyfile.detras-de-apache`.
 2. `./scripts/staging.sh up` (Caddy queda escuchando en 8080 solo para Apache).
 3. En cPanel, con la cuenta que ya tiene otros subdominios de Mirmibug, crear los dominios
-   `<DOMINIO>` (con su `www`) y `correo.<DOMINIO>`. El DNS de esos nombres ya debe apuntar a la VPS.
+   `<DOMINIO>` (cPanel agrega su `www`). El DNS ya debe apuntar a la VPS.
 4. Esperar a que AutoSSL emita los certificados (SSL/TLS Status en cPanel, o "Run AutoSSL").
-5. Copiar `deploy/apache-proxy.conf.example` como `proxy.conf` en las carpetas `userdata` de cPanel de
-   cada dominio (rutas dentro del archivo), y regenerar: `/scripts/rebuildhttpdconf && /scripts/restartsrv_httpd`.
+5. Copiar `deploy/apache-proxy.conf.example` como `proxy.conf` en las carpetas `userdata` de cPanel del
+   dominio (rutas dentro del archivo), y regenerar: `/scripts/rebuildhttpdconf && /scripts/restartsrv_httpd`.
 
-Con eso `https://<DOMINIO>` y `https://correo.<DOMINIO>` sirven el portal y el buzon con certificado
+Con eso `https://<DOMINIO>` y `https://<DOMINIO>/correo` sirven el portal y el buzon con certificado
 valido, y Apache sigue sirviendo lo demas como siempre.
 
 ## Operar
