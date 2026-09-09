@@ -9,8 +9,8 @@ import { NOMBRE_EMPRESA } from "@/lib/matriz-roles";
 import { apiConSesion } from "@/lib/sesion";
 import type { PartnerAdminOut } from "@/types/admin";
 import type { DocumentoOut } from "@/types/partner";
+import { NOMBRE_SUBTIPO } from "@/types/partner";
 
-const SUBTIPO = { distribuidor: "Distribuidor", mayorista: "Mayorista", institucional: "Institucional" };
 const TIPO: Record<string, string> = {
   constancia_fiscal: "Constancia de situacion fiscal",
   identificacion_representante: "Identificacion del representante",
@@ -22,7 +22,10 @@ function tamano(bytes: number): string {
   return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
 }
 
-/** Detalle de un partner con revision documento por documento. El backend aplica el alcance. */
+/**
+ * Detalle de un partner: sus vinculos por empresa (el admin decide solo los de su alcance) y los
+ * documentos de la razon social. El backend aplica alcance y modulos.
+ */
 export default async function AdminPartnerDetallePage({ params }: { params: { id: string } }) {
   let partner: PartnerAdminOut;
   let docs: DocumentoOut[];
@@ -44,33 +47,47 @@ export default async function AdminPartnerDetallePage({ params }: { params: { id
         </Link>
         <h1 className="text-[26px] font-bold">{partner.razon_social}</h1>
         <p className="text-sm text-muted-foreground">
-          {SUBTIPO[partner.subtipo]} · {NOMBRE_EMPRESA[partner.empresa_objetivo]}
-          {partner.rfc ? ` · RFC ${partner.rfc}` : ""} · {partner.nombre} {partner.apellidos} · {partner.email}
+          {partner.rfc ? `RFC ${partner.rfc} · ` : ""}
+          {partner.nombre} {partner.apellidos} · {partner.email}
           {partner.telefono ? ` · ${partner.telefono}` : ""}
         </p>
       </div>
 
-      <Card>
-        <CardContent className="flex flex-wrap items-center justify-between gap-4 p-5">
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted-foreground">Vinculo con {NOMBRE_EMPRESA[partner.empresa_objetivo]}</span>
-            <span className="flex items-center gap-2">
-              <Estado tono={tonoDeValidacion(partner.estado)} />
-              {partner.motivo_rechazo && <span className="text-[13px] text-[#b03535]">{partner.motivo_rechazo}</span>}
-              {partner.aprobado_en && partner.estado === "validado" && (
-                <span className="text-[13px] text-muted-foreground">
-                  desde el {new Date(partner.aprobado_en).toLocaleDateString("es-MX")}
-                </span>
-              )}
-            </span>
-          </div>
-          <DecisionBotones
-            estado={partner.estado}
-            rutaAprobar={`/admin/partners/${partner.usuario_id}/aprobar`}
-            rutaRechazar={`/admin/partners/${partner.usuario_id}/rechazar`}
-          />
-        </CardContent>
-      </Card>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-xl font-bold">Vinculos con el grupo</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          {partner.vinculos.map((v) => (
+            <Card key={v.id}>
+              <CardContent className="flex flex-col gap-3 p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-col">
+                    <span className="text-[15px] font-bold">{NOMBRE_EMPRESA[v.empresa]}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {NOMBRE_SUBTIPO[v.tipo]} · solicitado el {new Date(v.creado_en).toLocaleDateString("es-MX")}
+                    </span>
+                  </div>
+                  <Estado tono={tonoDeValidacion(v.estado)} />
+                </div>
+                {v.motivo_rechazo && <span className="text-[13px] text-[#b03535]">{v.motivo_rechazo}</span>}
+                {v.aprobado_en && v.estado === "validado" && (
+                  <span className="text-[13px] text-muted-foreground">
+                    Aprobado el {new Date(v.aprobado_en).toLocaleDateString("es-MX")}
+                  </span>
+                )}
+                {v.decidible ? (
+                  <DecisionBotones
+                    estado={v.estado}
+                    rutaAprobar={`/admin/vinculos/${v.id}/aprobar`}
+                    rutaRechazar={`/admin/vinculos/${v.id}/rechazar`}
+                  />
+                ) : (
+                  <span className="text-xs text-muted-foreground">Lo decide el equipo de {NOMBRE_EMPRESA[v.empresa]}.</span>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
 
       <section className="flex flex-col gap-3">
         <h2 className="text-xl font-bold">Documentos ({docs.length})</h2>
@@ -117,6 +134,9 @@ export default async function AdminPartnerDetallePage({ params }: { params: { id
             </div>
           ))}
         </div>
+        <p className="text-xs text-muted-foreground">
+          Los documentos son de la razon social: los revisa cualquiera de las empresas con las que tiene vinculo.
+        </p>
       </section>
     </div>
   );

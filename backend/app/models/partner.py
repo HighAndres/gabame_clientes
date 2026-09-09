@@ -5,11 +5,14 @@ from sqlalchemy import BigInteger, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.enums import Empresa, EstadoValidacion, SubtipoPartner
+from app.core.enums import EstadoValidacion
 from app.db.base import Base, TimestampMixin, enum_valores, nuevo_uuid
 
 
 class PerfilPartner(Base, TimestampMixin):
+    """Datos de la empresa del partner. La relacion con cada empresa del grupo (tipo y estado)
+    vive en `vinculos_empresa` (ADR-0008); aqui solo lo que es de la razon social."""
+
     __tablename__ = "perfiles_partner"
 
     usuario_id: Mapped[uuid.UUID] = mapped_column(
@@ -17,21 +20,6 @@ class PerfilPartner(Base, TimestampMixin):
     )
     razon_social: Mapped[str] = mapped_column(String(200), nullable=False)
     rfc: Mapped[str | None] = mapped_column(String(13), index=True)
-    subtipo: Mapped[SubtipoPartner] = mapped_column(
-        enum_valores(SubtipoPartner, "subtipo_partner"), nullable=False
-    )
-    empresa_objetivo: Mapped[Empresa] = mapped_column(enum_valores(Empresa, "empresa"), nullable=False)
-
-    estado: Mapped[EstadoValidacion] = mapped_column(
-        enum_valores(EstadoValidacion, "estado_validacion"),
-        default=EstadoValidacion.PENDIENTE,
-        nullable=False,
-    )
-    aprobado_por_id: Mapped[uuid.UUID | None] = mapped_column(
-        PGUUID(as_uuid=True), ForeignKey("usuarios.id", ondelete="SET NULL")
-    )
-    aprobado_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    motivo_rechazo: Mapped[str | None] = mapped_column(Text)
 
     documentos: Mapped[list["DocumentoPartner"]] = relationship(
         back_populates="partner", cascade="all, delete-orphan", order_by="DocumentoPartner.subido_en",
@@ -42,8 +30,9 @@ class PerfilPartner(Base, TimestampMixin):
 class DocumentoPartner(Base):
     """Documento cargado por el partner. El archivo vive en disco (UPLOADS_DIR), aqui solo metadatos.
 
+    Los documentos son de la razon social, no de un vinculo: cualquier admin con alcance sobre
+    alguna de las empresas vinculadas puede revisarlos.
     `tipo` es una clave del catalogo provisional `app/core/requisitos_partner.py` (Pendiente 0.4).
-    La revision deja bitacora como cualquier transicion (ADR-0004).
     """
 
     __tablename__ = "documentos_partner"

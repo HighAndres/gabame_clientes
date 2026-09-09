@@ -1,4 +1,4 @@
-"""Area Partners: estado de cuenta, requisitos, documentos y contactos por empresa."""
+"""Area Partners: razon social, vinculos por empresa, requisitos, documentos y contactos."""
 
 import uuid
 from datetime import datetime
@@ -6,8 +6,8 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from app.core.enums import Empresa, EstadoValidacion, SubtipoPartner
-from app.core.requisitos_partner import ContactoEmpresa, Requisito
-from app.models import DocumentoPartner, PerfilPartner
+from app.core.requisitos_partner import Requisito
+from app.models import DocumentoPartner, Espacio, PerfilPartner, VinculoEmpresa
 
 
 class DocumentoOut(BaseModel):
@@ -63,56 +63,82 @@ class ContactoEmpresaOut(BaseModel):
     pendiente: bool
 
     @classmethod
-    def desde(cls, c: ContactoEmpresa) -> "ContactoEmpresaOut":
+    def desde_espacio(cls, e: Espacio) -> "ContactoEmpresaOut":
         return cls(
-            empresa=c.empresa,
-            nombre=c.nombre,
-            email=c.email,
-            telefono=c.telefono,
-            portal_url=c.portal_url,
-            pendiente=c.nombre is None and c.email is None and c.portal_url is None,
+            empresa=e.empresa,
+            nombre=e.contacto_nombre,
+            email=e.contacto_email,
+            telefono=e.contacto_telefono,
+            portal_url=e.portal_url,
+            pendiente=not (e.contacto_nombre or e.contacto_email or e.portal_url),
+        )
+
+
+class VinculoOut(BaseModel):
+    id: uuid.UUID
+    empresa: Empresa
+    empresa_nombre: str
+    tipo: SubtipoPartner
+    estado: EstadoValidacion
+    motivo_rechazo: str | None
+    aprobado_en: datetime | None
+    creado_en: datetime
+    # Solo cuando el vinculo esta aprobado y la empresa tiene el modulo de contactos.
+    contacto: ContactoEmpresaOut | None = None
+
+    @classmethod
+    def desde_modelo(cls, v: VinculoEmpresa, espacio: Espacio | None, contacto: bool) -> "VinculoOut":
+        return cls(
+            id=v.id,
+            empresa=v.empresa,
+            empresa_nombre=espacio.nombre if espacio else v.empresa.value,
+            tipo=v.tipo,
+            estado=v.estado,
+            motivo_rechazo=v.motivo_rechazo,
+            aprobado_en=v.aprobado_en,
+            creado_en=v.creado_en,
+            contacto=ContactoEmpresaOut.desde_espacio(espacio) if (contacto and espacio) else None,
         )
 
 
 class EstadoPartnerOut(BaseModel):
     razon_social: str
     rfc: str | None
-    subtipo: SubtipoPartner
-    empresa_objetivo: Empresa
-    estado: EstadoValidacion
-    motivo_rechazo: str | None
-    aprobado_en: datetime | None
+    estado: EstadoValidacion | None  # agregado de los vinculos, para tarjetas
+    vinculos: list[VinculoOut]
     requisitos: list[RequisitoOut]
-    # Contactos y portales solo cuando la cuenta esta aprobada; antes va vacio.
-    contactos: list[ContactoEmpresaOut]
     limite_mb: int
     tipos_permitidos: list[str]
+    # Empresas con las que aun no hay vinculo y aceptan solicitudes
+    empresas_disponibles: list[Empresa]
 
     @classmethod
     def desde_modelo(
         cls,
         p: PerfilPartner,
-        requisitos: tuple[Requisito, ...],
-        contactos: tuple[ContactoEmpresa, ...],
+        vinculos: list[VinculoOut],
+        estado: EstadoValidacion | None,
+        requisitos: list[Requisito],
         *,
         limite_mb: int,
         tipos_permitidos: list[str],
+        empresas_disponibles: list[Empresa],
     ) -> "EstadoPartnerOut":
         return cls(
             razon_social=p.razon_social,
             rfc=p.rfc,
-            subtipo=p.subtipo,
-            empresa_objetivo=p.empresa_objetivo,
-            estado=p.estado,
-            motivo_rechazo=p.motivo_rechazo,
-            aprobado_en=p.aprobado_en,
+            estado=estado,
+            vinculos=vinculos,
             requisitos=[RequisitoOut.desde(r, p.documentos) for r in requisitos],
-            contactos=[ContactoEmpresaOut.desde(c) for c in contactos]
-            if p.estado == EstadoValidacion.VALIDADO
-            else [],
             limite_mb=limite_mb,
             tipos_permitidos=tipos_permitidos,
+            empresas_disponibles=empresas_disponibles,
         )
+
+
+class SolicitarVinculoIn(BaseModel):
+    empresa: Empresa
+    tipo: SubtipoPartner
 
 
 class DecisionDocumentoIn(BaseModel):

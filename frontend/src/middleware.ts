@@ -17,7 +17,7 @@ import type { ClaimsSesion, Rol, TokenOut } from "@/types/auth";
 const PUERTAS: readonly (readonly [string, readonly Rol[]])[] = [
   ["/medico", ["medico"]],
   ["/partner", ["partner"]],
-  ["/admin", ["admin_empresa", "admin_grupo"]],
+  ["/admin", ["admin_empresa", "editor_empresa", "admin_grupo"]],
 ];
 const RUTAS_AUTH = ["/login", "/registro"];
 

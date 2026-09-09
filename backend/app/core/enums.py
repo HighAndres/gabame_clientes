@@ -12,7 +12,8 @@ class Rol(StrEnum):
     PACIENTE = "paciente"
     MEDICO = "medico"
     PARTNER = "partner"
-    ADMIN_EMPRESA = "admin_empresa"
+    ADMIN_EMPRESA = "admin_empresa"    # aprueba cuentas y revisa documentos de su empresa
+    EDITOR_EMPRESA = "editor_empresa"  # edita contenido y contactos de su empresa; no aprueba
     ADMIN_GRUPO = "admin_grupo"
 
 
@@ -77,3 +78,12 @@ class TipoToken(StrEnum):
 
     EMAIL = "email"
     RESET_PASSWORD = "reset_password"
+
+
+class Modulo(StrEnum):
+    """Modulos que un espacio de empresa puede tener habilitados (ADR-0008)."""
+
+    CUENTAS = "cuentas"            # aprobar vinculos de partners
+    DOCUMENTOS = "documentos"      # revisar documentos de partners
+    CONTACTOS = "contactos"        # contactos comerciales y portal operativo
+    CONTENIDO_RX = "contenido_rx"  # fichas tecnicas para medicos validados (solo GABAME)

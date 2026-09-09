@@ -1,5 +1,6 @@
 from app.models.auditoria import BitacoraValidacion
 from app.models.contenido import AreaTerapeutica, FichaTecnica
+from app.models.espacio import Espacio, VinculoEmpresa
 from app.models.medico import PerfilMedico
 from app.models.origen import OrigenUsuario
 from app.models.partner import DocumentoPartner, PerfilPartner
@@ -11,6 +12,7 @@ __all__ = [
     "AreaTerapeutica",
     "BitacoraValidacion",
     "DocumentoPartner",
+    "Espacio",
     "FichaTecnica",
     "OrigenUsuario",
     "PerfilMedico",
@@ -19,4 +21,5 @@ __all__ = [
     "TokenVerificacion",
     "Usuario",
     "UsuarioRol",
+    "VinculoEmpresa",
 ]

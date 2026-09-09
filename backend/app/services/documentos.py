@@ -75,8 +75,10 @@ def _nombre_seguro(nombre: str) -> str:
     return (stem[:200] + (f".{sufijo}" if sufijo else "")).lower()
 
 
-async def guardar(db: Session, partner: PerfilPartner, tipo: str, archivo: UploadFile) -> DocumentoPartner:
-    if not tipo_valido(partner.subtipo, tipo):
+async def guardar(db: Session, usuario: Usuario, tipo: str, archivo: UploadFile) -> DocumentoPartner:
+    partner = usuario.perfil_partner
+    # El requisito debe existir para alguno de los tipos con los que el partner se relaciona (ADR-0008)
+    if partner is None or not any(tipo_valido(v.tipo, tipo) for v in usuario.vinculos):
         raise ArchivoInvalido("Tipo de documento no reconocido para tu tipo de partner.")
     content_type = (archivo.content_type or "").split(";")[0].strip().lower()
     if content_type not in TIPOS_PERMITIDOS:

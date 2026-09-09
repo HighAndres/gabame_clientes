@@ -60,6 +60,11 @@ class Usuario(Base, TimestampMixin):
         cascade="all, delete-orphan",
     )
 
+    vinculos: Mapped[list["VinculoEmpresa"]] = relationship(  # noqa: F821
+        back_populates="usuario", cascade="all, delete-orphan", lazy="selectin",
+        order_by="VinculoEmpresa.creado_en", foreign_keys="VinculoEmpresa.usuario_id",
+    )
+
     @property
     def email_verificado(self) -> bool:
         return self.email_verificado_en is not None

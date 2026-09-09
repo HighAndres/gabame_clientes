@@ -11,11 +11,7 @@ const ESTADO_MEDICO = {
   pendiente: "Tu acreditacion profesional esta en revision.",
   rechazado: "Tu acreditacion no fue aprobada.",
 };
-const ESTADO_PARTNER = {
-  validado: "Tu cuenta Partners esta aprobada.",
-  pendiente: "Tu cuenta Partners esta pendiente de aprobacion.",
-  rechazado: "Tu cuenta Partners no fue aprobada.",
-};
+const ESTADO_VINCULO = { validado: "aprobado", pendiente: "en revision", rechazado: "no aprobado" };
 
 function Tarjeta({ titulo, descripcion, href, accion, chip }: { titulo: string; descripcion: string; href: string; accion: string; chip?: React.ReactNode }) {
   return (
@@ -64,7 +60,7 @@ export default async function DashboardPage() {
         {roles.includes("partner") && (
           <Tarjeta
             titulo="GABAME Partners"
-            descripcion={u.estado_partner ? ESTADO_PARTNER[u.estado_partner] : ""}
+            descripcion={u.vinculos.map((v) => `${NOMBRE_EMPRESA[v.empresa]}: ${ESTADO_VINCULO[v.estado]}`).join(" · ")}
             href="/partner"
             accion="Ir a Partners"
             chip={<Estado tono={tonoDeValidacion(u.estado_partner)} />}

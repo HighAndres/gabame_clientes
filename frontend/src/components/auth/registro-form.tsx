@@ -63,9 +63,9 @@ export function RegistroForm({
     institucion: "",
     razon_social: "",
     rfc: "",
-    subtipo: "distribuidor" as SubtipoPartner,
-    empresa_objetivo: "gabame" as Empresa,
   });
+  // Empresa -> tipo de relacion. Solo las marcadas viajan al backend (ADR-0008).
+  const [vinculos, setVinculos] = useState<Partial<Record<Empresa, SubtipoPartner>>>({});
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
   const [listo, setListo] = useState<UsuarioOut | null>(null);
@@ -95,9 +95,17 @@ export function RegistroForm({
           : null,
       perfil_partner:
         tipo === "empresa"
-          ? { razon_social: f.razon_social, rfc: f.rfc || null, subtipo: f.subtipo, empresa_objetivo: f.empresa_objetivo }
+          ? {
+              razon_social: f.razon_social,
+              rfc: f.rfc || null,
+              vinculos: EMPRESAS.filter((e) => vinculos[e.valor]).map((e) => ({ empresa: e.valor, tipo: vinculos[e.valor]! })),
+            }
           : null,
     };
+    if (tipo === "empresa" && datos.perfil_partner?.vinculos.length === 0) {
+      setError("Elige al menos una empresa del grupo con la que trabajas.");
+      return;
+    }
     setCargando(true);
     try {
       const u = await api<UsuarioOut>("/auth/registro", { method: "POST", body: JSON.stringify(datos) });
@@ -123,7 +131,7 @@ export function RegistroForm({
             <> Tu acreditacion profesional quedara en revision; te avisaremos cuando este validada.</>
           )}
           {listo.estado_partner === "pendiente" && (
-            <> Tu cuenta Partners queda pendiente de aprobacion por el equipo del grupo.</>
+            <> Tu solicitud queda en revision; cada empresa te avisara por correo cuando la apruebe.</>
           )}
         </Aviso>
         <p className="text-sm text-muted-foreground">
@@ -218,32 +226,45 @@ export function RegistroForm({
             <Label htmlFor="rfc">RFC (opcional)</Label>
             <Input id="rfc" value={f.rfc} onChange={set("rfc")} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="subtipo">Tipo de relacion</Label>
-            <select id="subtipo" className={selectClase} value={f.subtipo} onChange={set("subtipo")}>
-              {SUBTIPOS.map((s) => (
-                <option key={s.valor} value={s.valor}>
-                  {s.texto}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="empresa_objetivo">Empresa del grupo con la que trabajas</Label>
-            <select
-              id="empresa_objetivo"
-              className={selectClase}
-              value={f.empresa_objetivo}
-              onChange={set("empresa_objetivo")}
-            >
-              {EMPRESAS.map((s) => (
-                <option key={s.valor} value={s.valor}>
-                  {s.texto}
-                </option>
-              ))}
-            </select>
-          </div>
-          {/* Pendiente 0.4 — carga de documentos por subtipo llega en Fase 5 */}
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">Empresas del grupo con las que trabajas</legend>
+            <p className="text-xs text-muted-foreground">Elige al menos una. Cada empresa revisa tu solicitud por separado.</p>
+            {EMPRESAS.map((e) => {
+              const marcada = Boolean(vinculos[e.valor]);
+              return (
+                <div key={e.valor} className="flex flex-wrap items-center gap-3 rounded-md border px-3 py-2">
+                  <label className="flex flex-1 items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-primary"
+                      checked={marcada}
+                      onChange={(ev) => {
+                        const nuevo = { ...vinculos };
+                        if (ev.target.checked) nuevo[e.valor] = "distribuidor";
+                        else delete nuevo[e.valor];
+                        setVinculos(nuevo);
+                      }}
+                    />
+                    {e.texto}
+                  </label>
+                  {marcada && (
+                    <select
+                      aria-label={`Tipo de relacion con ${e.texto}`}
+                      className={`${selectClase} w-auto`}
+                      value={vinculos[e.valor]}
+                      onChange={(ev) => setVinculos({ ...vinculos, [e.valor]: ev.target.value as SubtipoPartner })}
+                    >
+                      {SUBTIPOS.map((s) => (
+                        <option key={s.valor} value={s.valor}>
+                          {s.texto}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              );
+            })}
+          </fieldset>
         </fieldset>
       )}
 

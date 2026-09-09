@@ -30,16 +30,28 @@ class PerfilMedicoIn(BaseModel):
         return valor
 
 
+class VinculoIn(BaseModel):
+    empresa: Empresa
+    tipo: SubtipoPartner
+
+
 class PerfilPartnerIn(BaseModel):
     razon_social: str = Field(min_length=2, max_length=200)
     rfc: str | None = Field(default=None, min_length=12, max_length=13)
-    subtipo: SubtipoPartner
-    empresa_objetivo: Empresa
+    # Con que empresas del grupo se relaciona y como (ADR-0008). Al menos una, sin repetir.
+    vinculos: list[VinculoIn] = Field(min_length=1, max_length=4)
 
     @field_validator("rfc")
     @classmethod
     def _rfc_mayusculas(cls, valor: str | None) -> str | None:
         return valor.strip().upper() if valor else None
+
+    @field_validator("vinculos")
+    @classmethod
+    def _empresas_unicas(cls, valor: list[VinculoIn]) -> list[VinculoIn]:
+        if len({v.empresa for v in valor}) != len(valor):
+            raise ValueError("No se puede repetir una empresa en los vinculos")
+        return valor
 
 
 class RegistroIn(BaseModel):

@@ -89,8 +89,28 @@ AlcanceAdmin = Annotated[Alcance, Depends(get_alcance_admin)]
 
 
 def require_alcance_medicos(alcance: AlcanceAdmin) -> Alcance:
+    """Cola de validacion de medicos: quien administra GABAME."""
     if not alcance.ve_medicos:
         raise _prohibido("Sin alcance sobre la validacion de medicos")
+    return alcance
+
+
+def require_contenido_rx(alcance: AlcanceAdmin, db: DbSession) -> Alcance:
+    """Editar contenido Rx: quien edita GABAME (admin o editor) y el espacio tiene el modulo."""
+    from app.core.enums import Modulo
+    from app.core.matriz import EMPRESA_DUENA_MEDICOS
+    from app.services import espacios
+
+    if not alcance.edita_contenido_rx:
+        raise _prohibido("Sin alcance sobre el contenido Rx")
+    espacios.exigir_modulo(db, EMPRESA_DUENA_MEDICOS, Modulo.CONTENIDO_RX)
+    return alcance
+
+
+def require_administra_alguna(alcance: AlcanceAdmin) -> Alcance:
+    """Usuarios y cuentas: admins, no editores."""
+    if not alcance.administra_alguna:
+        raise _prohibido("Solo administradores")
     return alcance
 
 
@@ -109,8 +129,9 @@ def require_partner(usuario: UsuarioActual) -> Usuario:
 
 
 def require_partner_aprobado(usuario: Annotated[Usuario, Depends(require_partner)]) -> Usuario:
-    if usuario.perfil_partner.estado != EstadoValidacion.VALIDADO:
-        raise _prohibido("Tu cuenta Partners aun no esta aprobada")
+    """Al menos un vinculo aprobado con alguna empresa del grupo (ADR-0008)."""
+    if not any(v.estado == EstadoValidacion.VALIDADO for v in usuario.vinculos):
+        raise _prohibido("Aun no tienes un vinculo aprobado")
     return usuario
 
 

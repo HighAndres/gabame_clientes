@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { NOMBRE_EMPRESA } from "@/lib/matriz-roles";
-import { apiConSesion } from "@/lib/sesion";
+import { alcanceDe, NOMBRE_EMPRESA } from "@/lib/matriz-roles";
+import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { ResumenAdmin } from "@/types/admin";
 
 function Cifra({ valor, etiqueta, href, accion }: { valor: number | string; etiqueta: string; href: string; accion: string }) {
@@ -20,7 +20,8 @@ function Cifra({ valor, etiqueta, href, accion }: { valor: number | string; etiq
 }
 
 export default async function AdminPage() {
-  const r = await apiConSesion<ResumenAdmin>("/admin/resumen");
+  const [u, r] = await Promise.all([leerUsuarioActual(), apiConSesion<ResumenAdmin>("/admin/resumen")]);
+  const a = u ? alcanceDe(u) : null;
   const alcance = r.alcance_grupo ? "todo el grupo" : r.empresas.map((e) => NOMBRE_EMPRESA[e]).join(", ");
 
   return (
@@ -35,13 +36,20 @@ export default async function AdminPage() {
         {r.medicos_pendientes !== null && (
           <Cifra valor={r.medicos_pendientes} etiqueta="Medicos por validar" href="/admin/medicos" accion="Ver cola" />
         )}
-        <Cifra valor={r.partners_pendientes} etiqueta="Partners por aprobar" href="/admin/partners" accion="Ver cola" />
-        <Cifra
-          valor={r.usuarios_total ?? "—"}
-          etiqueta={r.usuarios_total === null ? "Usuarios (solo admin del grupo)" : "Usuarios en total"}
-          href="/admin/usuarios"
-          accion="Ver usuarios"
-        />
+        {a?.administraAlguna && (
+          <Cifra valor={r.partners_pendientes} etiqueta="Vinculos de partners por aprobar" href="/admin/partners" accion="Ver cola" />
+        )}
+        {a?.administraAlguna && (
+          <Cifra
+            valor={r.usuarios_total ?? "—"}
+            etiqueta={r.usuarios_total === null ? "Usuarios (solo admin del grupo)" : "Usuarios en total"}
+            href="/admin/usuarios"
+            accion="Ver usuarios"
+          />
+        )}
+        {a?.editaContenidoRx && (
+          <Cifra valor="Rx" etiqueta="Contenido para profesionales" href="/admin/contenido" accion="Editar contenido" />
+        )}
       </div>
     </div>
   );

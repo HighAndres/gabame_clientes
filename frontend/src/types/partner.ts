@@ -1,4 +1,4 @@
-/** Espejo de app/schemas/partner.py. */
+/** Espejo de app/schemas/partner.py (ADR-0008: vinculos por empresa). */
 
 import type { Empresa, EstadoValidacion, SubtipoPartner } from "@/types/auth";
 
@@ -31,16 +31,45 @@ export interface ContactoEmpresaOut {
   pendiente: boolean;
 }
 
-export interface EstadoPartnerOut {
-  razon_social: string;
-  rfc: string | null;
-  subtipo: SubtipoPartner;
-  empresa_objetivo: Empresa;
+export interface VinculoOut {
+  id: string;
+  empresa: Empresa;
+  empresa_nombre: string;
+  tipo: SubtipoPartner;
   estado: EstadoValidacion;
   motivo_rechazo: string | null;
   aprobado_en: string | null;
+  creado_en: string;
+  /** Solo cuando el vinculo esta aprobado y la empresa tiene el modulo de contactos. */
+  contacto: ContactoEmpresaOut | null;
+}
+
+export interface EstadoPartnerOut {
+  razon_social: string;
+  rfc: string | null;
+  /** Agregado de los vinculos: validado si alguno lo esta; pendiente si alguno; si no, rechazado. */
+  estado: EstadoValidacion | null;
+  vinculos: VinculoOut[];
   requisitos: RequisitoOut[];
-  contactos: ContactoEmpresaOut[];
   limite_mb: number;
   tipos_permitidos: string[];
+  /** Empresas con las que aun no hay vinculo y aceptan solicitudes. */
+  empresas_disponibles: Empresa[];
 }
+
+export interface SolicitarVinculoIn {
+  empresa: Empresa;
+  tipo: SubtipoPartner;
+}
+
+export const NOMBRE_SUBTIPO: Record<SubtipoPartner, string> = {
+  distribuidor: "Distribuidor",
+  mayorista: "Mayorista",
+  institucional: "Cliente institucional",
+};
+
+export const TEXTO_VINCULO: Record<EstadoValidacion, string> = {
+  pendiente: "En revision",
+  validado: "Aprobado",
+  rechazado: "No aprobado",
+};

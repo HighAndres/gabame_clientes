@@ -7,6 +7,7 @@ import smtplib
 from email.message import EmailMessage
 
 from app.core.config import settings
+from app.core.enums import Empresa
 from app.models import Usuario
 
 # Solo se usa cuando EMAIL_MODO == "memoria" (pruebas).
@@ -74,20 +75,24 @@ def enviar_medico_rechazado(usuario: Usuario, motivo: str) -> None:
     enviar_correo(usuario.email, "Acreditacion no validada - Cuenta GABAME", texto)
 
 
-def enviar_partner_aprobado(usuario: Usuario) -> None:
+def enviar_vinculo_aprobado(usuario: Usuario, empresa: Empresa) -> None:
+    from app.services.espacios import NOMBRES
+
     texto = (
         f"Hola {usuario.nombre},\n\n"
-        "Tu cuenta GABAME Partners fue aprobada. Ya puedes entrar a tu area:\n\n"
+        f"Tu vinculo con {NOMBRES[empresa]} fue aprobado. Ya puedes entrar a tu area:\n\n"
         f"{settings.FRONTEND_URL}/partner\n"
     )
-    enviar_correo(usuario.email, "Cuenta Partners aprobada - Cuenta GABAME", texto)
+    enviar_correo(usuario.email, f"Vinculo aprobado con {NOMBRES[empresa]} - Cuenta GABAME", texto)
 
 
-def enviar_partner_rechazado(usuario: Usuario, motivo: str) -> None:
+def enviar_vinculo_rechazado(usuario: Usuario, empresa: Empresa, motivo: str) -> None:
+    from app.services.espacios import NOMBRES
+
     texto = (
         f"Hola {usuario.nombre},\n\n"
-        "Tu solicitud de cuenta GABAME Partners no fue aprobada.\n"
+        f"Tu solicitud de vinculo con {NOMBRES[empresa]} no fue aprobada.\n"
         f"Motivo: {motivo}\n\n"
         "Si crees que es un error, contacta al equipo comercial de la empresa correspondiente.\n"
     )
-    enviar_correo(usuario.email, "Cuenta Partners no aprobada - Cuenta GABAME", texto)
+    enviar_correo(usuario.email, f"Vinculo no aprobado con {NOMBRES[empresa]} - Cuenta GABAME", texto)

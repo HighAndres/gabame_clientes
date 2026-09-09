@@ -3,6 +3,11 @@
     python -m app.seeds.seed_dev
 
 Contrasena de todos: SEED_PASSWORD si esta definida; si no, Local123! (solo local).
+
+Cuentas:
+- paciente@local.test, medico@local.test (validado), medico.pendiente@local.test
+- partner@local.test: vinculo con Ordan aprobado y con A7 en revision (ADR-0008)
+- admin.<empresa>@local.test por cada empresa, editor.gabame@local.test, admin.grupo@local.test
 """
 
 import os
@@ -14,7 +19,8 @@ from sqlalchemy.orm import Session
 from app.core.enums import Empresa, EstadoValidacion, EventoOrigen, Realm, Rol, SubtipoPartner
 from app.core.security import hash_password
 from app.db.session import SessionLocal
-from app.models import PerfilMedico, PerfilPartner, Usuario, UsuarioRol
+from app.models import PerfilMedico, PerfilPartner, Usuario, UsuarioRol, VinculoEmpresa
+from app.services import espacios
 from app.services.origen import registrar_origen
 
 PASSWORD = os.environ.get("SEED_PASSWORD") or "Local123!"
@@ -44,8 +50,29 @@ def _rol(db: Session, usuario: Usuario, rol: Rol, empresa: Empresa | None = None
     db.add(UsuarioRol(usuario_id=usuario.id, rol=rol, empresa=empresa))
 
 
+def _vinculo(
+    db: Session, usuario: Usuario, empresa: Empresa, tipo: SubtipoPartner, estado: EstadoValidacion
+) -> None:
+    existente = db.scalar(
+        select(VinculoEmpresa).where(VinculoEmpresa.usuario_id == usuario.id, VinculoEmpresa.empresa == empresa)
+    )
+    if existente:
+        return
+    db.add(
+        VinculoEmpresa(
+            usuario_id=usuario.id,
+            empresa=empresa,
+            tipo=tipo,
+            estado=estado,
+            aprobado_en=datetime.now(UTC) if estado == EstadoValidacion.VALIDADO else None,
+        )
+    )
+
+
 def main() -> None:
     with SessionLocal() as db:
+        espacios.listar(db)  # espacios con modulos por defecto
+
         paciente = _usuario(db, "paciente@local.test", "Ana", "Paciente", Realm.ID)
         _rol(db, paciente, Rol.PACIENTE)
 
@@ -75,21 +102,18 @@ def main() -> None:
         partner = _usuario(db, "partner@local.test", "Distribuidora", "Demo", Realm.PARTNERS)
         _rol(db, partner, Rol.PARTNER)
         if db.get(PerfilPartner, partner.id) is None:
-            db.add(
-                PerfilPartner(
-                    usuario_id=partner.id,
-                    razon_social="Distribuidora Demo SA de CV",
-                    subtipo=SubtipoPartner.DISTRIBUIDOR,
-                    empresa_objetivo=Empresa.ORDAN,
-                    estado=EstadoValidacion.VALIDADO,
-                )
-            )
+            db.add(PerfilPartner(usuario_id=partner.id, razon_social="Distribuidora Demo SA de CV"))
+        _vinculo(db, partner, Empresa.ORDAN, SubtipoPartner.DISTRIBUIDOR, EstadoValidacion.VALIDADO)
+        _vinculo(db, partner, Empresa.A7, SubtipoPartner.MAYORISTA, EstadoValidacion.PENDIENTE)
 
         for empresa in Empresa:
             admin = _usuario(
                 db, f"admin.{empresa.value}@local.test", "Admin", empresa.value.upper(), Realm.PARTNERS
             )
             _rol(db, admin, Rol.ADMIN_EMPRESA, empresa)
+
+        editor = _usuario(db, "editor.gabame@local.test", "Editora", "GABAME", Realm.PARTNERS)
+        _rol(db, editor, Rol.EDITOR_EMPRESA, Empresa.GABAME)
 
         grupo = _usuario(db, "admin.grupo@local.test", "Admin", "Grupo", Realm.PARTNERS)
         _rol(db, grupo, Rol.ADMIN_GRUPO)

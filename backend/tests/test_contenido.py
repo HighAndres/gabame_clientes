@@ -16,11 +16,13 @@ def actores(client, db):
     crear_usuario(db, "pend@ejemplo.com", roles=[(Rol.MEDICO, None)], estado_medico=EstadoValidacion.PENDIENTE)
     crear_usuario(db, "gabame@ejemplo.com", realm=Realm.PARTNERS, roles=[(Rol.ADMIN_EMPRESA, Empresa.GABAME)])
     crear_usuario(db, "ordan@ejemplo.com", realm=Realm.PARTNERS, roles=[(Rol.ADMIN_EMPRESA, Empresa.ORDAN)])
+    crear_usuario(db, "editor@ejemplo.com", realm=Realm.PARTNERS, roles=[(Rol.EDITOR_EMPRESA, Empresa.GABAME)])
     return {
         "medico": auth(login(client, "med@ejemplo.com")),
         "pendiente": auth(login(client, "pend@ejemplo.com")),
         "admin": auth(login(client, "gabame@ejemplo.com")),
         "ordan": auth(login(client, "ordan@ejemplo.com")),
+        "editor": auth(login(client, "editor@ejemplo.com")),
     }
 
 
@@ -46,6 +48,17 @@ def test_solo_admin_con_alcance_de_medicos_edita_contenido(client, actores):
     r = client.post(f"{ADMIN}/areas", json={"nombre": "X"}, headers=actores["medico"])
     assert r.status_code == 403
     assert client.get(f"{ADMIN}/areas", headers=actores["admin"]).status_code == 200
+    # el editor de GABAME edita contenido aunque no administre cuentas
+    assert client.get(f"{ADMIN}/areas", headers=actores["editor"]).status_code == 200
+    assert _area(client, actores["editor"], "Por editor")["nombre"] == "Por editor"
+
+
+def test_contenido_rx_exige_el_modulo_en_el_espacio_de_gabame(client, db, actores):
+    from app.services import espacios
+
+    espacios.actualizar(db, Empresa.GABAME, {"modulos": ["cuentas", "documentos", "contactos"]})
+    r = client.get(f"{ADMIN}/areas", headers=actores["admin"])
+    assert r.status_code == 403 and r.json()["detail"]["codigo"] == "modulo_no_habilitado"
 
 
 def test_medico_validado_solo_ve_lo_publicado(client, actores):

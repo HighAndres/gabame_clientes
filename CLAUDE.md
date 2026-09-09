@@ -102,9 +102,13 @@ Dos realms en una sola plataforma. Un usuario pertenece a **un solo** realm:
 
 Autorización = tres ejes combinados: **realm** × **rol** × **empresa**.
 
-- Roles: `paciente`, `medico`, `partner`, `admin_empresa`, `admin_grupo`.
+- Roles: `paciente`, `medico`, `partner`, `admin_empresa`, `editor_empresa`, `admin_grupo`.
 - Empresas: `gabame`, `medinter`, `ordan`, `a7`.
-- `admin_empresa` solo ve usuarios y contenido de su empresa. `admin_grupo` ve todo.
+- `admin_empresa` administra su empresa (aprueba vinculos, revisa documentos, ve sus usuarios).
+  `editor_empresa` solo edita contenido y contactos de su empresa. `admin_grupo` ve todo.
+- Un partner se relaciona con cada empresa por un **vinculo** propio (`vinculos_empresa`, ADR-0008):
+  puede estar aprobado con Ordan y en revision con A7. Cada empresa tiene un **espacio** (`espacios`)
+  con los modulos que tiene habilitados; lo que no esta habilitado responde 403.
 - Un `medico` con estado distinto de `validado` **no** ve contenido técnico Rx. Sin excepciones.
 
 Los enums viven en `backend/app/core/enums.py` y su espejo en `frontend/src/types/auth.ts`.
@@ -145,11 +149,11 @@ backend/          FastAPI
   app/schemas/    Pydantic v2 (auth, usuario, comun)
   app/api/deps.py require_role / require_empresa / require_medico_validado
   app/core/errores.py  ErrorNegocio -> {detail: {codigo, mensaje}}; el frontend decide por codigo
-  app/core/matriz.py   alcance provisional de admins (ADR-0004, pendiente 0.2); espejo en src/lib/matriz-roles.ts
+  app/core/matriz.py   alcance de admins y editores por empresa (ADR-0008, pendiente 0.2); espejo en src/lib/matriz-roles.ts
   app/core/ecosistema.py catálogo de piezas del grupo (solo enlaces), expuesto en GET /ecosistema
-  app/core/requisitos_partner.py requisitos documentales por subtipo (provisional 0.4) y contactos por empresa (placeholder)
+  app/core/requisitos_partner.py requisitos documentales por subtipo (provisional 0.4)
   app/core/ratelimit.py  límite de intentos en memoria por IP y por cuenta; nunca persistido ni logueado (ADR-0007)
-  app/services/   cuentas, sesion, tokens, origen, correo, validacion (transiciones + bitácora), validacion_medica (criterio 0.3), contenido (áreas/fichas Rx), documentos (archivos de partners en UPLOADS_DIR)
+  app/services/   cuentas, sesion, tokens, origen, correo, validacion (transiciones + bitácora), validacion_medica (criterio 0.3), contenido (áreas/fichas Rx), documentos (archivos de partners en UPLOADS_DIR), espacios (modulos/contactos por empresa), vinculos (relacion partner-empresa)
   app/api/v1/     router.py + routers/{auth,usuarios,medicos,partners,admin}.py
   app/seeds/      seed_dev.py — un usuario dummy por rol
   alembic/        migraciones
@@ -165,6 +169,7 @@ frontend/         Next.js 14
   src/lib/origen.ts  lee ?origen=&ruta=&campana= (espejo de la validación del backend)
   src/lib/sesion.ts  cookies httpOnly, leerSesion / leerUsuarioActual (server-only)
   src/lib/matriz-roles.ts espejo de app/core/matriz.py: navegación y alcance para renderizar
+  src/lib/guardas.ts  exigirAlcance(): guarda de layout de las secciones del panel admin
   src/i18n/request.ts + src/messages/es.json  next-intl sin enrutado por locale; cadenas del shell
   src/app/api/sesion/route.ts  único lugar del frontend que ve tokens en claro
   src/app/api/backend/[...path]  proxy genérico al backend con el token de la cookie (lo usan los componentes cliente)
@@ -203,7 +208,7 @@ npx shadcn@latest add button input form  # componentes bajo demanda
 | 2 — Auth y cuentas | **Cerrada** (ADR-0002, ADR-0003). Registro con bifurcación, verificación de email obligatoria, login/refresh rotativo/logout, recuperación, origen append-only, `?redirect=` con allowlist. Email inmutable (cambio con re-verificación queda como pieza aparte) |
 | 3 — Dashboard por rol | **Cerrada con matriz provisional** (ADR-0004). Colas de validación de médicos y partners con bitácora y correo, usuarios por alcance, catálogo del ecosistema por enlace. Falta que el cliente valide 0.2 y entregue URLs/contactos |
 | 4 — Área médica | **Estructura cerrada** (ADR-0005): áreas y fichas como datos con bandera `publicada`, admin de contenido, render markdown, interstitial. Vacía hasta que el cliente entregue 0.5; criterio de validación sigue en 0.3 |
-| 5 — Área partners | **Estructura cerrada** (ADR-0006): carga de documentos con catálogo provisional por subtipo, revisión del admin con alcance y bitácora, contactos y portales como placeholders. Falta que el cliente entregue 0.4, contactos y URLs |
+| 5 — Área partners | **Estructura cerrada** (ADR-0006, ADR-0008): vínculos por empresa con aprobación independiente, carga de documentos con catálogo provisional por subtipo, revisión del admin con alcance y bitácora, contactos por espacio. Falta que el cliente entregue 0.4, contactos y URLs |
 | 6 — SSO del grupo | No se construye. Solo se respetan sus prerrequisitos de diseño |
 | 7 — QA y salida de local | **Cerrada en local** (ADR-0007): rate limiting en memoria, guardias de arranque, cabeceras de seguridad, accesibilidad del shell, next-intl preparado, vitest, CI y `docs/despliegue.md`. Faltan del cliente: dominio (0.6) para CSP, y dar de alta el remoto y el VPS |
 

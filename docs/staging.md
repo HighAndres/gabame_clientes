@@ -33,7 +33,8 @@ todos los correos (verificacion, recuperacion, decisiones), con el usuario y con
 
 - URL del portal y del buzon con su usuario y contrasena.
 - Cuentas de prueba (contrasena = `SEED_PASSWORD`): `paciente@local.test`, `medico@local.test`
-  (validado), `medico.pendiente@local.test`, `partner@local.test`, `admin.gabame@local.test`,
+  (validado), `medico.pendiente@local.test`, `partner@local.test` (Ordan aprobado, A7 en revision), `editor.gabame@local.test`,
+  `admin.gabame@local.test`,
   `admin.ordan@local.test`, `admin.grupo@local.test`.
 - Guion de prueba: registrarse como paciente, profesional y empresa; verificar correo desde el
   buzon; como admin validar medico y partner; como medico validado entrar al area medica; como

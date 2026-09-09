@@ -6,7 +6,7 @@ import { Logo } from "@/components/marca/logo";
 import { CerrarSesion } from "@/components/portal/cerrar-sesion";
 import { NavLink } from "@/components/portal/nav-link";
 import { AvatarIniciales } from "@/components/ui/avatar-iniciales";
-import { alcanceDe, navAdmin, NOMBRE_EMPRESA, NOMBRE_ROL } from "@/lib/matriz-roles";
+import { alcanceDe, navAdmin, NOMBRE_EMPRESA, rolAdminDe } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { ResumenAdmin } from "@/types/admin";
 
@@ -20,8 +20,8 @@ const ICONO: Record<string, LucideIcon> = {
 
 /**
  * Shell admin (lienzo aprobado): barra lateral con el espacio de la empresa, navegacion por
- * modulo y contadores. Guarda de layout: solo admins. El selector de espacio real llega en el
- * corte 2 con los vinculos por empresa; hoy muestra el alcance.
+ * modulo y contadores. Guarda de layout: solo admins y editores; lo que cada uno ve lo decide
+ * `navAdmin` (espejo del alcance del backend).
  */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const u = await leerUsuarioActual();
@@ -41,7 +41,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     "/admin/medicos": resumen?.medicos_pendientes,
   };
   const espacio = alcance.grupo ? "Todo el grupo" : alcance.empresas.map((e) => NOMBRE_EMPRESA[e]).join(", ");
-  const rol = u.roles.find((r) => r.rol === "admin_grupo") ? NOMBRE_ROL.admin_grupo : NOMBRE_ROL.admin_empresa;
+  const rol = rolAdminDe(u);
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">

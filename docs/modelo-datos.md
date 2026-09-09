@@ -44,8 +44,19 @@ Unico: (`usuario_id`, `rol`, `empresa`).
 Trazabilidad obligatoria de quien aprobo y cuando.
 
 ### `perfiles_partner`
-`usuario_id` PK/FK, `razon_social`, `rfc`, `subtipo` SubtipoPartner, `empresa_objetivo` Empresa,
-`estado` EstadoValidacion, `aprobado_por_id` null, `aprobado_en` null, `motivo_rechazo` null.
+`usuario_id` PK/FK, `razon_social`, `rfc`. Solo lo que es de la razon social; la relacion con cada
+empresa del grupo vive en `vinculos_empresa` (ADR-0008).
+
+### `vinculos_empresa` (ADR-0008)
+`id`, `usuario_id` FK, `empresa` Empresa, `tipo` SubtipoPartner, `estado` EstadoValidacion,
+`aprobado_por_id` FK null, `aprobado_en` null, `motivo_rechazo` null. Unico por (`usuario_id`, `empresa`).
+Un partner puede estar aprobado con una empresa y en revision con otra; cada vinculo lo decide el
+admin de esa empresa y deja bitacora `vinculo_<estado>`.
+
+### `espacios` (ADR-0008)
+`empresa` PK Empresa, `nombre`, `modulos` JSONB (lista de `Modulo`: `cuentas`, `documentos`, `contactos`,
+`contenido_rx`), `contacto_nombre`, `contacto_email`, `contacto_telefono`, `portal_url`. Configuracion de
+cada empresa dentro del portal; lo que no esta en `modulos` responde 403 `modulo_no_habilitado`.
 
 ### `documentos_partner` (ADR-0006)
 `id`, `partner_id` FK, `tipo` (clave del catalogo provisional `requisitos_partner.py`, pendiente 0.4),

@@ -29,7 +29,7 @@ from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
-from app.models import PerfilMedico, PerfilPartner, Usuario, UsuarioRol
+from app.models import PerfilMedico, PerfilPartner, Usuario, UsuarioRol, VinculoEmpresa
 from app.services import correo
 
 PASSWORD = "Prueba123!"
@@ -117,9 +117,13 @@ def crear_usuario(
     verificado: bool = True,
     estado_medico: EstadoValidacion | None = None,
     estado_partner: EstadoValidacion | None = None,
+    vinculos: list[tuple[Empresa, EstadoValidacion]] | None = None,
     password: str = PASSWORD,
 ) -> Usuario:
-    """Crea un usuario directo en BD (sin pasar por /registro) para pruebas de permisos."""
+    """Crea un usuario directo en BD (sin pasar por /registro) para pruebas de permisos.
+
+    `estado_partner` es atajo para un solo vinculo con Ordan; `vinculos` da uno por empresa.
+    """
     u = Usuario(
         email=email,
         password_hash=hash_password(password),
@@ -134,16 +138,17 @@ def crear_usuario(
         db.add(UsuarioRol(usuario_id=u.id, rol=rol, empresa=empresa))
     if estado_medico is not None:
         db.add(PerfilMedico(usuario_id=u.id, cedula_profesional="12345678", estado=estado_medico))
-    if estado_partner is not None:
-        db.add(
-            PerfilPartner(
-                usuario_id=u.id,
-                razon_social="Prueba SA",
-                subtipo=SubtipoPartner.DISTRIBUIDOR,
-                empresa_objetivo=Empresa.ORDAN,
-                estado=estado_partner,
+    if estado_partner is not None and vinculos is None:
+        vinculos = [(Empresa.ORDAN, estado_partner)]
+    if vinculos is not None:
+        db.add(PerfilPartner(usuario_id=u.id, razon_social="Prueba SA"))
+        for empresa, estado in vinculos:
+            db.add(
+                VinculoEmpresa(
+                    usuario_id=u.id, empresa=empresa, tipo=SubtipoPartner.DISTRIBUIDOR, estado=estado,
+                    aprobado_en=datetime.now(UTC) if estado == EstadoValidacion.VALIDADO else None,
+                )
             )
-        )
     db.commit()
     db.refresh(u)
     return u

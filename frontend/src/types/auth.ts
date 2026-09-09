@@ -1,10 +1,12 @@
 /** Espejo de app/core/enums.py del backend. Si cambia alla, cambia aqui. */
 
 export type Realm = "id" | "partners";
-export type Rol = "paciente" | "medico" | "partner" | "admin_empresa" | "admin_grupo";
+export type Rol = "paciente" | "medico" | "partner" | "admin_empresa" | "editor_empresa" | "admin_grupo";
 export type Empresa = "gabame" | "medinter" | "ordan" | "a7";
 export type EstadoValidacion = "pendiente" | "validado" | "rechazado";
 export type SubtipoPartner = "distribuidor" | "mayorista" | "institucional";
+/** Modulos que un espacio (empresa) puede tener habilitados (ADR-0008). */
+export type Modulo = "cuentas" | "documentos" | "contactos" | "contenido_rx";
 
 /** Piezas del ecosistema. Ojo: no es lo mismo que Empresa — las tiendas son productos, no empresas. */
 export type Producto =
@@ -44,9 +46,20 @@ export interface RegistroIn {
   perfil_partner?: {
     razon_social: string;
     rfc?: string | null;
-    subtipo: SubtipoPartner;
-    empresa_objetivo: Empresa;
+    /** Con que empresas del grupo se relaciona y como. Al menos una, sin repetir (ADR-0008). */
+    vinculos: VinculoIn[];
   } | null;
+}
+
+export interface VinculoIn {
+  empresa: Empresa;
+  tipo: SubtipoPartner;
+}
+
+export interface VinculoResumenOut {
+  empresa: Empresa;
+  tipo: SubtipoPartner;
+  estado: EstadoValidacion;
 }
 
 export interface TokenOut {
@@ -67,7 +80,9 @@ export interface UsuarioOut {
   roles: { rol: Rol; empresa: Empresa | null }[];
   origen_inicial: Producto;
   estado_medico: EstadoValidacion | null;
+  /** Agregado de los vinculos; el detalle por empresa va en `vinculos`. */
   estado_partner: EstadoValidacion | null;
+  vinculos: VinculoResumenOut[];
   creado_en: string;
 }
 

@@ -60,8 +60,10 @@ def test_registro_empresa_va_a_realm_partners(client):
             "empresa",
             perfil_partner={
                 "razon_social": "Distribuidora X",
-                "subtipo": "distribuidor",
-                "empresa_objetivo": "ordan",
+                "vinculos": [
+                    {"empresa": "ordan", "tipo": "distribuidor"},
+                    {"empresa": "a7", "tipo": "mayorista"},
+                ],
             },
         ),
     )
@@ -70,6 +72,19 @@ def test_registro_empresa_va_a_realm_partners(client):
     assert cuerpo["realm"] == "partners"
     assert [x["rol"] for x in cuerpo["roles"]] == ["partner"]
     assert cuerpo["estado_partner"] == "pendiente"
+    assert [(v["empresa"], v["tipo"], v["estado"]) for v in cuerpo["vinculos"]] == [
+        ("ordan", "distribuidor", "pendiente"),
+        ("a7", "mayorista", "pendiente"),
+    ]
+
+
+def test_registro_empresa_exige_al_menos_un_vinculo_y_sin_repetir(client):
+    base = {"razon_social": "Distribuidora X"}
+    r = client.post(f"{BASE}/registro", json=_registro("empresa", perfil_partner={**base, "vinculos": []}))
+    assert r.status_code == 422
+    repetidos = [{"empresa": "ordan", "tipo": "distribuidor"}, {"empresa": "ordan", "tipo": "mayorista"}]
+    r = client.post(f"{BASE}/registro", json=_registro("empresa", perfil_partner={**base, "vinculos": repetidos}))
+    assert r.status_code == 422
 
 
 def test_registro_profesional_sin_cedula_es_422(client):

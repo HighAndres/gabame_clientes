@@ -11,7 +11,7 @@ from app.core.errores import EmailYaRegistrado, TokenInvalido
 from app.core.security import hash_password
 from app.models import PerfilMedico, PerfilPartner, Usuario, UsuarioRol
 from app.schemas.auth import RegistroIn
-from app.services import correo, validacion_medica
+from app.services import correo, validacion_medica, vinculos
 from app.services.origen import registrar_origen
 from app.services.sesion import revocar_todas_las_sesiones
 from app.services.tokens import consumir_token, emitir_token
@@ -63,15 +63,11 @@ def registrar(db: Session, datos: RegistroIn) -> Usuario:
             )
         )
     elif datos.tipo_cuenta == TipoCuenta.EMPRESA and datos.perfil_partner:
-        db.add(
-            PerfilPartner(
-                usuario_id=usuario.id,
-                razon_social=datos.perfil_partner.razon_social,
-                rfc=datos.perfil_partner.rfc,
-                subtipo=datos.perfil_partner.subtipo,
-                empresa_objetivo=datos.perfil_partner.empresa_objetivo,
-            )
-        )
+        db.add(PerfilPartner(usuario_id=usuario.id, razon_social=datos.perfil_partner.razon_social, rfc=datos.perfil_partner.rfc))
+        db.flush()
+        db.refresh(usuario)
+        for v in datos.perfil_partner.vinculos:
+            vinculos.crear(db, usuario, v.empresa, v.tipo)
 
     registrar_origen(db, usuario, EventoOrigen.REGISTRO, datos.origen)
     token = emitir_token(db, usuario, TipoToken.EMAIL)
