@@ -6,8 +6,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from app.core.enums import Empresa, EstadoValidacion, SubtipoPartner
-from app.core.requisitos_partner import Requisito
-from app.models import DocumentoPartner, Espacio, PerfilPartner, VinculoEmpresa
+from app.models import DocumentoPartner, Espacio, PerfilPartner, RequisitoDocumental, VinculoEmpresa
 
 
 class DocumentoOut(BaseModel):
@@ -39,18 +38,19 @@ class DocumentoOut(BaseModel):
 class RequisitoOut(BaseModel):
     tipo: str
     nombre: str
-    descripcion: str
+    descripcion: str | None
     obligatorio: bool
     documentos: list[DocumentoOut]
 
     @classmethod
-    def desde(cls, r: Requisito, documentos: list[DocumentoPartner]) -> "RequisitoOut":
+    def desde(cls, r: RequisitoDocumental, documentos: list[DocumentoPartner]) -> "RequisitoOut":
+        # `tipo` en la API es la clave del requisito (asi lo guarda documentos_partner.tipo)
         return cls(
-            tipo=r.tipo,
+            tipo=r.clave,
             nombre=r.nombre,
             descripcion=r.descripcion,
             obligatorio=r.obligatorio,
-            documentos=[DocumentoOut.desde_modelo(d) for d in documentos if d.tipo == r.tipo],
+            documentos=[DocumentoOut.desde_modelo(d) for d in documentos if d.tipo == r.clave],
         )
 
 
@@ -118,7 +118,7 @@ class EstadoPartnerOut(BaseModel):
         p: PerfilPartner,
         vinculos: list[VinculoOut],
         estado: EstadoValidacion | None,
-        requisitos: list[Requisito],
+        requisitos: list[RequisitoDocumental],
         *,
         limite_mb: int,
         tipos_permitidos: list[str],

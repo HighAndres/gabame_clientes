@@ -37,8 +37,11 @@ describe("alcanceDe", () => {
     expect(a.editaContenidoRx).toBe(false);
     expect(navAdmin(usuario([{ rol: "admin_empresa", empresa: "ordan" }])).map((n) => n.href)).toEqual([
       "/admin",
+      "/admin/publicaciones",
       "/admin/partners",
       "/admin/usuarios",
+      "/admin/espacios",
+      "/admin/bitacora",
     ]);
   });
 
@@ -49,7 +52,7 @@ describe("alcanceDe", () => {
     expect(a.administraAlguna).toBe(false);
     expect(a.veMedicos).toBe(false);
     expect(a.editaContenidoRx).toBe(true);
-    expect(navAdmin(u).map((n) => n.href)).toEqual(["/admin", "/admin/contenido"]);
+    expect(navAdmin(u).map((n) => n.href)).toEqual(["/admin", "/admin/contenido", "/admin/publicaciones", "/admin/espacios"]);
   });
 
   it("un paciente no es admin", () => {

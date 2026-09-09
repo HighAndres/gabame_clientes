@@ -87,3 +87,11 @@ class Modulo(StrEnum):
     DOCUMENTOS = "documentos"      # revisar documentos de partners
     CONTACTOS = "contactos"        # contactos comerciales y portal operativo
     CONTENIDO_RX = "contenido_rx"  # fichas tecnicas para medicos validados (solo GABAME)
+
+
+class Audiencia(StrEnum):
+    """A quien va dirigida una publicacion de un espacio (corte 3)."""
+
+    PACIENTES = "pacientes"  # cualquier persona con sesion
+    MEDICOS = "medicos"      # solo medicos validados
+    PARTNERS = "partners"    # solo partners con vinculo aprobado con esa empresa

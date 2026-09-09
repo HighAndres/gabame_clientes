@@ -28,7 +28,7 @@ export function FilaRequisito({
 }: {
   tipo: string;
   nombre: string;
-  descripcion: string;
+  descripcion: string | null;
   obligatorio: boolean;
   documentos: DocumentoOut[];
   limiteMb: number;

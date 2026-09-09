@@ -7,6 +7,8 @@ export type EstadoValidacion = "pendiente" | "validado" | "rechazado";
 export type SubtipoPartner = "distribuidor" | "mayorista" | "institucional";
 /** Modulos que un espacio (empresa) puede tener habilitados (ADR-0008). */
 export type Modulo = "cuentas" | "documentos" | "contactos" | "contenido_rx";
+/** A quien va dirigida una publicacion de un espacio (corte 3). */
+export type Audiencia = "pacientes" | "medicos" | "partners";
 
 /** Piezas del ecosistema. Ojo: no es lo mismo que Empresa — las tiendas son productos, no empresas. */
 export type Producto =

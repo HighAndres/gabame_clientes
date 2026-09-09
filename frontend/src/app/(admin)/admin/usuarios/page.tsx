@@ -1,14 +1,15 @@
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { Input } from "@/components/ui/input";
 import { NOMBRE_ROL } from "@/lib/matriz-roles";
+import { cn } from "@/lib/utils";
 import { apiConSesion } from "@/lib/sesion";
 import type { PaginaUsuarios } from "@/types/admin";
 import type { Rol } from "@/types/auth";
 
-const ROLES: Rol[] = ["paciente", "medico", "partner", "admin_empresa", "admin_grupo"];
+const ROLES: Rol[] = ["paciente", "medico", "partner", "admin_empresa", "editor_empresa", "admin_grupo"];
 const POR_PAGINA = 25;
 
 /** Usuarios dentro del alcance del admin. El backend aplica la matriz (ADR-0004). */
@@ -37,9 +38,14 @@ export default async function AdminUsuariosPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <p className="text-xs text-muted-foreground">Usuarios</p>
-        <h1 className="text-[26px] font-bold">Usuarios en tu alcance</h1>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <p className="text-xs text-muted-foreground">Usuarios</p>
+          <h1 className="text-[26px] font-bold">Usuarios en tu alcance</h1>
+        </div>
+        <Link href="/admin/usuarios/nuevo" className={cn(buttonVariants({ size: "sm" }))}>
+          Nuevo administrador
+        </Link>
       </div>
 
       <div className="overflow-hidden rounded-lg border bg-card">
@@ -82,7 +88,9 @@ export default async function AdminUsuariosPage({
               className="grid items-center gap-2 border-t px-5 py-3 text-sm md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_90px_minmax(0,1.2fr)_110px_110px_90px]"
             >
               <span className="truncate font-bold">
-                {u.nombre} {u.apellidos}
+                <Link href={`/admin/usuarios/${u.id}`} className="hover:text-primary">
+                  {u.nombre} {u.apellidos}
+                </Link>
                 {!u.activo && <span className="ml-2 text-xs font-normal text-destructive">inactivo</span>}
               </span>
               <span className="flex min-w-0 flex-col">

@@ -53,6 +53,16 @@ empresa del grupo vive en `vinculos_empresa` (ADR-0008).
 Un partner puede estar aprobado con una empresa y en revision con otra; cada vinculo lo decide el
 admin de esa empresa y deja bitacora `vinculo_<estado>`.
 
+### `publicaciones` (ADR-0009)
+`id`, `empresa` Empresa, `audiencia` (`pacientes` | `medicos` | `partners`), `slug` (unico por empresa), `titulo`,
+`resumen`, `contenido` (markdown), `orden`, `publicada`. Informacion institucional o comercial de cada espacio; el
+contenido tecnico Rx sigue en `fichas_tecnicas`. Lectura por `acceso_audiencia` (deps.py).
+
+### `requisitos_documentales` (ADR-0009)
+`id`, `empresa` Empresa, `tipo` SubtipoPartner null (null = todos), `clave` (unica por empresa; es lo que guarda
+`documentos_partner.tipo`), `nombre`, `descripcion`, `obligatorio`, `orden`, `activo`. Editable desde el panel;
+retirar = desactivar. Resuelve 0.4 como dato.
+
 ### `espacios` (ADR-0008)
 `empresa` PK Empresa, `nombre`, `modulos` JSONB (lista de `Modulo`: `cuentas`, `documentos`, `contactos`,
 `contenido_rx`), `contacto_nombre`, `contacto_email`, `contacto_telefono`, `portal_url`. Configuracion de

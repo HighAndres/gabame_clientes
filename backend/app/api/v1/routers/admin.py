@@ -29,20 +29,40 @@ from app.models import (
     VinculoEmpresa,
 )
 from app.schemas.admin import (
+    ActivoIn,
+    AdminNuevoIn,
+    BitacoraOut,
     DecisionIn,
     EspacioOut,
     EspacioUpdate,
     MedicoAdminOut,
+    PaginaBitacora,
     PaginaUsuarios,
     PartnerAdminOut,
+    PersonaRefOut,
+    PublicacionIn,
+    PublicacionOut,
+    PublicacionUpdate,
+    RequisitoDocumentalOut,
+    RequisitosIn,
     ResumenAdmin,
+    RolesIn,
     UsuarioAdminOut,
     VinculoAdminOut,
     VinculoDetalleOut,
 )
 from app.schemas.contenido import AreaIn, AreaOut, AreaUpdate, FichaIn, FichaOut, FichaUpdate
 from app.schemas.partner import DecisionDocumentoIn, DocumentoOut
-from app.services import contenido, documentos, espacios, validacion
+from app.services import (
+    administracion,
+    bitacora,
+    contenido,
+    documentos,
+    espacios,
+    publicaciones,
+    requisitos,
+    validacion,
+)
 
 router = APIRouter()
 
@@ -125,6 +145,14 @@ def _usuarios_visibles(db: Session, alcance: Alcance):
     if alcance.admin:
         condiciones.append(
             Usuario.id.in_(select(VinculoEmpresa.usuario_id).where(VinculoEmpresa.empresa.in_(alcance.admin)))
+        )
+        condiciones.append(
+            Usuario.id.in_(
+                select(UsuarioRol.usuario_id).where(
+                    UsuarioRol.rol.in_([Rol.ADMIN_EMPRESA, Rol.EDITOR_EMPRESA]),
+                    UsuarioRol.empresa.in_(alcance.admin),
+                )
+            )
         )
     if alcance.ve_medicos:
         condiciones.append(Usuario.id.in_(select(PerfilMedico.usuario_id)))
@@ -362,3 +390,141 @@ def crear_ficha(datos: FichaIn, alcance: AlcanceContenido, db: DbSession) -> Fic
 @router.patch("/contenido/fichas/{ficha_id}", response_model=FichaOut)
 def actualizar_ficha(ficha_id: uuid.UUID, datos: FichaUpdate, alcance: AlcanceContenido, db: DbSession) -> FichaOut:
     return FichaOut.desde_modelo(contenido.actualizar_ficha(db, ficha_id, datos))
+
+
+# ---------- corte 3: cuentas administrativas ----------
+
+
+def _usuario_visible(db: Session, alcance: Alcance, usuario_id: uuid.UUID) -> Usuario:
+    u = db.scalar(_usuarios_visibles(db, alcance).where(Usuario.id == usuario_id))
+    if u is None:
+        raise validacion.PerfilNoEncontrado("No existe ese usuario o esta fuera de tu alcance.")
+    return u
+
+
+@router.get("/usuarios/{usuario_id}", response_model=UsuarioAdminOut)
+def leer_usuario(usuario_id: uuid.UUID, alcance: AlcanceCuentas, db: DbSession) -> UsuarioAdminOut:
+    return UsuarioAdminOut.desde_modelo(_usuario_visible(db, alcance, usuario_id))
+
+
+@router.post("/usuarios", response_model=UsuarioAdminOut, status_code=status.HTTP_201_CREATED)
+def crear_administrador(datos: AdminNuevoIn, alcance: AlcanceCuentas, actor: UsuarioActual, db: DbSession) -> UsuarioAdminOut:
+    """Alta de admin o editor dentro del alcance. Recibe por correo el enlace para fijar su contrasena."""
+    u = administracion.crear_administrador(
+        db, actor, alcance, email=datos.email, nombre=datos.nombre, apellidos=datos.apellidos,
+        roles=[r.par() for r in datos.roles],
+    )
+    return UsuarioAdminOut.desde_modelo(u)
+
+
+@router.put("/usuarios/{usuario_id}/roles", response_model=UsuarioAdminOut)
+def asignar_roles(
+    usuario_id: uuid.UUID, datos: RolesIn, alcance: AlcanceCuentas, actor: UsuarioActual, db: DbSession
+) -> UsuarioAdminOut:
+    u = _usuario_visible(db, alcance, usuario_id)
+    return UsuarioAdminOut.desde_modelo(administracion.asignar_roles(db, actor, alcance, u, [r.par() for r in datos.roles]))
+
+
+@router.patch("/usuarios/{usuario_id}/activo", response_model=UsuarioAdminOut)
+def cambiar_activo(
+    usuario_id: uuid.UUID, datos: ActivoIn, alcance: AlcanceCuentas, actor: UsuarioActual, db: DbSession
+) -> UsuarioAdminOut:
+    u = _usuario_visible(db, alcance, usuario_id)
+    return UsuarioAdminOut.desde_modelo(administracion.cambiar_activo(db, actor, u, datos.activo))
+
+
+@router.post("/usuarios/{usuario_id}/restablecer", status_code=status.HTTP_204_NO_CONTENT)
+def enviar_restablecimiento(usuario_id: uuid.UUID, alcance: AlcanceCuentas, actor: UsuarioActual, db: DbSession) -> None:
+    u = _usuario_visible(db, alcance, usuario_id)
+    administracion.enviar_restablecimiento(db, actor, u)
+
+
+# ---------- corte 3: requisitos documentales por espacio ----------
+
+
+@router.get("/espacios/{empresa}/requisitos", response_model=list[RequisitoDocumentalOut])
+def listar_requisitos(empresa: Empresa, alcance: AlcanceAdmin, db: DbSession) -> list[RequisitoDocumentalOut]:
+    if not alcance.edita(empresa):
+        raise _prohibido("Sin alcance sobre esta empresa")
+    return [RequisitoDocumentalOut.desde_modelo(r) for r in requisitos.listar(db, empresa)]
+
+
+@router.put("/espacios/{empresa}/requisitos", response_model=list[RequisitoDocumentalOut])
+def reemplazar_requisitos(
+    empresa: Empresa, datos: RequisitosIn, alcance: AlcanceCuentas, db: DbSession
+) -> list[RequisitoDocumentalOut]:
+    """Solo quien administra la empresa; exige el modulo de documentos."""
+    if not alcance.administra(empresa):
+        raise _prohibido("Sin alcance sobre esta empresa")
+    espacios.exigir_modulo(db, empresa, Modulo.DOCUMENTOS)
+    filas = requisitos.reemplazar(db, empresa, [r.model_dump() for r in datos.requisitos])
+    return [RequisitoDocumentalOut.desde_modelo(r) for r in filas]
+
+
+# ---------- corte 3: publicaciones por audiencia ----------
+
+
+def _publicacion_en_alcance(db: Session, alcance: Alcance, publicacion_id: uuid.UUID):
+    p = publicaciones.obtener(db, publicacion_id)
+    if not alcance.edita(p.empresa):
+        raise _prohibido("Sin alcance sobre esta empresa")
+    return p
+
+
+@router.get("/espacios/{empresa}/publicaciones", response_model=list[PublicacionOut])
+def listar_publicaciones(empresa: Empresa, alcance: AlcanceAdmin, db: DbSession) -> list[PublicacionOut]:
+    if not alcance.edita(empresa):
+        raise _prohibido("Sin alcance sobre esta empresa")
+    return [PublicacionOut.desde_modelo(p) for p in publicaciones.listar_admin(db, empresa)]
+
+
+@router.post("/espacios/{empresa}/publicaciones", response_model=PublicacionOut, status_code=status.HTTP_201_CREATED)
+def crear_publicacion(empresa: Empresa, datos: PublicacionIn, alcance: AlcanceAdmin, db: DbSession) -> PublicacionOut:
+    if not alcance.edita(empresa):
+        raise _prohibido("Sin alcance sobre esta empresa")
+    return PublicacionOut.desde_modelo(publicaciones.crear(db, empresa, datos.model_dump()))
+
+
+@router.get("/publicaciones/{publicacion_id}", response_model=PublicacionOut)
+def leer_publicacion(publicacion_id: uuid.UUID, alcance: AlcanceAdmin, db: DbSession) -> PublicacionOut:
+    return PublicacionOut.desde_modelo(_publicacion_en_alcance(db, alcance, publicacion_id))
+
+
+@router.patch("/publicaciones/{publicacion_id}", response_model=PublicacionOut)
+def actualizar_publicacion(
+    publicacion_id: uuid.UUID, datos: PublicacionUpdate, alcance: AlcanceAdmin, db: DbSession
+) -> PublicacionOut:
+    p = _publicacion_en_alcance(db, alcance, publicacion_id)
+    return PublicacionOut.desde_modelo(publicaciones.actualizar(db, p, datos.model_dump(exclude_unset=True)))
+
+
+@router.delete("/publicaciones/{publicacion_id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_publicacion(publicacion_id: uuid.UUID, alcance: AlcanceAdmin, db: DbSession) -> None:
+    publicaciones.eliminar(db, _publicacion_en_alcance(db, alcance, publicacion_id))
+
+
+# ---------- corte 3: bitacora ----------
+
+
+@router.get("/bitacora", response_model=PaginaBitacora)
+def listar_bitacora(
+    alcance: AlcanceCuentas,
+    db: DbSession,
+    objetivo_id: uuid.UUID | None = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 25,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> PaginaBitacora:
+    """Quien hizo que sobre quien, dentro del alcance del admin. Solo lectura: nadie la edita."""
+    total, filas = bitacora.listar(
+        db, alcance, _usuarios_visibles(db, alcance), objetivo_id=objetivo_id, limit=limit, offset=offset
+    )
+    return PaginaBitacora(
+        total=total,
+        items=[
+            BitacoraOut(
+                id=b.id, accion=b.accion, detalle=b.detalle, creado_en=b.creado_en,
+                actor=PersonaRefOut.desde_modelo(a), objetivo=PersonaRefOut.desde_modelo(o), objetivo_id=b.objetivo_id,
+            )
+            for b, a, o in filas
+        ],
+    )

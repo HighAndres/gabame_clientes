@@ -13,3 +13,4 @@ Una decision no se edita cuando cambia: se escribe un ADR nuevo que la supersede
 | 0006 | Documentos de partners: catalogo provisional (hasta 0.4) y disco local | Aceptado |
 | 0007 | Salida de local: limites de intentos, cabeceras, i18n, CI, copy sin arquitectura | Aceptado |
 | 0008 | Espacios por empresa (modulos como datos) y vinculos usuario-empresa; rol `editor_empresa` | Aceptado (supersede parcialmente 0004 y 0006) |
+| 0009 | Administracion por espacio: cuentas administrativas, requisitos como dato, publicaciones por audiencia, bitacora visible | Aceptado (supersede el punto 1 de 0006) |

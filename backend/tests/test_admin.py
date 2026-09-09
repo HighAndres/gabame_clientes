@@ -242,10 +242,11 @@ def test_listado_de_usuarios_respeta_alcance(client, escenario):
     assert grupo["total"] == 8
 
     ordan = client.get(f"{BASE}/usuarios", headers=auth(login(client, "admin.ordan@ejemplo.com"))).json()
-    assert sorted(u["email"] for u in ordan["items"]) == ["doble@ejemplo.com", "ordan@ejemplo.com"]
+    # sus partners y las cuentas administrativas de su empresa (incluida la suya)
+    assert sorted(u["email"] for u in ordan["items"]) == ["admin.ordan@ejemplo.com", "doble@ejemplo.com", "ordan@ejemplo.com"]
 
     gabame = client.get(f"{BASE}/usuarios", headers=auth(login(client, "admin.gabame@ejemplo.com"))).json()
-    assert [u["email"] for u in gabame["items"]] == ["med@ejemplo.com"]
+    assert sorted(u["email"] for u in gabame["items"]) == ["admin.gabame@ejemplo.com", "editor.gabame@ejemplo.com", "med@ejemplo.com"]
 
 
 def test_busqueda_y_filtro_por_rol(client, escenario):

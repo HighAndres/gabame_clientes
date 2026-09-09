@@ -15,9 +15,10 @@ export interface DocumentoOut {
 }
 
 export interface RequisitoOut {
+  /** Clave del requisito (asi se guarda en el documento). */
   tipo: string;
   nombre: string;
-  descripcion: string;
+  descripcion: string | null;
   obligatorio: boolean;
   documentos: DocumentoOut[];
 }

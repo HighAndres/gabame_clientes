@@ -16,8 +16,8 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.enums import EstadoValidacion
 from app.core.errores import ErrorNegocio
-from app.core.requisitos_partner import tipo_valido
 from app.models import BitacoraValidacion, DocumentoPartner, PerfilPartner, Usuario
+from app.services import requisitos
 
 # Tipos aceptados: solo lo que un admin puede abrir sin riesgo.
 TIPOS_PERMITIDOS: dict[str, str] = {
@@ -77,8 +77,8 @@ def _nombre_seguro(nombre: str) -> str:
 
 async def guardar(db: Session, usuario: Usuario, tipo: str, archivo: UploadFile) -> DocumentoPartner:
     partner = usuario.perfil_partner
-    # El requisito debe existir para alguno de los tipos con los que el partner se relaciona (ADR-0008)
-    if partner is None or not any(tipo_valido(v.tipo, tipo) for v in usuario.vinculos):
+    # La clave debe ser un requisito activo de alguna empresa vinculada (ADR-0008, corte 3)
+    if partner is None or not requisitos.clave_valida(db, usuario, tipo):
         raise ArchivoInvalido("Tipo de documento no reconocido para tu tipo de partner.")
     content_type = (archivo.content_type or "").split(";")[0].strip().lower()
     if content_type not in TIPOS_PERMITIDOS:

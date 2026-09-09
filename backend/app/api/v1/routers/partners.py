@@ -1,8 +1,8 @@
 """Router: partners. Area del propio partner (Fase 5, vinculos por empresa en ADR-0008).
 
-# Pendiente 0.4 — los tipos de documento son el catalogo provisional de
-# `app/core/requisitos_partner.py`. Contactos y portales operativos: los captura cada admin en
-# su espacio; hasta entonces aparecen "por confirmar".
+# Pendiente 0.4 — los requisitos documentales son dato por empresa (`requisitos_documentales`),
+# sembrados con el catalogo generico hasta que cada empresa capture los suyos. Contactos y
+# portales: los captura cada admin en su espacio; hasta entonces aparecen "por confirmar".
 """
 
 import uuid
@@ -14,10 +14,9 @@ from fastapi.responses import FileResponse
 from app.api.deps import DbSession, require_partner
 from app.core.config import settings
 from app.core.enums import Empresa, EstadoValidacion, Modulo
-from app.core.requisitos_partner import Requisito, requisitos_de
 from app.models import Usuario
 from app.schemas.partner import DocumentoOut, EstadoPartnerOut, SolicitarVinculoIn, VinculoOut
-from app.services import documentos, espacios, vinculos
+from app.services import documentos, espacios, requisitos, vinculos
 
 router = APIRouter()
 
@@ -32,15 +31,6 @@ def _estado(db, usuario: Usuario) -> EstadoPartnerOut:
         con_contacto = v.estado == EstadoValidacion.VALIDADO and espacio.tiene(Modulo.CONTACTOS.value)
         salida.append(VinculoOut.desde_modelo(v, espacio, con_contacto))
 
-    # Requisitos: union de los catalogos de los tipos con los que se relaciona (hoy son iguales).
-    requisitos: list[Requisito] = []
-    vistos: set[str] = set()
-    for v in usuario.vinculos:
-        for r in requisitos_de(v.tipo):
-            if r.tipo not in vistos:
-                vistos.add(r.tipo)
-                requisitos.append(r)
-
     ya = {v.empresa for v in usuario.vinculos}
     disponibles = [e for e in Empresa if e not in ya and espacios.obtener(db, e).tiene(Modulo.CUENTAS.value)]
 
@@ -48,7 +38,7 @@ def _estado(db, usuario: Usuario) -> EstadoPartnerOut:
         perfil,
         salida,
         vinculos.estado_agregado(usuario.vinculos),
-        requisitos,
+        requisitos.para_usuario(db, usuario),
         limite_mb=settings.UPLOAD_MAX_MB,
         tipos_permitidos=sorted(documentos.TIPOS_PERMITIDOS),
         empresas_disponibles=disponibles,

@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { BitacoraLista } from "@/components/admin/bitacora-lista";
 import { DecisionBotones } from "@/components/admin/decision-botones";
 import { Card, CardContent } from "@/components/ui/card";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { ApiError } from "@/lib/api";
 import { NOMBRE_EMPRESA } from "@/lib/matriz-roles";
 import { apiConSesion } from "@/lib/sesion";
-import type { PartnerAdminOut } from "@/types/admin";
+import type { PaginaBitacora, PartnerAdminOut } from "@/types/admin";
 import type { DocumentoOut } from "@/types/partner";
 import { NOMBRE_SUBTIPO } from "@/types/partner";
 
@@ -29,10 +30,12 @@ function tamano(bytes: number): string {
 export default async function AdminPartnerDetallePage({ params }: { params: { id: string } }) {
   let partner: PartnerAdminOut;
   let docs: DocumentoOut[];
+  let historial: PaginaBitacora;
   try {
-    [partner, docs] = await Promise.all([
+    [partner, docs, historial] = await Promise.all([
       apiConSesion<PartnerAdminOut>(`/admin/partners/${encodeURIComponent(params.id)}`),
       apiConSesion<DocumentoOut[]>(`/admin/partners/${encodeURIComponent(params.id)}/documentos`),
+      apiConSesion<PaginaBitacora>(`/admin/bitacora?objetivo_id=${encodeURIComponent(params.id)}&limit=50`),
     ]);
   } catch (e) {
     if (e instanceof ApiError && (e.status === 404 || e.status === 403)) notFound();
@@ -137,6 +140,13 @@ export default async function AdminPartnerDetallePage({ params }: { params: { id
         <p className="text-xs text-muted-foreground">
           Los documentos son de la razon social: los revisa cualquiera de las empresas con las que tiene vinculo.
         </p>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-xl font-bold">Historial ({historial.total})</h2>
+        <div className="overflow-hidden rounded-lg border bg-card">
+          <BitacoraLista items={historial.items} conObjetivo={false} />
+        </div>
       </section>
     </div>
   );

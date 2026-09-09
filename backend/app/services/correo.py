@@ -96,3 +96,17 @@ def enviar_vinculo_rechazado(usuario: Usuario, empresa: Empresa, motivo: str) ->
         "Si crees que es un error, contacta al equipo comercial de la empresa correspondiente.\n"
     )
     enviar_correo(usuario.email, f"Vinculo no aprobado con {NOMBRES[empresa]} - Cuenta GABAME", texto)
+
+
+def enviar_bienvenida_admin(usuario: Usuario, token: str) -> None:
+    """Cuenta administrativa creada desde el panel: el enlace establece la contrasena y confirma el correo."""
+    enlace = f"{settings.FRONTEND_URL}/restablecer?token={token}"
+    texto = (
+        f"Hola {usuario.nombre},\n\n"
+        "Te dieron de alta en el panel de administracion de la Cuenta GABAME. "
+        "Establece tu contrasena con este enlace:\n\n"
+        f"{enlace}\n\n"
+        f"El enlace vence en {settings.RESET_TOKEN_EXPIRE_MINUTES} minutos. Si expira, pide uno nuevo "
+        "con 'Olvide mi contrasena' en la pantalla de inicio de sesion.\n"
+    )
+    enviar_correo(usuario.email, "Tu acceso al panel - Cuenta GABAME", texto)

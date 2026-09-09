@@ -1,6 +1,6 @@
 /** Espejo de app/schemas/admin.py. */
 
-import type { Empresa, EstadoValidacion, Modulo, Producto, SubtipoPartner, UsuarioOut } from "@/types/auth";
+import type { Audiencia, Empresa, EstadoValidacion, Modulo, Producto, Rol, SubtipoPartner, UsuarioOut } from "@/types/auth";
 
 export interface UsuarioAdminOut extends UsuarioOut {
   activo: boolean;
@@ -111,3 +111,76 @@ export interface PiezaOut {
   descripcion: string;
   pendiente: boolean;
 }
+
+// ---------- corte 3 ----------
+
+export interface RolAsignado {
+  rol: Rol;
+  empresa: Empresa | null;
+}
+
+export interface AdminNuevoIn {
+  email: string;
+  nombre: string;
+  apellidos: string;
+  roles: RolAsignado[];
+}
+
+export interface RequisitoDocumentalIn {
+  clave?: string | null;
+  nombre: string;
+  descripcion?: string | null;
+  obligatorio: boolean;
+  tipo?: SubtipoPartner | null;
+}
+
+export interface RequisitoDocumentalOut {
+  id: string;
+  clave: string;
+  nombre: string;
+  descripcion: string | null;
+  obligatorio: boolean;
+  tipo: SubtipoPartner | null;
+  orden: number;
+  activo: boolean;
+}
+
+export interface PublicacionOut {
+  id: string;
+  empresa: Empresa;
+  audiencia: Audiencia;
+  slug: string;
+  titulo: string;
+  resumen: string | null;
+  contenido: string;
+  orden: number;
+  publicada: boolean;
+  actualizado_en: string;
+}
+
+export interface PersonaRefOut {
+  id: string;
+  email: string;
+  nombre: string;
+}
+
+export interface BitacoraOut {
+  id: string;
+  accion: string;
+  detalle: Record<string, unknown>;
+  creado_en: string;
+  actor: PersonaRefOut | null;
+  objetivo: PersonaRefOut | null;
+  objetivo_id: string;
+}
+
+export interface PaginaBitacora {
+  total: number;
+  items: BitacoraOut[];
+}
+
+export const NOMBRE_AUDIENCIA: Record<Audiencia, string> = {
+  pacientes: "Pacientes y consumidores",
+  medicos: "Profesionales de la salud validados",
+  partners: "Partners con vinculo aprobado",
+};

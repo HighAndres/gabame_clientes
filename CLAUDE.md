@@ -151,16 +151,16 @@ backend/          FastAPI
   app/core/errores.py  ErrorNegocio -> {detail: {codigo, mensaje}}; el frontend decide por codigo
   app/core/matriz.py   alcance de admins y editores por empresa (ADR-0008, pendiente 0.2); espejo en src/lib/matriz-roles.ts
   app/core/ecosistema.py catálogo de piezas del grupo (solo enlaces), expuesto en GET /ecosistema
-  app/core/requisitos_partner.py requisitos documentales por subtipo (provisional 0.4)
+  app/core/requisitos_partner.py catálogo por defecto de requisitos; los reales son dato (`requisitos_documentales`, ADR-0009)
   app/core/ratelimit.py  límite de intentos en memoria por IP y por cuenta; nunca persistido ni logueado (ADR-0007)
-  app/services/   cuentas, sesion, tokens, origen, correo, validacion (transiciones + bitácora), validacion_medica (criterio 0.3), contenido (áreas/fichas Rx), documentos (archivos de partners en UPLOADS_DIR), espacios (modulos/contactos por empresa), vinculos (relacion partner-empresa)
-  app/api/v1/     router.py + routers/{auth,usuarios,medicos,partners,admin}.py
+  app/services/   cuentas, sesion, tokens, origen, correo, validacion (transiciones + bitácora), validacion_medica (criterio 0.3), contenido (áreas/fichas Rx), documentos (archivos de partners en UPLOADS_DIR), espacios (modulos/contactos por empresa), vinculos (relacion partner-empresa), requisitos (documentales por empresa), publicaciones (por audiencia), administracion (altas de admins, roles, activar, reset), bitacora (lectura)
+  app/api/v1/     router.py + routers/{auth,usuarios,medicos,partners,admin,espacios}.py
   app/seeds/      seed_dev.py — un usuario dummy por rol
   alembic/        migraciones
 frontend/         Next.js 14
   src/app/(auth)/    login, registro, verificar-email, recuperar
   src/app/(portal)/  dashboard, perfil, medico, partner (shell con barra superior)
-  src/app/(admin)/admin/  resumen, medicos, contenido, partners, usuarios (shell con barra lateral)
+  src/app/(admin)/admin/  resumen, medicos, contenido, publicaciones, partners, usuarios (alta y detalle), espacios, bitacora (shell con barra lateral)
   src/components/marca, ui/estado, ui/avatar-iniciales  sistema de diseño (docs/diseno.md)
   src/middleware.ts  puerta de sesión y rol (verifica JWT con jose, rota refresh)
   src/lib/api.ts     cliente HTTP del backend (ApiError con codigo)
@@ -206,9 +206,9 @@ npx shadcn@latest add button input form  # componentes bajo demanda
 | 0 — Decisiones | **0.1 cerrado** (dos realms). Abiertos: 0.2 matriz roles×empresas, 0.3 validación de médicos, 0.4 documentos de partner, 0.5 contenido médico, 0.6 dominio, 0.7 B2B de tiendas |
 | 1 — Fundación local | **Cerrada.** Migración inicial, seed idempotente, pytest contra BD `_test` |
 | 2 — Auth y cuentas | **Cerrada** (ADR-0002, ADR-0003). Registro con bifurcación, verificación de email obligatoria, login/refresh rotativo/logout, recuperación, origen append-only, `?redirect=` con allowlist. Email inmutable (cambio con re-verificación queda como pieza aparte) |
-| 3 — Dashboard por rol | **Cerrada con matriz provisional** (ADR-0004). Colas de validación de médicos y partners con bitácora y correo, usuarios por alcance, catálogo del ecosistema por enlace. Falta que el cliente valide 0.2 y entregue URLs/contactos |
+| 3 — Dashboard por rol | **Cerrada con matriz provisional** (ADR-0004, ADR-0008, ADR-0009). Colas de validación con bitácora y correo, usuarios por alcance con alta de admins/editores y roles, publicaciones por audiencia, configuración del espacio, bitácora visible. Falta que el cliente valide 0.2 y entregue URLs/contactos |
 | 4 — Área médica | **Estructura cerrada** (ADR-0005): áreas y fichas como datos con bandera `publicada`, admin de contenido, render markdown, interstitial. Vacía hasta que el cliente entregue 0.5; criterio de validación sigue en 0.3 |
-| 5 — Área partners | **Estructura cerrada** (ADR-0006, ADR-0008): vínculos por empresa con aprobación independiente, carga de documentos con catálogo provisional por subtipo, revisión del admin con alcance y bitácora, contactos por espacio. Falta que el cliente entregue 0.4, contactos y URLs |
+| 5 — Área partners | **Estructura cerrada** (ADR-0006, ADR-0008, ADR-0009): vínculos por empresa con aprobación independiente, requisitos documentales editables por empresa desde el panel, revisión del admin con alcance y bitácora, contactos por espacio. Falta que el cliente capture 0.4 en el panel, contactos y URLs |
 | 6 — SSO del grupo | No se construye. Solo se respetan sus prerrequisitos de diseño |
 | 7 — QA y salida de local | **Cerrada en local** (ADR-0007): rate limiting en memoria, guardias de arranque, cabeceras de seguridad, accesibilidad del shell, next-intl preparado, vitest, CI y `docs/despliegue.md`. Faltan del cliente: dominio (0.6) para CSP, y dar de alta el remoto y el VPS |
 

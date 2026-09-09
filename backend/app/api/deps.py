@@ -13,7 +13,7 @@ from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.enums import Empresa, EstadoValidacion, Rol
+from app.core.enums import Audiencia, Empresa, EstadoValidacion, Rol
 from app.core.matriz import Alcance, alcance_de
 from app.core.security import decode_token
 from app.db.session import get_db
@@ -132,6 +132,20 @@ def require_partner_aprobado(usuario: Annotated[Usuario, Depends(require_partner
     """Al menos un vinculo aprobado con alguna empresa del grupo (ADR-0008)."""
     if not any(v.estado == EstadoValidacion.VALIDADO for v in usuario.vinculos):
         raise _prohibido("Aun no tienes un vinculo aprobado")
+    return usuario
+
+
+def acceso_audiencia(empresa: Empresa, audiencia: "Audiencia", usuario: UsuarioActual) -> Usuario:
+    """Puerta de las publicaciones de un espacio (corte 3), por audiencia:
+    pacientes = cualquier sesion; medicos = medico validado; partners = vinculo aprobado con ESA empresa."""
+    from app.core.enums import Audiencia
+
+    if audiencia == Audiencia.MEDICOS:
+        return require_medico_validado(usuario)
+    if audiencia == Audiencia.PARTNERS and not any(
+        v.empresa == empresa and v.estado == EstadoValidacion.VALIDADO for v in usuario.vinculos
+    ):
+        raise _prohibido("Solo partners con vinculo aprobado con esta empresa")
     return usuario
 
 

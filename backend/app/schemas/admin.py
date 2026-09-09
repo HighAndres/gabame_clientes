@@ -3,10 +3,27 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
-from app.core.enums import Empresa, EstadoValidacion, Modulo, Producto, SubtipoPartner
-from app.models import Espacio, PerfilMedico, PerfilPartner, Usuario, VinculoEmpresa
+from app.core.enums import (
+    Audiencia,
+    Empresa,
+    EstadoValidacion,
+    Modulo,
+    Producto,
+    Rol,
+    SubtipoPartner,
+)
+from app.models import (
+    Espacio,
+    PerfilMedico,
+    PerfilPartner,
+    Publicacion,
+    RequisitoDocumental,
+    Usuario,
+    VinculoEmpresa,
+)
+from app.schemas.auth import normalizar_email
 from app.schemas.usuario import UsuarioOut
 
 
@@ -215,3 +232,142 @@ class PiezaOut(BaseModel):
     url: str | None
     descripcion: str
     pendiente: bool
+
+
+# ---------- corte 3: cuentas administrativas, requisitos, publicaciones, bitacora ----------
+
+
+class RolAsignadoIn(BaseModel):
+    rol: Rol
+    empresa: Empresa | None = None
+
+    @model_validator(mode="after")
+    def _empresa_segun_rol(self) -> "RolAsignadoIn":
+        if self.rol == Rol.ADMIN_GRUPO and self.empresa is not None:
+            raise ValueError("admin_grupo no lleva empresa")
+        if self.rol in (Rol.ADMIN_EMPRESA, Rol.EDITOR_EMPRESA) and self.empresa is None:
+            raise ValueError("Ese rol necesita empresa")
+        return self
+
+    def par(self) -> tuple[Rol, Empresa | None]:
+        return (self.rol, self.empresa)
+
+
+class RolesIn(BaseModel):
+    roles: list[RolAsignadoIn] = Field(max_length=12)
+
+
+class AdminNuevoIn(BaseModel):
+    email: EmailStr
+    nombre: str = Field(min_length=1, max_length=120)
+    apellidos: str = Field(min_length=1, max_length=160)
+    roles: list[RolAsignadoIn] = Field(min_length=1, max_length=12)
+
+    @field_validator("email")
+    @classmethod
+    def _email(cls, valor: str) -> str:
+        return normalizar_email(valor)
+
+    @field_validator("nombre", "apellidos")
+    @classmethod
+    def _sin_espacios(cls, valor: str) -> str:
+        return valor.strip()
+
+
+class ActivoIn(BaseModel):
+    activo: bool
+
+
+class RequisitoDocumentalIn(BaseModel):
+    clave: str | None = Field(default=None, max_length=60, pattern=r"^[a-z0-9_]+$")
+    nombre: str = Field(min_length=2, max_length=120)
+    descripcion: str | None = Field(default=None, max_length=500)
+    obligatorio: bool = True
+    tipo: SubtipoPartner | None = None
+
+
+class RequisitosIn(BaseModel):
+    requisitos: list[RequisitoDocumentalIn] = Field(max_length=30)
+
+
+class RequisitoDocumentalOut(BaseModel):
+    id: uuid.UUID
+    clave: str
+    nombre: str
+    descripcion: str | None
+    obligatorio: bool
+    tipo: SubtipoPartner | None
+    orden: int
+    activo: bool
+
+    @classmethod
+    def desde_modelo(cls, r: RequisitoDocumental) -> "RequisitoDocumentalOut":
+        return cls(
+            id=r.id, clave=r.clave, nombre=r.nombre, descripcion=r.descripcion, obligatorio=r.obligatorio,
+            tipo=r.tipo, orden=r.orden, activo=r.activo,
+        )
+
+
+class PublicacionIn(BaseModel):
+    audiencia: Audiencia
+    titulo: str = Field(min_length=2, max_length=160)
+    resumen: str | None = Field(default=None, max_length=500)
+    contenido: str = Field(default="", max_length=100_000)
+    orden: int = Field(default=0, ge=0, le=999)
+    publicada: bool = False
+
+
+class PublicacionUpdate(BaseModel):
+    audiencia: Audiencia | None = None
+    titulo: str | None = Field(default=None, min_length=2, max_length=160)
+    resumen: str | None = Field(default=None, max_length=500)
+    contenido: str | None = Field(default=None, max_length=100_000)
+    orden: int | None = Field(default=None, ge=0, le=999)
+    publicada: bool | None = None
+
+
+class PublicacionOut(BaseModel):
+    id: uuid.UUID
+    empresa: Empresa
+    audiencia: Audiencia
+    slug: str
+    titulo: str
+    resumen: str | None
+    contenido: str
+    orden: int
+    publicada: bool
+    actualizado_en: datetime
+
+    @classmethod
+    def desde_modelo(cls, p: Publicacion) -> "PublicacionOut":
+        return cls(
+            id=p.id, empresa=p.empresa, audiencia=p.audiencia, slug=p.slug, titulo=p.titulo, resumen=p.resumen,
+            contenido=p.contenido, orden=p.orden, publicada=p.publicada, actualizado_en=p.actualizado_en,
+        )
+
+
+class PersonaRefOut(BaseModel):
+    id: uuid.UUID
+    email: str
+    nombre: str
+
+    @classmethod
+    def desde_modelo(cls, u: Usuario | None) -> "PersonaRefOut | None":
+        if u is None:
+            return None
+        return cls(id=u.id, email=u.email, nombre=f"{u.nombre} {u.apellidos}".strip())
+
+
+class BitacoraOut(BaseModel):
+    id: uuid.UUID
+    accion: str
+    detalle: dict
+    creado_en: datetime
+    actor: PersonaRefOut | None
+    objetivo: PersonaRefOut | None
+    objetivo_id: uuid.UUID
+
+
+class PaginaBitacora(BaseModel):
+    total: int
+    items: list[BitacoraOut]

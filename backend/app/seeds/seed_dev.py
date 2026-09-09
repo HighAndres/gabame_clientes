@@ -16,11 +16,19 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.enums import Empresa, EstadoValidacion, EventoOrigen, Realm, Rol, SubtipoPartner
+from app.core.enums import (
+    Audiencia,
+    Empresa,
+    EstadoValidacion,
+    EventoOrigen,
+    Realm,
+    Rol,
+    SubtipoPartner,
+)
 from app.core.security import hash_password
 from app.db.session import SessionLocal
-from app.models import PerfilMedico, PerfilPartner, Usuario, UsuarioRol, VinculoEmpresa
-from app.services import espacios
+from app.models import PerfilMedico, PerfilPartner, Publicacion, Usuario, UsuarioRol, VinculoEmpresa
+from app.services import espacios, requisitos
 from app.services.origen import registrar_origen
 
 PASSWORD = os.environ.get("SEED_PASSWORD") or "Local123!"
@@ -69,9 +77,32 @@ def _vinculo(
     )
 
 
+def _publicacion(db: Session, empresa: Empresa, audiencia: Audiencia, slug: str, titulo: str, resumen: str) -> None:
+    existe = db.scalar(select(Publicacion.id).where(Publicacion.empresa == empresa, Publicacion.slug == slug))
+    if existe:
+        return
+    db.add(
+        Publicacion(
+            empresa=empresa, audiencia=audiencia, slug=slug, titulo=titulo, resumen=resumen,
+            contenido=f"# {titulo}\n\n{resumen}\n\nContenido de ejemplo del espacio de {espacios.NOMBRES[empresa]}.",
+            publicada=True,
+        )
+    )
+
+
 def main() -> None:
     with SessionLocal() as db:
         espacios.listar(db)  # espacios con modulos por defecto
+        for empresa in Empresa:
+            requisitos.listar(db, empresa)  # catalogo generico de documentos
+            _publicacion(
+                db, empresa, Audiencia.PARTNERS, "bienvenida-partners", f"Bienvenido a {espacios.NOMBRES[empresa]}",
+                "Como trabajamos con nuestros distribuidores y clientes.",
+            )
+        _publicacion(
+            db, Empresa.GABAME, Audiencia.PACIENTES, "nuestras-marcas", "Nuestras marcas",
+            "Las marcas de GABAME y donde encontrarlas.",
+        )
 
         paciente = _usuario(db, "paciente@local.test", "Ana", "Paciente", Realm.ID)
         _rol(db, paciente, Rol.PACIENTE)

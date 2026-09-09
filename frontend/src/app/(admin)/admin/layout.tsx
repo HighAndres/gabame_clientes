@@ -1,4 +1,4 @@
-import { Briefcase, FileText, LayoutGrid, type LucideIcon, Stethoscope, Users } from "lucide-react";
+import { Briefcase, Building2, FileText, LayoutGrid, type LucideIcon, Newspaper, ScrollText, Stethoscope, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
@@ -14,8 +14,11 @@ const ICONO: Record<string, LucideIcon> = {
   "/admin": LayoutGrid,
   "/admin/medicos": Stethoscope,
   "/admin/contenido": FileText,
+  "/admin/publicaciones": Newspaper,
   "/admin/partners": Briefcase,
   "/admin/usuarios": Users,
+  "/admin/espacios": Building2,
+  "/admin/bitacora": ScrollText,
 };
 
 /**

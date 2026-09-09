@@ -92,7 +92,10 @@ export function navAdmin(u: UsuarioOut): ItemNav[] {
   const items: ItemNav[] = [{ href: "/admin", texto: "Resumen" }];
   if (a.veMedicos) items.push({ href: "/admin/medicos", texto: "Medicos" });
   if (a.editaContenidoRx) items.push({ href: "/admin/contenido", texto: "Contenido Rx" });
+  items.push({ href: "/admin/publicaciones", texto: "Publicaciones" });
   if (a.administraAlguna) items.push({ href: "/admin/partners", texto: "Partners" });
   if (a.administraAlguna) items.push({ href: "/admin/usuarios", texto: "Usuarios" });
+  items.push({ href: "/admin/espacios", texto: a.grupo || a.empresas.length > 1 ? "Espacios" : "Mi espacio" });
+  if (a.administraAlguna) items.push({ href: "/admin/bitacora", texto: "Bitacora" });
   return items;
 }
