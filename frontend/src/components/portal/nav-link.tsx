@@ -5,8 +5,18 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
-/** Enlace de navegacion con `aria-current="page"` (WCAG 2.4.8) y estilo activo. */
-export function NavLink({ href, children, exacto = false }: { href: string; children: React.ReactNode; exacto?: boolean }) {
+/** Enlace de navegacion tipo pildora con `aria-current="page"` (WCAG 2.4.8). */
+export function NavLink({
+  href,
+  children,
+  exacto = false,
+  className,
+}: {
+  href: string;
+  children: React.ReactNode;
+  exacto?: boolean;
+  className?: string;
+}) {
   const pathname = usePathname();
   const activo = exacto ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
   return (
@@ -14,8 +24,9 @@ export function NavLink({ href, children, exacto = false }: { href: string; chil
       href={href}
       aria-current={activo ? "page" : undefined}
       className={cn(
-        "rounded-sm px-1 py-0.5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        activo ? "font-medium text-foreground" : "text-muted-foreground",
+        "inline-flex h-9 items-center rounded-md px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        activo ? "bg-primary-soft font-bold text-primary-soft-foreground" : "text-heading hover:bg-background",
+        className,
       )}
     >
       {children}

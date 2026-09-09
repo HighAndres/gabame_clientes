@@ -22,30 +22,31 @@ export default async function FichaPage({ params }: { params: { area: string; fi
   }
 
   return (
-    <article className="max-w-3xl space-y-6">
-      <div>
-        <Link href={`/medico/${ficha.area_slug}`} className="text-xs text-muted-foreground hover:underline">
-          ← {ficha.area_nombre}
-        </Link>
-        <h1 className="mt-1 text-2xl font-semibold">{ficha.nombre}</h1>
-        {ficha.resumen && <p className="mt-1 text-sm text-muted-foreground">{ficha.resumen}</p>}
-      </div>
+    <article className="flex max-w-3xl flex-col gap-4 rounded-lg border bg-card p-7 md:p-8">
+      <p className="text-xs text-muted-foreground">
+        <Link href={`/medico/${ficha.area_slug}`} className="text-primary hover:text-primary-hover">
+          {ficha.area_nombre}
+        </Link>{" "}
+        · Ficha tecnica
+      </p>
+      <h2 className="text-2xl font-bold">{ficha.nombre}</h2>
+      {ficha.resumen && <p className="text-[15px] text-muted-foreground">{ficha.resumen}</p>}
 
-      <div className="prose-gabame space-y-3 text-sm leading-relaxed">
+      <div className="flex flex-col gap-3 text-[15px] leading-relaxed">
         <ReactMarkdown
           components={{
-            h1: (p) => <h2 className="mt-6 text-xl font-semibold" {...p} />,
-            h2: (p) => <h3 className="mt-5 text-lg font-semibold" {...p} />,
-            h3: (p) => <h4 className="mt-4 font-semibold" {...p} />,
+            h1: (p) => <h3 className="mt-4 text-lg font-bold" {...p} />,
+            h2: (p) => <h3 className="mt-4 text-lg font-bold" {...p} />,
+            h3: (p) => <h4 className="mt-3 text-base font-bold" {...p} />,
             ul: (p) => <ul className="list-disc space-y-1 pl-5" {...p} />,
             ol: (p) => <ol className="list-decimal space-y-1 pl-5" {...p} />,
             a: (p) => <a className="text-primary underline" target="_blank" rel="noopener noreferrer" {...p} />,
             table: (p) => (
               <div className="overflow-x-auto">
-                <table className="w-full border text-left text-xs" {...p} />
+                <table className="w-full border text-left text-sm" {...p} />
               </div>
             ),
-            th: (p) => <th className="border bg-muted/50 px-2 py-1" {...p} />,
+            th: (p) => <th className="border bg-background px-2 py-1" {...p} />,
             td: (p) => <td className="border px-2 py-1" {...p} />,
           }}
         >
@@ -53,7 +54,7 @@ export default async function FichaPage({ params }: { params: { area: string; fi
         </ReactMarkdown>
       </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="border-t pt-3 text-xs text-muted-foreground">
         Informacion dirigida exclusivamente a profesionales de la salud. Actualizada el{" "}
         {new Date(ficha.actualizado_en).toLocaleDateString("es-MX")}.
       </p>

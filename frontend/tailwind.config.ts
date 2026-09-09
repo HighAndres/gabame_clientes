@@ -6,21 +6,25 @@ const config: Config = {
   theme: {
     container: { center: true, padding: "1.5rem", screens: { "2xl": "1280px" } },
     extend: {
+      fontFamily: {
+        // Lato via next/font (src/app/layout.tsx); fallback con metricas parecidas
+        sans: ["var(--font-lato)", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif"],
+      },
       colors: {
-        // Azul institucional GABAME. Las demas paletas del grupo NO se mezclan aqui:
-        // el portal es del grupo, no de una empresa. `primary` de shadcn apunta al mismo azul.
-        gabame: {
-          DEFAULT: "#3D89FD",
-          fg: "#FFFFFF",
-        },
+        // Marca del grupo. Las demas paletas del grupo NO se mezclan aqui.
+        gabame: { DEFAULT: "#3d7cc9", fg: "#ffffff" },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        heading: "hsl(var(--heading))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
+          hover: "hsl(var(--primary-hover))",
           foreground: "hsl(var(--primary-foreground))",
+          soft: "hsl(var(--primary-soft))",
+          "soft-foreground": "hsl(var(--primary-soft-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -30,6 +34,8 @@ const config: Config = {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
@@ -49,8 +55,8 @@ const config: Config = {
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        md: "0.5rem",
+        sm: "0.375rem",
       },
     },
   },

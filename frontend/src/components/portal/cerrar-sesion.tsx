@@ -20,7 +20,7 @@ export function CerrarSesion() {
   }
 
   return (
-    <Button variant="ghost" size="sm" onClick={salir} disabled={cargando}>
+    <Button variant="outline" size="sm" onClick={salir} disabled={cargando}>
       Cerrar sesion
     </Button>
   );

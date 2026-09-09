@@ -19,28 +19,31 @@ export default async function AreaPage({ params }: { params: { area: string } })
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Link href="/medico" className="text-xs text-muted-foreground hover:underline">
-          ← Area medica
-        </Link>
-        <h1 className="mt-1 text-2xl font-semibold">{area.nombre}</h1>
-        {area.descripcion && <p className="mt-1 text-sm text-muted-foreground">{area.descripcion}</p>}
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-1">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="text-[22px] font-bold">{area.nombre}</h2>
+          <span className="text-[13px] text-muted-foreground">
+            {area.fichas.length} {area.fichas.length === 1 ? "ficha tecnica" : "fichas tecnicas"}
+          </span>
+        </div>
+        {area.descripcion && <p className="text-sm text-muted-foreground">{area.descripcion}</p>}
       </div>
 
       {area.fichas.length === 0 ? (
         <p className="text-sm text-muted-foreground">Aun no hay fichas publicadas en esta area.</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {area.fichas.map((f) => (
             <Card key={f.id}>
-              <CardHeader>
-                <CardTitle className="text-base">{f.nombre}</CardTitle>
+              <CardHeader className="pb-2">
+                <p className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">Ficha tecnica</p>
+                <CardTitle className="text-[17px]">{f.nombre}</CardTitle>
                 {f.resumen && <CardDescription>{f.resumen}</CardDescription>}
               </CardHeader>
               <CardContent>
-                <Link href={`/medico/${area.slug}/${f.slug}`} className="text-sm text-primary hover:underline">
-                  Ver ficha tecnica
+                <Link href={`/medico/${area.slug}/${f.slug}`} className="text-sm font-bold text-primary hover:text-primary-hover">
+                  Ver ficha
                 </Link>
               </CardContent>
             </Card>

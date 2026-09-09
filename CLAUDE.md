@@ -14,7 +14,8 @@ solo enlazan hacia ella.
 
 Plan de trabajo completo: `docs/plan-plataforma-clientes-gabame.md`. Arquitectura: `docs/arquitectura.md`.
 Modelo de datos: `docs/modelo-datos.md`. Decisiones cerradas: `docs/decisiones/`. Salida de local: `docs/despliegue.md`.
-Staging para validación del cliente (VPS de Mirmibug, datos de prueba): `docs/staging.md`, `docker-compose.staging.yml`,
+Sistema de diseño aprobado (marca del grupo, tokens, shells): `docs/diseno.md`; no inventes colores ni sombras fuera de él.
+Staging para validación del cliente (VPS del cliente o de Mirmibug, datos de prueba): `docs/staging.md`, `docker-compose.staging.yml`,
 `deploy/Caddyfile`, `scripts/staging.sh`. El portal se actualiza solo con autorización del usuario: workflow manual
 `Desplegar staging` (`.github/workflows/desplegar-staging.yml`) que corre `scripts/desplegar.sh` en la VPS. Nunca
 despliegues por tu cuenta ni automatices ese paso. Producción va en infraestructura del cliente, nunca en staging.
@@ -154,7 +155,9 @@ backend/          FastAPI
   alembic/        migraciones
 frontend/         Next.js 14
   src/app/(auth)/    login, registro, verificar-email, recuperar
-  src/app/(portal)/  dashboard, perfil, medico, partner, admin
+  src/app/(portal)/  dashboard, perfil, medico, partner (shell con barra superior)
+  src/app/(admin)/admin/  resumen, medicos, contenido, partners, usuarios (shell con barra lateral)
+  src/components/marca, ui/estado, ui/avatar-iniciales  sistema de diseño (docs/diseno.md)
   src/middleware.ts  puerta de sesión y rol (verifica JWT con jose, rota refresh)
   src/lib/api.ts     cliente HTTP del backend (ApiError con codigo)
   src/lib/redirect.ts   destinoSeguro(): única función que decide un redirect (ADR-0003)

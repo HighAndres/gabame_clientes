@@ -2,51 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Tokens de marca del grupo GABAME (lienzo aprobado, corte 1).
+ * Azul #3d7cc9, gris #504f51, naranja #ef8f00 solo para estados pendientes.
+ * Ninguna empresa aporta su paleta: aqui no entran los colores de Medinter, Ordan ni A7.
+ */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 220 20% 97%;        /* #f6f7f9 */
+    --foreground: 240 2% 17%;         /* #2b2b2d */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 240 2% 17%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    /* Azul institucional GABAME (#3D89FD). Marca del grupo, no de una empresa. */
-    --primary: 217 98% 62%;
+    --popover-foreground: 240 2% 17%;
+    --primary: 213 56% 51%;           /* #3d7cc9 */
+    --primary-hover: 213 54% 44%;     /* #3369ad */
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
+    --primary-soft: 214 62% 95%;      /* #eaf1fa */
+    --primary-soft-foreground: 212 54% 37%; /* #2b5a91 */
+    --secondary: 220 20% 97%;
+    --secondary-foreground: 270 1% 31%;
+    --muted: 220 20% 97%;
+    --muted-foreground: 218 5% 44%;   /* #6b6f76 */
+    --accent: 214 62% 95%;
+    --accent-foreground: 212 54% 37%;
+    --destructive: 0 60% 56%;         /* #d24b4b */
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 217 98% 62%;
-    --radius: 0.6rem;
-  }
-
-  .dark {
-    --background: 222 47% 8%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 10%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 10%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 98% 62%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 217 98% 62%;
+    --success: 154 64% 34%;           /* #1f8f5f */
+    --warning: 36 100% 47%;           /* #ef8f00 */
+    --heading: 270 1% 31%;            /* #504f51 */
+    --border: 214 14% 90%;            /* #e3e6ea */
+    --input: 213 12% 85%;             /* #d5d9de */
+    --ring: 213 56% 51%;
+    --radius: 0.75rem;                /* 12 px tarjetas; botones y campos a 8 px */
   }
 
   * {
@@ -55,5 +43,10 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+  }
+
+  h1, h2, h3 {
+    @apply text-heading;
+    text-wrap: pretty;
   }
 }

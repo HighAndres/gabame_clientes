@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Aviso } from "@/components/auth/aviso";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ApiError, api } from "@/lib/api";
 import { esDestinoExterno } from "@/lib/redirect";
+import { cn } from "@/lib/utils";
 import type { OrigenIn } from "@/types/auth";
 
 export function LoginForm({
@@ -69,22 +70,15 @@ export function LoginForm({
   }
 
   return (
-    <form onSubmit={enviar} className="space-y-4" noValidate>
-      <div className="space-y-2">
+    <form onSubmit={enviar} className="flex flex-col gap-5" noValidate>
+      <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">Correo electronico</Label>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
-      <div className="space-y-2">
+      <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <Label htmlFor="password">Contrasena</Label>
-          <Link href={enlaceRecuperar} className="text-xs text-primary hover:underline">
+          <Link href={enlaceRecuperar} className="text-[13px] text-primary hover:text-primary-hover">
             Olvide mi contrasena
           </Link>
         </div>
@@ -104,7 +98,7 @@ export function LoginForm({
           {error.codigo === "email_no_verificado" && (
             <>
               {" "}
-              <button type="button" onClick={reenviar} className="underline">
+              <button type="button" onClick={reenviar} className="font-bold underline">
                 Reenviar correo de confirmacion
               </button>
             </>
@@ -113,16 +107,19 @@ export function LoginForm({
       )}
       {aviso && <Aviso tipo="info">{aviso}</Aviso>}
 
-      <Button type="submit" className="w-full" disabled={cargando}>
+      <Button type="submit" size="lg" className="w-full" disabled={cargando}>
         {cargando ? "Entrando..." : "Iniciar sesion"}
       </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
-        ¿Aun no tienes cuenta?{" "}
-        <Link href={enlaceRegistro} className="text-primary hover:underline">
-          Crear cuenta
-        </Link>
-      </p>
+      <div className="flex items-center gap-3 text-xs text-muted-foreground" aria-hidden="true">
+        <span className="h-px flex-1 bg-border" />
+        <span>¿Aun no tienes cuenta?</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      <Link href={enlaceRegistro} className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full")}>
+        Crear cuenta
+      </Link>
     </form>
   );
 }
