@@ -135,16 +135,23 @@ def require_partner_aprobado(usuario: Annotated[Usuario, Depends(require_partner
     return usuario
 
 
-def acceso_audiencia(empresa: Empresa, audiencia: "Audiencia", usuario: UsuarioActual) -> Usuario:
-    """Puerta de las publicaciones de un espacio (corte 3), por audiencia:
-    pacientes = cualquier sesion; medicos = medico validado; partners = vinculo aprobado con ESA empresa."""
-    from app.core.enums import Audiencia
+def audiencias_permitidas(usuario: Usuario, empresa: Empresa) -> list[Audiencia]:
+    """Que audiencias de un espacio puede ver la persona: pacientes = cualquier sesion; medicos =
+    medico validado (misma regla que el contenido Rx); partners = vinculo aprobado con ESA empresa."""
+    salida = [Audiencia.PACIENTES]
+    perfil = usuario.perfil_medico
+    if perfil is not None and perfil.estado == EstadoValidacion.VALIDADO:
+        salida.append(Audiencia.MEDICOS)
+    if any(v.empresa == empresa and v.estado == EstadoValidacion.VALIDADO for v in usuario.vinculos):
+        salida.append(Audiencia.PARTNERS)
+    return salida
 
+
+def acceso_audiencia(empresa: Empresa, audiencia: Audiencia, usuario: UsuarioActual) -> Usuario:
+    """Puerta de las publicaciones de un espacio (corte 3), por audiencia."""
     if audiencia == Audiencia.MEDICOS:
         return require_medico_validado(usuario)
-    if audiencia == Audiencia.PARTNERS and not any(
-        v.empresa == empresa and v.estado == EstadoValidacion.VALIDADO for v in usuario.vinculos
-    ):
+    if audiencia not in audiencias_permitidas(usuario, empresa):
         raise _prohibido("Solo partners con vinculo aprobado con esta empresa")
     return usuario
 

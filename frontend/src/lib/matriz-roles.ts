@@ -78,7 +78,7 @@ export interface ItemNav {
 /** Navegacion principal del portal segun roles. */
 export function navPara(u: UsuarioOut): ItemNav[] {
   const roles = u.roles.map((r) => r.rol);
-  const items: ItemNav[] = [{ href: "/dashboard", texto: "Inicio" }];
+  const items: ItemNav[] = [{ href: "/dashboard", texto: "Inicio" }, { href: "/espacios", texto: "Empresas" }];
   if (roles.includes("medico")) items.push({ href: "/medico", texto: "Area medica" });
   if (roles.includes("partner")) items.push({ href: "/partner", texto: "Partners" });
   if (alcanceDe(u).esAdmin) items.push({ href: "/admin", texto: "Administracion" });

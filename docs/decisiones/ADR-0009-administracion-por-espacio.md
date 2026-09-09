@@ -53,5 +53,7 @@ documentos pide a sus partners, publicar contenido para sus audiencias y ver qui
   empresas, además de sus partners.
 - `GET /espacios` expone nombre, módulos y portal de cada espacio a cualquier sesión; el
   contacto comercial solo viaja dentro del vínculo aprobado (`/partners/me`).
-- Corte 4 consume `GET /espacios` y las publicaciones para las vistas por empresa de paciente,
-  médico y partner.
+- Corte 4 (vistas por empresa) consume `GET /espacios/mios` y `GET /espacios/{empresa}/mio`: cada
+  espacio con las audiencias que la persona puede ver (`audiencias_permitidas` en deps.py), su vínculo,
+  el contacto si aplica y lo publicado. La identidad de la empresa dentro de su espacio es nombre y
+  logo (solo GABAME tiene logo entregado; las demás muestran iniciales), siempre con la paleta del grupo.

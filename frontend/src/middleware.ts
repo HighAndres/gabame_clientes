@@ -94,6 +94,7 @@ export const config = {
     "/perfil/:path*",
     "/medico/:path*",
     "/partner/:path*",
+    "/espacios/:path*",
     "/admin/:path*",
     "/login",
     "/registro",

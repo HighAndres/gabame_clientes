@@ -159,9 +159,9 @@ backend/          FastAPI
   alembic/        migraciones
 frontend/         Next.js 14
   src/app/(auth)/    login, registro, verificar-email, recuperar
-  src/app/(portal)/  dashboard, perfil, medico, partner (shell con barra superior)
+  src/app/(portal)/  dashboard, perfil, medico, partner, espacios/[empresa] (vistas por empresa; shell con barra superior)
   src/app/(admin)/admin/  resumen, medicos, contenido, publicaciones, partners, usuarios (alta y detalle), espacios, bitacora (shell con barra lateral)
-  src/components/marca, ui/estado, ui/avatar-iniciales  sistema de diseño (docs/diseno.md)
+  src/components/marca (logo del grupo, logo-empresa: nombre/logo de la empresa con paleta del grupo), ui/estado, ui/avatar-iniciales  sistema de diseño (docs/diseno.md)
   src/middleware.ts  puerta de sesión y rol (verifica JWT con jose, rota refresh)
   src/lib/api.ts     cliente HTTP del backend (ApiError con codigo)
   src/lib/redirect.ts   destinoSeguro(): única función que decide un redirect (ADR-0003)

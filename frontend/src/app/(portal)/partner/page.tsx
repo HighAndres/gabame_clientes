@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 
 import { SolicitarVinculo } from "@/components/partner/solicitar-vinculo";
 import { FilaRequisito } from "@/components/partner/subir-documento";
@@ -126,6 +127,11 @@ function TarjetaVinculo({ v }: { v: VinculoOut }) {
         )}
         {aprobado && v.aprobado_en && (
           <p className="text-[13px] text-muted-foreground">Aprobado el {new Date(v.aprobado_en).toLocaleDateString("es-MX")}.</p>
+        )}
+        {aprobado && (
+          <Link href={`/espacios/${v.empresa}`} className="text-sm font-bold text-primary hover:text-primary-hover">
+            Entrar al espacio de {v.empresa_nombre}
+          </Link>
         )}
 
         {aprobado && v.contacto && (

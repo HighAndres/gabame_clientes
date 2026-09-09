@@ -260,3 +260,36 @@ def test_bitacora_respeta_alcance(client, db, actores):
     ordan = client.get(f"{BASE}/bitacora", headers=actores["admin.ordan"]).json()
     assert [b["accion"] for b in ordan["items"]] == ["restablecimiento_enviado"]
     assert client.get(f"{BASE}/bitacora", params={"limit": 1, "offset": 1}, headers=actores["grupo"]).json()["items"][0]["accion"] == "medico_validado"
+
+
+# ---------- corte 4: mis espacios ----------
+
+
+def test_mis_espacios_segun_quien_soy(client, actores):
+    _crear_publicacion(client, actores["grupo"], "ordan", "pacientes", "Para todos")
+    _crear_publicacion(client, actores["grupo"], "ordan", "partners", "Solo partners")
+    _crear_publicacion(client, actores["grupo"], "ordan", "medicos", "Solo medicos")
+    _crear_publicacion(client, actores["grupo"], "a7", "partners", "A7 partners")
+
+    def mios(headers):
+        r = client.get("/api/v1/espacios/mios", headers=headers)
+        assert r.status_code == 200, r.text
+        return {e["empresa"]: e for e in r.json()}
+
+    p = mios(actores["paciente"])
+    assert p["ordan"]["audiencias"] == ["pacientes"] and [x["titulo"] for x in p["ordan"]["publicaciones"]] == ["Para todos"]
+    assert p["ordan"]["vinculo_estado"] is None and p["ordan"]["contacto"] is None
+
+    m = mios(actores["med"])
+    assert m["ordan"]["audiencias"] == ["pacientes", "medicos"]
+    assert sorted(x["titulo"] for x in m["ordan"]["publicaciones"]) == ["Para todos", "Solo medicos"]
+    assert mios(actores["med.pend"])["ordan"]["audiencias"] == ["pacientes"]
+
+    pa = mios(actores["partner"])
+    assert pa["ordan"]["audiencias"] == ["pacientes", "partners"] and pa["ordan"]["vinculo_estado"] == "validado"
+    assert pa["ordan"]["contacto"] is not None and pa["ordan"]["contacto"]["pendiente"] is True
+    assert pa["a7"]["audiencias"] == ["pacientes"] and pa["a7"]["vinculo_estado"] == "pendiente"
+    assert pa["a7"]["publicaciones"] == [] and pa["a7"]["contacto"] is None
+
+    r = client.get("/api/v1/espacios/ordan/mio", headers=actores["partner"])
+    assert r.status_code == 200 and r.json()["nombre"] == "Ordan"

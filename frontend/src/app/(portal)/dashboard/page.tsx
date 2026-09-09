@@ -1,10 +1,12 @@
 import Link from "next/link";
 
 import { Ecosistema } from "@/components/portal/ecosistema";
+import { TarjetaEspacio } from "@/components/portal/tarjeta-espacio";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { alcanceDe, NOMBRE_EMPRESA } from "@/lib/matriz-roles";
-import { leerUsuarioActual } from "@/lib/sesion";
+import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
+import type { EspacioMioOut } from "@/types/espacios";
 
 const ESTADO_MEDICO = {
   validado: "Tu acreditacion esta validada.",
@@ -39,6 +41,12 @@ export default async function DashboardPage() {
   const roles = u.roles.map((r) => r.rol);
   const admin = alcanceDe(u);
   const saludo = u.nombre;
+  let espacios: EspacioMioOut[] = [];
+  try {
+    espacios = await apiConSesion<EspacioMioOut[]>("/espacios/mios");
+  } catch {
+    espacios = [];
+  }
 
   return (
     <div className="flex flex-col gap-9">
@@ -83,7 +91,23 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <Ecosistema titulo={u.realm === "partners" ? "Empresas y canales del grupo" : "Marcas y tiendas del grupo"} />
+      {espacios.length > 0 && (
+        <section className="flex flex-col gap-4">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-xl font-bold">Empresas del grupo</h2>
+            <Link href="/espacios" className="text-[13px] font-bold text-primary hover:text-primary-hover">
+              Ver todas
+            </Link>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {espacios.map((e) => (
+              <TarjetaEspacio key={e.empresa} e={e} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <Ecosistema titulo={u.realm === "partners" ? "Sitios y canales oficiales" : "Marcas y tiendas del grupo"} />
     </div>
   );
 }

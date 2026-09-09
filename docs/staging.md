@@ -38,7 +38,7 @@ todos los correos (verificacion, recuperacion, decisiones), con el usuario y con
   `admin.ordan@local.test`, `admin.grupo@local.test`.
 - Guion de prueba: registrarse como paciente, profesional y empresa; verificar correo desde el
   buzon; como admin validar medico y partner, dar de alta un editor, capturar contacto y requisitos
-  del espacio, publicar algo para partners y revisar la bitacora; como medico validado entrar al area medica; como
+  del espacio, publicar algo para partners y revisar la bitacora; como paciente, medico y partner entrar a Empresas y ver el espacio de cada una; como medico validado entrar al area medica; como
   partner subir documentos y como admin revisarlos; probar `?origen=gabame&ruta=/conocer-mas` y
   `?redirect=https://gabame.com`.
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { AreaOut } from "@/types/contenido";
+import type { EspacioMioOut } from "@/types/espacios";
 
 /** Entrada del area medica: resumen de areas. El layout ya filtra a quien no esta validado. */
 export default async function MedicoPage() {
@@ -14,6 +15,13 @@ export default async function MedicoPage() {
     areas = await apiConSesion<AreaOut[]>("/medicos/areas");
   } catch {
     areas = [];
+  }
+  let paraMedicos: EspacioMioOut["publicaciones"] = [];
+  try {
+    const gabame = await apiConSesion<EspacioMioOut>("/espacios/gabame/mio");
+    paraMedicos = gabame.publicaciones.filter((p) => p.audiencia === "medicos");
+  } catch {
+    paraMedicos = [];
   }
 
   return (
@@ -48,6 +56,22 @@ export default async function MedicoPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {paraMedicos.length > 0 && (
+        <section className="flex flex-col gap-3 border-t pt-5">
+          <h3 className="text-[17px] font-bold">Más de GABAME para profesionales</h3>
+          <ul className="flex flex-col gap-2 text-sm">
+            {paraMedicos.map((p) => (
+              <li key={p.id}>
+                <Link href={`/espacios/gabame/medicos/${p.slug}`} className="font-bold text-primary hover:text-primary-hover">
+                  {p.titulo}
+                </Link>
+                {p.resumen && <span className="text-muted-foreground"> · {p.resumen}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );
