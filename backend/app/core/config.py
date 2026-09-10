@@ -66,9 +66,9 @@ if settings.ENVIRONMENT == "production":
     if "cambiar_en_local" in settings.DATABASE_URL:
         raise RuntimeError("DATABASE_URL de produccion con credenciales de ejemplo")
 
-# Los correos del seed usan el TLD reservado `.test` (@local.test), que email-validator rechaza
-# por defecto. Se permite en local y, explicitamente, en staging (PERMITIR_TLD_TEST=1).
-# En produccion real no: ninguna cuenta de prueba debe poder entrar.
+# email-validator rechaza el TLD reservado `.test` por defecto. Se permite en local (pruebas) y solo
+# explicitamente fuera de local (PERMITIR_TLD_TEST=1). Las cuentas del seed ya usan @gabame.com,
+# asi que staging no lo necesita. En produccion real no se activa.
 _permitir_tld_test = (
     settings.PERMITIR_TLD_TEST
     if settings.PERMITIR_TLD_TEST is not None

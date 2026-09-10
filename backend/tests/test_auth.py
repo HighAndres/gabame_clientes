@@ -261,6 +261,6 @@ def test_refresh_token_no_sirve_como_access(client, db):
 
 
 def test_correos_del_seed_con_tld_test_pasan_en_local(client, db):
-    """Los usuarios dummy usan @local.test (TLD reservado); email-validator lo permite fuera de produccion."""
+    """El TLD reservado .test (email-validator lo rechaza por defecto) se permite en local para pruebas."""
     crear_usuario(db, "medico@local.test")
     assert login(client, "medico@local.test")["access_token"]

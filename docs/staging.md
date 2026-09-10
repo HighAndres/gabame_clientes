@@ -32,10 +32,11 @@ todos los correos (verificacion, recuperacion, decisiones), con el usuario y con
 ## Que entregar al cliente
 
 - URL del portal y del buzon con su usuario y contrasena.
-- Cuentas de prueba (contrasena = `SEED_PASSWORD`): `paciente@local.test`, `medico@local.test`
-  (validado), `medico.pendiente@local.test`, `partner@local.test` (Ordan aprobado, A7 en revision), `editor.gabame@local.test`,
-  `admin.gabame@local.test`,
-  `admin.ordan@local.test`, `admin.grupo@local.test`.
+- Cuentas de prueba (contrasena = `SEED_PASSWORD`; el rol va antes de la arroba y el dominio es el
+  del grupo): `paciente@gabame.com`, `medico@gabame.com` (validado), `medico.pendiente@gabame.com`,
+  `partner@gabame.com` (Ordan aprobado, A7 en revision), `admin.gabame@gabame.com`, `admin.medinter@gabame.com`,
+  `admin.ordan@gabame.com`, `admin.a7@gabame.com`, `editor.gabame@gabame.com`, `admin.grupo@gabame.com`.
+  Son buzones ficticios: el correo de staging va al buzon de pruebas, nunca a internet.
 - Guion de prueba: registrarse como paciente, profesional y empresa; verificar correo desde el
   buzon; como admin validar medico y partner, dar de alta un editor, capturar contacto y requisitos
   del espacio, publicar algo para partners y revisar la bitacora; como paciente, medico y partner entrar a Empresas y ver el espacio de cada una; como medico validado entrar al area medica; como

@@ -4,16 +4,19 @@
 
 Contrasena de todos: SEED_PASSWORD si esta definida; si no, Local123! (solo local).
 
-Cuentas:
-- paciente@local.test, medico@local.test (validado), medico.pendiente@local.test
-- partner@local.test: vinculo con Ordan aprobado y con A7 en revision (ADR-0008)
-- admin.<empresa>@local.test por cada empresa, editor.gabame@local.test, admin.grupo@local.test
+Cuentas (el rol va antes de la arroba para distinguirlas; el dominio es el del grupo):
+- paciente@gabame.com, medico@gabame.com (validado), medico.pendiente@gabame.com
+- partner@gabame.com: vinculo con Ordan aprobado y con A7 en revision (ADR-0008)
+- admin.<empresa>@gabame.com por cada empresa, editor.gabame@gabame.com, admin.grupo@gabame.com
+
+Las cuentas antiguas con dominio @local.test se eliminan al correr (con todo lo que cuelga de
+ellas: roles, perfiles, vinculos, documentos, sesiones). Solo son datos de prueba.
 """
 
 import os
 from datetime import UTC, datetime
 
-from sqlalchemy import select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.core.enums import (
@@ -32,6 +35,18 @@ from app.services import espacios, requisitos
 from app.services.origen import registrar_origen
 
 PASSWORD = os.environ.get("SEED_PASSWORD") or "Local123!"
+DOMINIO = "@gabame.com"
+DOMINIOS_VIEJOS = ("@local.test",)
+
+
+def _retirar_cuentas_viejas(db: Session) -> int:
+    """Borra las cuentas de prueba de dominios anteriores. Cascada en BD: roles, perfiles,
+    vinculos, documentos, origenes, tokens y sesiones. La bitacora conserva sus filas."""
+    total = 0
+    for dominio in DOMINIOS_VIEJOS:
+        r = db.execute(delete(Usuario).where(func.lower(Usuario.email).like(f"%{dominio}")))
+        total += r.rowcount or 0
+    return total
 
 
 def _usuario(db: Session, email: str, nombre: str, apellidos: str, realm: Realm) -> Usuario:
@@ -92,6 +107,7 @@ def _publicacion(db: Session, empresa: Empresa, audiencia: Audiencia, slug: str,
 
 def main() -> None:
     with SessionLocal() as db:
+        retiradas = _retirar_cuentas_viejas(db)
         espacios.listar(db)  # espacios con modulos por defecto
         for empresa in Empresa:
             requisitos.listar(db, empresa)  # catalogo generico de documentos
@@ -104,10 +120,10 @@ def main() -> None:
             "Las marcas de GABAME y donde encontrarlas.",
         )
 
-        paciente = _usuario(db, "paciente@local.test", "Ana", "Paciente", Realm.ID)
+        paciente = _usuario(db, "paciente@gabame.com", "Ana", "Paciente", Realm.ID)
         _rol(db, paciente, Rol.PACIENTE)
 
-        medico = _usuario(db, "medico@local.test", "Hugo", "Medico", Realm.ID)
+        medico = _usuario(db, "medico@gabame.com", "Hugo", "Medico", Realm.ID)
         _rol(db, medico, Rol.MEDICO)
         if db.get(PerfilMedico, medico.id) is None:
             db.add(
@@ -119,7 +135,7 @@ def main() -> None:
                 )
             )
 
-        medico_pend = _usuario(db, "medico.pendiente@local.test", "Iris", "Pendiente", Realm.ID)
+        medico_pend = _usuario(db, "medico.pendiente@gabame.com", "Iris", "Pendiente", Realm.ID)
         _rol(db, medico_pend, Rol.MEDICO)
         if db.get(PerfilMedico, medico_pend.id) is None:
             db.add(
@@ -130,7 +146,7 @@ def main() -> None:
                 )
             )
 
-        partner = _usuario(db, "partner@local.test", "Distribuidora", "Demo", Realm.PARTNERS)
+        partner = _usuario(db, "partner@gabame.com", "Distribuidora", "Demo", Realm.PARTNERS)
         _rol(db, partner, Rol.PARTNER)
         if db.get(PerfilPartner, partner.id) is None:
             db.add(PerfilPartner(usuario_id=partner.id, razon_social="Distribuidora Demo SA de CV"))
@@ -139,18 +155,20 @@ def main() -> None:
 
         for empresa in Empresa:
             admin = _usuario(
-                db, f"admin.{empresa.value}@local.test", "Admin", empresa.value.upper(), Realm.PARTNERS
+                db, f"admin.{empresa.value}@gabame.com", "Admin", empresa.value.upper(), Realm.PARTNERS
             )
             _rol(db, admin, Rol.ADMIN_EMPRESA, empresa)
 
-        editor = _usuario(db, "editor.gabame@local.test", "Editora", "GABAME", Realm.PARTNERS)
+        editor = _usuario(db, "editor.gabame@gabame.com", "Editora", "GABAME", Realm.PARTNERS)
         _rol(db, editor, Rol.EDITOR_EMPRESA, Empresa.GABAME)
 
-        grupo = _usuario(db, "admin.grupo@local.test", "Admin", "Grupo", Realm.PARTNERS)
+        grupo = _usuario(db, "admin.grupo@gabame.com", "Admin", "Grupo", Realm.PARTNERS)
         _rol(db, grupo, Rol.ADMIN_GRUPO)
 
         db.commit()
-    print(f"Seed listo. Contrasena de todos: {PASSWORD}")
+    if retiradas:
+        print(f"Cuentas de prueba antiguas retiradas: {retiradas}")
+    print(f"Seed listo. Cuentas *{DOMINIO}; contrasena de todas: {PASSWORD}")
 
 
 if __name__ == "__main__":

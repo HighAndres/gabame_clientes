@@ -51,8 +51,6 @@ services:
       UPLOADS_DIR: /app/uploads
       SEED_AL_ARRANCAR: ${SEED_AL_ARRANCAR:-1}
       SEED_PASSWORD: ${SEED_PASSWORD:-}
-      # Staging: las cuentas de prueba usan @local.test. En produccion real esto NO se pone.
-      PERMITIR_TLD_TEST: "1"
     volumes:
       - staging-uploads:/app/uploads
 
