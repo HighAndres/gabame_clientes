@@ -1,3 +1,4 @@
+import { ModalLegal } from "@/components/legal/modal-legal";
 import { Briefcase, Stethoscope, User } from "lucide-react";
 import Link from "next/link";
 
@@ -70,9 +71,8 @@ export default function Home() {
       <footer className="container flex flex-wrap items-center justify-between gap-3 border-t py-8 text-[13px] text-muted-foreground">
         <span>GABAME · Medinter · Ordan · A7 Pharmaceutical Distributor</span>
         <span className="flex gap-6">
-          <a href="https://gabame.com" className="text-primary hover:text-primary-hover">
-            Aviso de privacidad
-          </a>
+          <ModalLegal documento="aviso-privacidad" />
+          <ModalLegal documento="terminos" />
           <a href="https://gabame.com" className="text-primary hover:text-primary-hover">
             Contacto
           </a>

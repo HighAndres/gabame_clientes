@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { PieLegal } from "@/components/legal/pie-legal";
 import { Logo } from "@/components/marca/logo";
 import { CerrarSesion } from "@/components/portal/cerrar-sesion";
 import { NavLink } from "@/components/portal/nav-link";
@@ -71,6 +72,7 @@ export default async function PortalLayout({ children }: { children: React.React
       <main id="contenido" className="container py-10">
         {children}
       </main>
+      <PieLegal className="border-t" />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Aviso } from "@/components/auth/aviso";
+import { ModalLegal } from "@/components/legal/modal-legal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -301,7 +302,9 @@ export function RegistroForm({
         {cargando ? "Creando cuenta..." : "Crear cuenta"}
       </Button>
       <p className="text-center text-xs text-muted-foreground">
-        Al crear tu cuenta aceptas el aviso de privacidad del grupo GABAME (LFPDPPP).
+        Al crear tu cuenta aceptas el <ModalLegal documento="aviso-privacidad">aviso de privacidad</ModalLegal> y los{" "}
+        <ModalLegal documento="terminos">términos de uso</ModalLegal> del grupo GABAME.{" "}
+        <ModalLegal documento="aviso-privacidad-simplificado">Ver resumen</ModalLegal>.
       </p>
     </form>
   );
