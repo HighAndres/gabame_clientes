@@ -46,12 +46,18 @@ export function RegistroForm({
   origen,
   destino,
   enlaceLogin,
+  tipoInicial = null,
+  empresaInicial = null,
 }: {
   origen: OrigenIn | null;
   destino: string;
   enlaceLogin: string;
+  /** Tipo ya elegido por la puerta de entrada (?tipo=); la persona puede cambiarlo. */
+  tipoInicial?: TipoCuenta | null;
+  /** Empresa preseleccionada en el registro de partners (?empresa=, sitios de Medinter, Ordan y A7). */
+  empresaInicial?: Empresa | null;
 }) {
-  const [tipo, setTipo] = useState<TipoCuenta | null>(null);
+  const [tipo, setTipo] = useState<TipoCuenta | null>(tipoInicial);
   const [f, setF] = useState({
     nombre: "",
     apellidos: "",
@@ -66,7 +72,9 @@ export function RegistroForm({
     rfc: "",
   });
   // Empresa -> tipo de relacion. Solo las marcadas viajan al backend (ADR-0008).
-  const [vinculos, setVinculos] = useState<Partial<Record<Empresa, SubtipoPartner>>>({});
+  const [vinculos, setVinculos] = useState<Partial<Record<Empresa, SubtipoPartner>>>(
+    empresaInicial ? { [empresaInicial]: "distribuidor" } : {},
+  );
   const [error, setError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
   const [listo, setListo] = useState<UsuarioOut | null>(null);

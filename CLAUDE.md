@@ -14,6 +14,7 @@ solo enlazan hacia ella.
 
 Plan de trabajo completo: `docs/plan-plataforma-clientes-gabame.md`. Arquitectura: `docs/arquitectura.md`.
 Modelo de datos: `docs/modelo-datos.md`. Decisiones cerradas: `docs/decisiones/`. Salida de local: `docs/despliegue.md`.
+Puertas de entrada que enlazan los sitios del grupo (`/medicos`, `/clientes`, `/empresas`): `docs/puntos-de-entrada.md`.
 Sistema de diseño aprobado (marca del grupo, tokens, shells): `docs/diseno.md`; no inventes colores ni sombras fuera de él.
 Staging para validación del cliente (VPS del cliente o de Mirmibug, datos de prueba): `docs/staging.md`, `docker-compose.staging.yml`,
 `deploy/Caddyfile`, `scripts/staging.sh`. El portal se actualiza solo con autorización del usuario: workflow manual
@@ -158,7 +159,7 @@ backend/          FastAPI
   app/seeds/      seed_dev.py — un usuario dummy por rol
   alembic/        migraciones
 frontend/         Next.js 14
-  src/app/(auth)/    login, registro, verificar-email, recuperar
+  src/app/(auth)/    login, registro, verificar-email, recuperar, medicos/clientes/empresas (puertas de entrada por audiencia)
   src/app/(portal)/  dashboard, perfil, medico, partner, espacios/[empresa] (vistas por empresa; shell con barra superior)
   src/app/(admin)/admin/  resumen, medicos, contenido, publicaciones, partners, usuarios (alta y detalle), espacios, bitacora (shell con barra lateral)
   src/components/marca (logo del grupo, logo-empresa: nombre/logo de la empresa con paleta del grupo), ui/estado, ui/avatar-iniciales  sistema de diseño (docs/diseno.md)
@@ -167,6 +168,7 @@ frontend/         Next.js 14
   src/lib/redirect.ts   destinoSeguro(): única función que decide un redirect (ADR-0003)
   src/lib/dominios-grupo.ts allowlist de dominios del grupo
   src/lib/origen.ts  lee ?origen=&ruta=&campana= (espejo de la validación del backend)
+  src/lib/entradas.ts catálogo de puertas de entrada: tipo que preseleccionan, destino y enlaces para los sitios
   src/lib/sesion.ts  cookies httpOnly, leerSesion / leerUsuarioActual (server-only)
   src/lib/matriz-roles.ts espejo de app/core/matriz.py: navegación y alcance para renderizar
   src/lib/guardas.ts  exigirAlcance(): guarda de layout de las secciones del panel admin

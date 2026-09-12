@@ -37,10 +37,10 @@ export function leerOrigen(params: Params): OrigenIn | null {
   return { producto: producto as Producto, ruta_entrada: ruta, campana };
 }
 
-/** Conserva los parametros de origen y redirect al pasar de login a registro y viceversa. */
+/** Conserva origen, redirect y la puerta elegida (tipo, empresa) al pasar de puerta a login a registro. */
 export function conservarParams(params: Params, extra?: Record<string, string>): string {
   const salida = new URLSearchParams();
-  for (const k of [PARAM_ORIGEN, PARAM_RUTA, PARAM_CAMPANA, "redirect"]) {
+  for (const k of [PARAM_ORIGEN, PARAM_RUTA, PARAM_CAMPANA, "redirect", "tipo", "empresa"]) {
     const v = params.get(k);
     if (v) salida.set(k, v);
   }

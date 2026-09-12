@@ -1,4 +1,5 @@
 import { LoginForm } from "@/components/auth/login-form";
+import { entradaPorTipo, PARAM_TIPO } from "@/lib/entradas";
 import { conservarParams, leerOrigen } from "@/lib/origen";
 import { destinoSeguro } from "@/lib/redirect";
 
@@ -10,12 +11,16 @@ function lector(sp: Params) {
 
 export default function LoginPage({ searchParams }: { searchParams: Params }) {
   const params = lector(searchParams);
-  const destino = destinoSeguro(params.get("redirect"));
+  // La puerta por la que llego (Area medica, Portal de clientes, Empresas) decide titulo y destino
+  // cuando no viene un redirect explicito. Sin puerta, es el login generico.
+  const puerta = entradaPorTipo(params.get(PARAM_TIPO));
+  const destino = destinoSeguro(params.get("redirect") ?? puerta?.destino);
   const origen = leerOrigen(params);
 
   return (
     <section className="rounded-lg border bg-card p-7 md:p-9">
       <div className="mb-6 flex flex-col gap-1.5">
+        {puerta && <p className="text-xs font-bold uppercase tracking-[0.08em] text-primary">{puerta.titulo}</p>}
         <h1 className="text-[26px] font-bold">Iniciar sesion</h1>
         <p className="text-sm text-muted-foreground">Entra con tu correo y contrasena.</p>
       </div>

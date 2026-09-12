@@ -36,6 +36,11 @@ describe("leerOrigen", () => {
 });
 
 describe("conservarParams", () => {
+  it("propaga la puerta elegida (tipo y empresa) ademas del origen", () => {
+    const s = conservarParams(params({ origen: "ordan", tipo: "empresa", empresa: "ordan", otro: "no" }));
+    expect(s).toBe("?origen=ordan&tipo=empresa&empresa=ordan");
+  });
+
   it("solo propaga origen, ruta, campana y redirect", () => {
     const s = conservarParams(params({ origen: "gabame", ruta: "/a", redirect: "/perfil", otro: "no" }));
     expect(s).toBe("?origen=gabame&ruta=%2Fa&redirect=%2Fperfil");
