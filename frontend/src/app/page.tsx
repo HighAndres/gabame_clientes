@@ -1,15 +1,17 @@
 import { ModalLegal } from "@/components/legal/modal-legal";
-import { Briefcase, Stethoscope, User } from "lucide-react";
+import { ArrowRight, Briefcase, type LucideIcon, Stethoscope, User } from "lucide-react";
 import Link from "next/link";
 
 import { Logo } from "@/components/marca/logo";
 import { buttonVariants } from "@/components/ui/button";
+import { type Entrada, ENTRADAS } from "@/lib/entradas";
 import { cn } from "@/lib/utils";
 
-const PERFILES = [
-  { icono: User, titulo: "Paciente o consumidor", detalle: "Marcas del grupo y farmacia en linea." },
-  { icono: Stethoscope, titulo: "Profesional de la salud", detalle: "Informacion tecnica del portafolio, con cedula validada." },
-  { icono: Briefcase, titulo: "Empresa o distribuidor", detalle: "Documentos, contactos comerciales y portales operativos." },
+/** Las mismas puertas que enlazan los sitios del grupo (docs/puntos-de-entrada.md). */
+const PERFILES: { entrada: Entrada; icono: LucideIcon; detalle: string }[] = [
+  { entrada: "clientes", icono: User, detalle: "Marcas del grupo y farmacia en linea." },
+  { entrada: "medicos", icono: Stethoscope, detalle: "Informacion tecnica del portafolio, con cedula validada." },
+  { entrada: "empresas", icono: Briefcase, detalle: "Documentos, contactos comerciales y portales operativos." },
 ];
 
 export default function Home() {
@@ -39,11 +41,11 @@ export default function Home() {
             Verifica tu correo, completa tu perfil y entra a las marcas, tiendas y contenido que te corresponden.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/registro" className={cn(buttonVariants({ size: "lg" }))}>
-              Crear cuenta
+            <Link href={ENTRADAS.medicos.ruta} className={cn(buttonVariants({ size: "lg" }))}>
+              {ENTRADAS.medicos.boton}
             </Link>
-            <Link href="/login" className={cn(buttonVariants({ size: "lg", variant: "outline" }))}>
-              Iniciar sesion
+            <Link href={ENTRADAS.clientes.ruta} className={cn(buttonVariants({ size: "lg", variant: "outline" }))}>
+              {ENTRADAS.clientes.boton}
             </Link>
           </div>
         </div>
@@ -53,17 +55,26 @@ export default function Home() {
             ¿Como te relacionas con GABAME?
           </p>
           <ul className="flex flex-col gap-3">
-            {PERFILES.map((p) => (
-              <li key={p.titulo} className="flex items-center gap-4 rounded-lg border bg-white px-5 py-4">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary">
-                  <p.icono className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
-                </span>
-                <span className="flex flex-col">
-                  <span className="text-[15px] font-bold text-foreground">{p.titulo}</span>
-                  <span className="text-[13px] text-muted-foreground">{p.detalle}</span>
-                </span>
-              </li>
-            ))}
+            {PERFILES.map((p) => {
+              const e = ENTRADAS[p.entrada];
+              return (
+                <li key={p.entrada}>
+                  <Link
+                    href={e.ruta}
+                    className="flex items-center gap-4 rounded-lg border bg-white px-5 py-4 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary">
+                      <p.icono className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
+                    </span>
+                    <span className="flex flex-1 flex-col">
+                      <span className="text-[15px] font-bold text-foreground">{e.boton}</span>
+                      <span className="text-[13px] text-muted-foreground">{p.detalle}</span>
+                    </span>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </main>
