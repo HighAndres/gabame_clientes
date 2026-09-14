@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { AvisoAcceso } from "@/components/portal/aviso-acceso";
 import { Ecosistema } from "@/components/portal/ecosistema";
+import { Novedades } from "@/components/portal/novedades";
 import { TarjetaEspacio } from "@/components/portal/tarjeta-espacio";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
@@ -95,6 +96,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Re
           chip={u.email_verificado ? <Estado tono="validado">Correo verificado</Estado> : <Estado tono="pendiente">Correo sin verificar</Estado>}
         />
       </div>
+
+      <Novedades espacios={espacios} />
 
       {espacios.length > 0 && (
         <section className="flex flex-col gap-4">
