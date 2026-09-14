@@ -39,7 +39,6 @@ export interface Alcance {
   administraAlguna: boolean;
   veMedicos: boolean;
   editaContenidoRx: boolean;
-  vePacientes: boolean;
 }
 
 export function alcanceDe(u: UsuarioOut): Alcance {
@@ -58,7 +57,6 @@ export function alcanceDe(u: UsuarioOut): Alcance {
     administraAlguna: grupo || admin.length > 0,
     veMedicos: administra(EMPRESA_DUENA_MEDICOS),
     editaContenidoRx: edita(EMPRESA_DUENA_MEDICOS),
-    vePacientes: grupo,
   };
 }
 

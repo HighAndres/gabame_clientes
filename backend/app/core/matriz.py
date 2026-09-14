@@ -11,7 +11,8 @@ Reglas:
 - `editor_empresa` edita contenido y contactos de su empresa; no aprueba ni ve documentos.
 - Los medicos los ve y valida quien administra GABAME (el contenido Rx es de GABAME). El
   contenido Rx lo edita quien edita GABAME.
-- Los pacientes solo los ve `admin_grupo`.
+- Los pacientes solo los ve `admin_grupo`. Esa regla no es una propiedad de `Alcance`: la aplica
+  `_usuarios_visibles` en el router de admin, que es el unico listado donde aparecen (ADR-0010).
 """
 
 from dataclasses import dataclass, field
@@ -58,10 +59,6 @@ class Alcance:
     @property
     def edita_contenido_rx(self) -> bool:
         return self.edita(EMPRESA_DUENA_MEDICOS)
-
-    @property
-    def ve_pacientes(self) -> bool:
-        return self.grupo
 
     @property
     def empresas_partner(self) -> frozenset[Empresa] | None:

@@ -2,7 +2,10 @@
 
 - **Fecha:** 2026-09-09
 - **Estado:** Aceptado. Supersede parcialmente ADR-0004 (el alcance de admins) y el punto 4 de
-  ADR-0006 (contactos como placeholder en codigo). La matriz sigue siendo provisional hasta 0.2
+  ADR-0006 (contactos como placeholder en codigo). La matriz sigue siendo provisional hasta 0.2.
+  ADR-0010 supersede el punto 3 en lo que dice de `require_partner_aprobado`: esa dependencia no
+  existe, el area Partners esta abierta a cualquier partner con perfil y el vinculo aprobado se
+  exige por empresa en el detalle, no por cuenta en la entrada
 - **Decide:** Andres Celis (Mirmibug)
 
 ## Contexto

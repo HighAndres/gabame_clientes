@@ -2,9 +2,11 @@
 
 Los permisos se resuelven aqui, nunca con chequeos sueltos dentro de un handler.
 Tres ejes: realm, rol y empresa (ver docs/arquitectura.md).
+
+Cada dependencia de este modulo protege al menos un endpoint (ADR-0010): si una regla deja de
+usarse se retira, para que no haya dos formas de decidir lo mismo.
 """
 
-from collections.abc import Callable
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
@@ -52,31 +54,6 @@ def _prohibido(mensaje: str) -> HTTPException:
     return HTTPException(status.HTTP_403_FORBIDDEN, {"codigo": "prohibido", "mensaje": mensaje})
 
 
-def require_role(*roles: Rol) -> Callable[[Usuario], Usuario]:
-    permitidos = set(roles)
-
-    def _dep(usuario: UsuarioActual) -> Usuario:
-        if not permitidos & {r.rol for r in usuario.roles}:
-            raise _prohibido("Rol insuficiente")
-        return usuario
-
-    return _dep
-
-
-def require_empresa(empresa: Empresa) -> Callable[[Usuario], Usuario]:
-    """admin_grupo pasa siempre; admin_empresa solo en la suya."""
-
-    def _dep(usuario: UsuarioActual) -> Usuario:
-        roles = {r.rol for r in usuario.roles}
-        if Rol.ADMIN_GRUPO in roles:
-            return usuario
-        if any(r.rol == Rol.ADMIN_EMPRESA and r.empresa == empresa for r in usuario.roles):
-            return usuario
-        raise _prohibido("Sin alcance sobre esta empresa")
-
-    return _dep
-
-
 def get_alcance_admin(usuario: UsuarioActual) -> Alcance:
     """Alcance del admin actual segun la matriz provisional (ADR-0004). 403 si no es admin."""
     alcance = alcance_de(usuario)
@@ -114,24 +91,16 @@ def require_administra_alguna(alcance: AlcanceAdmin) -> Alcance:
     return alcance
 
 
-def require_alcance_pacientes(alcance: AlcanceAdmin) -> Alcance:
-    if not alcance.ve_pacientes:
-        raise _prohibido("Solo admin_grupo ve pacientes")
-    return alcance
-
-
 def require_partner(usuario: UsuarioActual) -> Usuario:
-    """Area Partners: rol partner con perfil. Pendiente o aprobado entran (para cargar documentos);
-    lo que exige aprobacion lo decide cada endpoint con `require_partner_aprobado`."""
+    """Area Partners: rol partner con perfil, sin exigir vinculo aprobado (ADR-0010).
+
+    La aprobacion depende de los documentos que se cargan aqui, asi que cerrar el area a quien
+    esta en revision seria un candado sin llave. Lo que si exige vinculo aprobado es el detalle de
+    cada empresa (contacto, portal y publicaciones), y esa regla vive en `audiencias_permitidas`
+    y en el router de partners, por vinculo y no por cuenta.
+    """
     if not usuario.tiene_rol(Rol.PARTNER) or usuario.perfil_partner is None:
         raise _prohibido("Solo cuentas GABAME Partners")
-    return usuario
-
-
-def require_partner_aprobado(usuario: Annotated[Usuario, Depends(require_partner)]) -> Usuario:
-    """Al menos un vinculo aprobado con alguna empresa del grupo (ADR-0008)."""
-    if not any(v.estado == EstadoValidacion.VALIDADO for v in usuario.vinculos):
-        raise _prohibido("Aun no tienes un vinculo aprobado")
     return usuario
 
 

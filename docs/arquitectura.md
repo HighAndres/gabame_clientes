@@ -19,8 +19,9 @@ gabame.com   medinter.com.mx   ordan.com.mx   a7siete.com   tiendagabame.com
 
 - **frontend/** — Next.js 14 App Router. Grupos de ruta `(auth)` y `(portal)`. `middleware.ts`
   resuelve sesion y rol antes de renderizar. UI con shadcn/ui sobre Tailwind.
-- **backend/** — FastAPI. Routers versionados en `app/api/v1/`. Permisos como dependencias
-  (`require_role`, `require_empresa`), nunca chequeos sueltos dentro del handler.
+- **backend/** — FastAPI. Routers versionados en `app/api/v1/`. Permisos como dependencias de
+  `app/api/deps.py` (alcance del admin, contenido Rx, medico validado, partner), nunca chequeos
+  sueltos dentro del handler. Cada dependencia protege al menos un endpoint (ADR-0010).
 - **BD** — PostgreSQL. Migraciones Alembic desde la primera tabla.
 
 ## Aislamiento de datos (regla dura)

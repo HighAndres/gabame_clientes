@@ -148,7 +148,7 @@ backend/          FastAPI
   app/db/         Base declarativa, sesión
   app/models/     usuario, medico, partner, auditoria, token, sesion, origen, contenido
   app/schemas/    Pydantic v2 (auth, usuario, comun)
-  app/api/deps.py require_role / require_empresa / require_medico_validado
+  app/api/deps.py dependencias de permiso; toda regla vive aqui y protege al menos un endpoint (ADR-0010)
   app/core/errores.py  ErrorNegocio -> {detail: {codigo, mensaje}}; el frontend decide por codigo
   app/core/matriz.py   alcance de admins y editores por empresa (ADR-0008, pendiente 0.2); espejo en src/lib/matriz-roles.ts
   app/core/ecosistema.py catálogo de piezas del grupo (solo enlaces), expuesto en GET /ecosistema

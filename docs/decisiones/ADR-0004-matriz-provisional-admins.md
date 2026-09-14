@@ -1,7 +1,9 @@
 # ADR-0004 — Matriz provisional de alcance de los admins
 
 - **Fecha:** 2026-09-07
-- **Estado:** Aceptado como provisional. Lo supersede la matriz que valide el cliente (pendiente 0.2)
+- **Estado:** Aceptado como provisional. Lo supersede la matriz que valide el cliente (pendiente 0.2).
+  ADR-0008 lo supersede en el alcance por empresa; ADR-0010 en la mención de `require_alcance_pacientes`,
+  que ya no existe: la regla sobre pacientes la aplica `_usuarios_visibles` en el router de admin
 - **Decide:** Andres Celis (Mirmibug)
 
 ## Contexto

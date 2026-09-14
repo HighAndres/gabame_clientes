@@ -8,12 +8,10 @@ Casos obligatorios antes de salir de local:
 """
 
 import pytest
-from fastapi import HTTPException
 
-from app.api.deps import require_empresa, require_role
-from app.core.enums import Empresa, EstadoValidacion, Realm, Rol
+from app.core.enums import Audiencia, Empresa, EstadoValidacion, Realm, Rol
 from app.db.base import Base
-from app.models import Usuario, UsuarioRol
+from app.services import publicaciones
 from tests.conftest import auth, crear_usuario, login
 
 CONTENIDO = "/api/v1/medicos/areas"
@@ -61,34 +59,93 @@ def test_rechazo_posterior_corta_el_acceso_aunque_el_token_siga_vigente(client, 
     assert client.get(CONTENIDO, headers=auth(tokens)).status_code == 403
 
 
-# ---------- alcance por empresa (dependencias, sin endpoint todavia) ----------
+# ---------- alcance por empresa: sobre endpoints reales, no sobre dependencias sueltas ----------
+#
+# ADR-0010: cada regla se prueba donde se aplica. Una dependencia que no protege ningun endpoint
+# no se conserva "por si acaso", porque abre una segunda forma de decidir lo mismo.
 
 
-def _usuario_con(roles: list[tuple[Rol, Empresa | None]]) -> Usuario:
-    u = Usuario(email="x@ejemplo.com", password_hash="-", nombre="X", apellidos="Y", realm=Realm.PARTNERS)
-    u.roles = [UsuarioRol(rol=rol, empresa=empresa) for rol, empresa in roles]
-    return u
+def _partner_de_ordan(db, email="partner@ejemplo.com", estado=EstadoValidacion.PENDIENTE):
+    return crear_usuario(
+        db, email, realm=Realm.PARTNERS, roles=[(Rol.PARTNER, None)], vinculos=[(Empresa.ORDAN, estado)]
+    )
 
 
-def test_admin_empresa_no_ve_otra_empresa():
-    admin_ordan = _usuario_con([(Rol.ADMIN_EMPRESA, Empresa.ORDAN)])
-    assert require_empresa(Empresa.ORDAN)(admin_ordan) is admin_ordan
-    with pytest.raises(HTTPException) as exc:
-        require_empresa(Empresa.MEDINTER)(admin_ordan)
-    assert exc.value.status_code == 403
+def test_admin_empresa_no_ve_datos_de_otra_empresa(client, db):
+    """La regla vive en el alcance del router de admin, no en una dependencia por empresa."""
+    _partner_de_ordan(db)
+    crear_usuario(
+        db, "medinter@ejemplo.com", realm=Realm.PARTNERS, roles=[(Rol.PARTNER, None)],
+        vinculos=[(Empresa.MEDINTER, EstadoValidacion.PENDIENTE)],
+    )
+    crear_usuario(db, "admin.ordan@ejemplo.com", realm=Realm.PARTNERS, roles=[(Rol.ADMIN_EMPRESA, Empresa.ORDAN)])
+    ordan = auth(login(client, "admin.ordan@ejemplo.com"))
+
+    vinculos = client.get("/api/v1/admin/partners", headers=ordan).json()
+    assert [v["empresa"] for v in vinculos] == ["ordan"]
+    assert [u["email"] for u in client.get("/api/v1/admin/usuarios", headers=ordan).json()["items"]] == [
+        "admin.ordan@ejemplo.com",
+        "partner@ejemplo.com",
+    ]
 
 
-def test_admin_grupo_ve_todas_las_empresas():
-    grupo = _usuario_con([(Rol.ADMIN_GRUPO, None)])
-    for empresa in Empresa:
-        assert require_empresa(empresa)(grupo) is grupo
+def test_solo_admin_grupo_ve_pacientes(client, db):
+    """Sin dependencia propia: la aplica la consulta de usuarios visibles del router de admin."""
+    crear_usuario(db, "paciente@ejemplo.com")
+    crear_usuario(db, "admin.ordan@ejemplo.com", realm=Realm.PARTNERS, roles=[(Rol.ADMIN_EMPRESA, Empresa.ORDAN)])
+    crear_usuario(db, "grupo@ejemplo.com", realm=Realm.PARTNERS, roles=[(Rol.ADMIN_GRUPO, None)])
+
+    def emails(quien: str) -> list[str]:
+        r = client.get("/api/v1/admin/usuarios", headers=auth(login(client, quien)))
+        return [u["email"] for u in r.json()["items"]]
+
+    assert "paciente@ejemplo.com" not in emails("admin.ordan@ejemplo.com")
+    assert "paciente@ejemplo.com" in emails("grupo@ejemplo.com")
 
 
-def test_require_role_rechaza_rol_ausente():
-    paciente = _usuario_con([(Rol.PACIENTE, None)])
-    assert require_role(Rol.PACIENTE, Rol.MEDICO)(paciente) is paciente
-    with pytest.raises(HTTPException):
-        require_role(Rol.ADMIN_EMPRESA)(paciente)
+# ---------- partners: el area entra sin vinculo aprobado; el detalle no (ADR-0010) ----------
+
+
+def test_partner_en_revision_entra_y_sube_documentos(client, db):
+    """La aprobacion depende de estos documentos: cerrarle el area seria un candado sin llave."""
+    _partner_de_ordan(db)
+    headers = auth(login(client, "partner@ejemplo.com"))
+
+    estado = client.get("/api/v1/partners/me", headers=headers)
+    assert estado.status_code == 200
+    assert estado.json()["estado"] == "pendiente"
+
+    r = client.post(
+        "/api/v1/partners/me/documentos",
+        data={"tipo": "constancia_fiscal"},
+        files={"archivo": ("csf.pdf", b"%PDF-1.4\n", "application/pdf")},
+        headers=headers,
+    )
+    assert r.status_code == 201, r.text
+
+
+def test_partner_en_revision_no_ve_contacto_ni_publicaciones_de_su_empresa(client, db):
+    """El control real es por vinculo, no por cuenta: mismo partner, distinto estado."""
+    publicaciones.crear(
+        db, Empresa.ORDAN,
+        {"audiencia": Audiencia.PARTNERS, "titulo": "Solo partners", "resumen": None, "contenido": "x",
+         "orden": 0, "publicada": True},
+    )
+    _partner_de_ordan(db, "pendiente@ejemplo.com", EstadoValidacion.PENDIENTE)
+    _partner_de_ordan(db, "aprobado@ejemplo.com", EstadoValidacion.VALIDADO)
+
+    def espacio(quien: str) -> dict:
+        return client.get("/api/v1/espacios/ordan/mio", headers=auth(login(client, quien))).json()
+
+    pendiente = espacio("pendiente@ejemplo.com")
+    assert pendiente["contacto"] is None
+    assert pendiente["audiencias"] == ["pacientes"]
+    assert pendiente["publicaciones"] == []
+
+    aprobado = espacio("aprobado@ejemplo.com")
+    assert aprobado["contacto"] is not None
+    assert "partners" in aprobado["audiencias"]
+    assert [p["titulo"] for p in aprobado["publicaciones"]] == ["Solo partners"]
 
 
 # ---------- cero datos clinicos ----------
