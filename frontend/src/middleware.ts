@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { type MotivoAviso, PARAM_AVISO } from "@/lib/avisos-acceso";
 import { COOKIE_ACCESS, COOKIE_REFRESH, borrarSesion, guardarSesion } from "@/lib/cookies";
 import { verificarAccessToken } from "@/lib/jwt";
 import { destinoSeguro } from "@/lib/redirect";
@@ -14,10 +15,11 @@ import type { ClaimsSesion, Rol, TokenOut } from "@/types/auth";
  *   el backend rechaza igual; esto solo evita renderizar pantallas que no aplican.
  * - Un usuario ya autenticado que entra a /login o /registro va a su destino seguro.
  */
-const PUERTAS: readonly (readonly [string, readonly Rol[]])[] = [
-  ["/medico", ["medico"]],
-  ["/partner", ["partner"]],
-  ["/admin", ["admin_empresa", "editor_empresa", "admin_grupo"]],
+/** Prefijo protegido, motivo del aviso si no pasa, y roles que sí pasan. */
+const PUERTAS: readonly (readonly [string, MotivoAviso, readonly Rol[]])[] = [
+  ["/medico", "solo_medicos", ["medico"]],
+  ["/partner", "solo_partners", ["partner"]],
+  ["/admin", "solo_panel", ["admin_empresa", "editor_empresa", "admin_grupo"]],
 ];
 const RUTAS_AUTH = ["/login", "/registro"];
 
@@ -75,10 +77,12 @@ export async function middleware(request: NextRequest) {
     return res;
   }
 
-  // Puertas por rol
+  // Puertas por rol: se devuelve al inicio con el motivo, no en silencio (ADR-0011)
   const puerta = PUERTAS.find(([prefijo]) => coincide(pathname, prefijo));
-  if (puerta && !puerta[1].some((rol) => claims!.roles.includes(rol))) {
-    const res = NextResponse.redirect(new URL("/dashboard", request.url));
+  if (puerta && !puerta[2].some((rol) => claims!.roles.includes(rol))) {
+    const destino = new URL("/dashboard", request.url);
+    destino.searchParams.set(PARAM_AVISO, puerta[1]);
+    const res = NextResponse.redirect(destino);
     if (tokensNuevos) guardarSesion(res, tokensNuevos);
     return res;
   }

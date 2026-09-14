@@ -172,6 +172,7 @@ frontend/         Next.js 14
   src/lib/sesion.ts  cookies httpOnly, leerSesion / leerUsuarioActual (server-only)
   src/lib/matriz-roles.ts espejo de app/core/matriz.py: navegación y alcance para renderizar
   src/lib/guardas.ts  exigirAlcance(): guarda de layout de las secciones del panel admin
+  src/lib/avisos-acceso.ts catalogo cerrado de motivos que explican una redireccion de guarda (ADR-0011)
   src/i18n/request.ts + src/messages/es.json  next-intl sin enrutado por locale; cadenas del shell
   src/app/api/sesion/route.ts  único lugar del frontend que ve tokens en claro
   src/app/api/backend/[...path]  proxy genérico al backend con el token de la cookie (lo usan los componentes cliente)

@@ -1,10 +1,12 @@
 import Link from "next/link";
 
+import { AvisoAcceso } from "@/components/portal/aviso-acceso";
 import { Ecosistema } from "@/components/portal/ecosistema";
 import { TarjetaEspacio } from "@/components/portal/tarjeta-espacio";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { alcanceDe, NOMBRE_EMPRESA } from "@/lib/matriz-roles";
+import { leerAviso, PARAM_AVISO } from "@/lib/avisos-acceso";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { EspacioMioOut } from "@/types/espacios";
 
@@ -35,7 +37,7 @@ function Tarjeta({ titulo, descripcion, href, accion, chip }: { titulo: string; 
 }
 
 /** Inicio por rol (lienzo aprobado). Matriz provisional hasta 0.2. */
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
   const u = await leerUsuarioActual();
   if (!u) return null;
   const roles = u.roles.map((r) => r.rol);
@@ -48,8 +50,11 @@ export default async function DashboardPage() {
     espacios = [];
   }
 
+  const aviso = leerAviso(searchParams[PARAM_AVISO]);
+
   return (
     <div className="flex flex-col gap-9">
+      {aviso && <AvisoAcceso motivo={aviso} />}
       <div className="flex flex-col gap-1.5">
         <h1 className="text-3xl font-bold">Hola, {saludo}</h1>
         <p className="text-[15px] text-muted-foreground">Bienvenido a tu Cuenta GABAME.</p>

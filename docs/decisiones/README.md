@@ -15,3 +15,4 @@ Una decision no se edita cuando cambia: se escribe un ADR nuevo que la supersede
 | 0008 | Espacios por empresa (modulos como datos) y vinculos usuario-empresa; rol `editor_empresa` | Aceptado (supersede parcialmente 0004 y 0006) |
 | 0009 | Administracion por espacio: cuentas administrativas, requisitos como dato, publicaciones por audiencia, bitacora visible | Aceptado (supersede el punto 1 de 0006) |
 | 0010 | Una sola forma de decidir permisos: se retiran las dependencias sin uso; el area Partners no exige vinculo aprobado | Aceptado (supersede el punto 3 de 0008 y una mencion de 0004) |
+| 0011 | Avisos de acceso: la guarda redirige con un motivo de catalogo cerrado, sin pantalla de error | Aceptado |

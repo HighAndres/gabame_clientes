@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { AvisoAcceso } from "@/components/portal/aviso-acceso";
 import { Card, CardContent } from "@/components/ui/card";
+import { leerAviso, PARAM_AVISO } from "@/lib/avisos-acceso";
 import { alcanceDe, NOMBRE_EMPRESA } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { ResumenAdmin } from "@/types/admin";
@@ -19,13 +21,16 @@ function Cifra({ valor, etiqueta, href, accion }: { valor: number | string; etiq
   );
 }
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
   const [u, r] = await Promise.all([leerUsuarioActual(), apiConSesion<ResumenAdmin>("/admin/resumen")]);
   const a = u ? alcanceDe(u) : null;
   const alcance = r.alcance_grupo ? "todo el grupo" : r.empresas.map((e) => NOMBRE_EMPRESA[e]).join(", ");
 
+  const aviso = leerAviso(searchParams[PARAM_AVISO]);
+
   return (
     <div className="flex flex-col gap-6">
+      {aviso && <AvisoAcceso motivo={aviso} />}
       <div className="flex flex-col gap-1">
         <p className="text-xs text-muted-foreground">{alcance} · Resumen</p>
         <h1 className="text-[26px] font-bold">Administracion</h1>
