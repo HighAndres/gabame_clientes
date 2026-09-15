@@ -6,6 +6,7 @@ Las URLs que no estan aqui no las tenemos: se marcan `Pendiente` y las entrega e
 
 from dataclasses import dataclass
 
+from app.core.config import settings
 from app.core.enums import Empresa, Producto, Realm
 
 
@@ -29,7 +30,7 @@ PIEZAS: tuple[Pieza, ...] = (
           (Realm.ID, Realm.PARTNERS), "Distribucion de Babe y Sheglam."),
     Pieza(Producto.A7, "A7 Pharmaceutical Distributor", "sitio", Empresa.A7, "https://a7siete.com",
           (Realm.PARTNERS,), "Logistica y distribucion."),
-    Pieza(Producto.TIENDAGABAME, "Farmacias GABAME", "tienda", Empresa.GABAME, "https://farmaciasgabame.com",
+    Pieza(Producto.TIENDAGABAME, "Farmacias GABAME", "tienda", Empresa.GABAME, settings.URL_FARMACIAS,
           (Realm.ID, Realm.PARTNERS), "Farmacia en linea Rx y OTC."),
     # Pendiente 0.6 — dominio de Aurashop no documentado
     Pieza(Producto.AURASHOP, "Aurashop", "tienda", Empresa.ORDAN, None,

@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: str = "http://localhost:3000"
     # Base de los enlaces que van en los correos (verificar email, restablecer contrasena)
     FRONTEND_URL: str = "http://localhost:3000"
+    # Farmacias GABAME vive hoy en un entorno de pruebas y manana en su dominio definitivo.
+    # Va por configuracion para poder moverla sin tocar codigo ni volver a desplegar el catalogo.
+    URL_FARMACIAS: str = "https://farmaciasgabame.com"
 
     SMTP_HOST: str = "localhost"
     SMTP_PORT: int = 1025

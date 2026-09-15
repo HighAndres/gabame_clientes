@@ -43,6 +43,7 @@ services:
       SECRET_KEY: ${SECRET_KEY:?define SECRET_KEY en .env.staging}
       BACKEND_CORS_ORIGINS: https://${DOMINIO:?define DOMINIO en .env.staging}
       FRONTEND_URL: https://${DOMINIO}
+      URL_FARMACIAS: ${URL_FARMACIAS:-https://farmaciasgabame.com}
       SMTP_HOST: ${SMTP_HOST:-mailhog}
       SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_USER: ${SMTP_USER:-}

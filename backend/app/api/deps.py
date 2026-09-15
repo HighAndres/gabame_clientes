@@ -125,6 +125,18 @@ def acceso_audiencia(empresa: Empresa, audiencia: Audiencia, usuario: UsuarioAct
     return usuario
 
 
+def require_perfil_medico(usuario: UsuarioActual) -> Usuario:
+    """Su propia acreditacion: cualquier medico con perfil, en cualquier estado.
+
+    No confundir con `require_medico_validado`: esta deja entrar al que esta en revision o
+    rechazado, porque son justo quienes necesitan consultar o corregir su acreditacion. No abre
+    ningun contenido Rx.
+    """
+    if not usuario.tiene_rol(Rol.MEDICO) or usuario.perfil_medico is None:
+        raise _prohibido("Solo profesionales de la salud con acreditacion registrada")
+    return usuario
+
+
 def require_medico_validado(usuario: UsuarioActual) -> Usuario:
     """Puerta del contenido tecnico Rx (Fase 4). Nadie no-validado pasa.
 
