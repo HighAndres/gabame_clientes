@@ -1,6 +1,8 @@
+import { Users } from "lucide-react";
 import Link from "next/link";
 
 import { Button, buttonVariants } from "@/components/ui/button";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { Input } from "@/components/ui/input";
 import { NOMBRE_ROL } from "@/lib/matriz-roles";
@@ -38,15 +40,16 @@ export default async function AdminUsuariosPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-xs text-muted-foreground">Usuarios</p>
-          <h1 className="text-[26px] font-bold">Usuarios en tu alcance</h1>
-        </div>
-        <Link href="/admin/usuarios/nuevo" className={cn(buttonVariants({ size: "sm" }))}>
-          Nuevo administrador
-        </Link>
-      </div>
+      <EncabezadoArea
+        icono={Users}
+        etiqueta="Usuarios"
+        titulo="Usuarios en tu alcance"
+        acciones={
+          <Link href="/admin/usuarios/nuevo" className={cn(buttonVariants({ size: "sm" }))}>
+            Nuevo administrador
+          </Link>
+        }
+      />
 
       <div className="overflow-hidden rounded-lg border bg-card">
         <form className="flex flex-wrap items-center gap-2 border-b px-5 py-3.5" method="get">
@@ -70,7 +73,7 @@ export default async function AdminUsuariosPage({
           <span className="ml-auto text-[13px] text-muted-foreground">{datos.total} en total</span>
         </form>
 
-        <div className="hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_90px_minmax(0,1.2fr)_110px_110px_90px] bg-background px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground md:grid">
+        <div className="hidden grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_90px_minmax(0,1.2fr)_110px_110px_90px] bg-background px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground xl:grid">
           <span>Nombre</span>
           <span>Correo</span>
           <span>Realm</span>
@@ -85,7 +88,7 @@ export default async function AdminUsuariosPage({
           return (
             <div
               key={u.id}
-              className="grid items-center gap-2 border-t px-5 py-3 text-sm md:grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_90px_minmax(0,1.2fr)_110px_110px_90px]"
+              className="grid items-center gap-2 border-t px-5 py-3 text-sm xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_90px_minmax(0,1.2fr)_110px_110px_90px]"
             >
               <span className="truncate font-bold">
                 <Link href={`/admin/usuarios/${u.id}`} className="hover:text-primary">

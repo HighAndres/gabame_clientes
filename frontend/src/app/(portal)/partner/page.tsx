@@ -1,10 +1,11 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Briefcase } from "lucide-react";
 import Link from "next/link";
 
 import { SolicitarVinculo } from "@/components/partner/solicitar-vinculo";
 import { FilaRequisito } from "@/components/partner/subir-documento";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { ApiError } from "@/lib/api";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
@@ -31,8 +32,8 @@ export default async function PartnerPage() {
 
   if (!p) {
     return (
-      <div className="flex flex-col gap-6">
-        <h1 className="text-3xl font-bold">GABAME Partners</h1>
+      <div className="flex max-w-2xl flex-col gap-6">
+        <EncabezadoArea icono={Briefcase} etiqueta="GABAME Partners" titulo="GABAME Partners" />
         <Alert>
           <AlertTitle>Sin perfil de partner</AlertTitle>
           <AlertDescription>No encontramos un perfil de partner asociado a tu cuenta.</AlertDescription>
@@ -46,16 +47,16 @@ export default async function PartnerPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1.5">
-        <h1 className="text-3xl font-bold">{p.razon_social}</h1>
-        <p className="text-[15px] text-muted-foreground">GABAME Partners{p.rfc ? ` · RFC ${p.rfc}` : ""}</p>
-      </div>
+      <EncabezadoArea
+        icono={Briefcase}
+        etiqueta="GABAME Partners"
+        titulo={p.razon_social}
+        descripcion={p.rfc ? `RFC ${p.rfc}` : undefined}
+        acciones={<SolicitarVinculo disponibles={p.empresas_disponibles} />}
+      />
 
       <section className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-bold">Empresas con las que trabajas</h2>
-          <SolicitarVinculo disponibles={p.empresas_disponibles} />
-        </div>
+        <h2 className="text-xl font-bold">Empresas con las que trabajas</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {p.vinculos.map((v) => (
             <TarjetaVinculo key={v.id} v={v} />

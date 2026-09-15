@@ -1,6 +1,8 @@
+import { ScrollText } from "lucide-react";
 import Link from "next/link";
 
 import { BitacoraLista } from "@/components/admin/bitacora-lista";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { apiConSesion } from "@/lib/sesion";
 import type { PaginaBitacora } from "@/types/admin";
 
@@ -14,13 +16,12 @@ export default async function BitacoraPage({ searchParams }: { searchParams: Rec
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <p className="text-xs text-muted-foreground">Bitácora</p>
-        <h1 className="text-[26px] font-bold">Movimientos</h1>
-        <p className="text-sm text-muted-foreground">
-          Cada aprobación, rechazo y cambio de cuenta queda registrado con quién lo hizo y cuándo. No se edita.
-        </p>
-      </div>
+      <EncabezadoArea
+        icono={ScrollText}
+        etiqueta="Bitácora"
+        titulo="Movimientos"
+        descripcion="Cada aprobación, rechazo y cambio de cuenta queda registrado con quién lo hizo y cuándo. No se edita."
+      />
       <div className="overflow-hidden rounded-lg border bg-card">
         <BitacoraLista items={datos.items} />
         <div className="flex items-center justify-between border-t px-5 py-3 text-[13px] text-muted-foreground">

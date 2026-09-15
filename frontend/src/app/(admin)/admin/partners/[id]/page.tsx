@@ -1,9 +1,11 @@
+import { Briefcase } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BitacoraLista } from "@/components/admin/bitacora-lista";
 import { DecisionBotones } from "@/components/admin/decision-botones";
 import { Card, CardContent } from "@/components/ui/card";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { ApiError } from "@/lib/api";
 import { NOMBRE_EMPRESA } from "@/lib/matriz-roles";
@@ -44,17 +46,19 @@ export default async function AdminPartnerDetallePage({ params }: { params: { id
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <Link href="/admin/partners" className="text-xs text-muted-foreground hover:text-primary">
-          ← Partners
-        </Link>
-        <h1 className="text-[26px] font-bold">{partner.razon_social}</h1>
-        <p className="text-sm text-muted-foreground">
-          {partner.rfc ? `RFC ${partner.rfc} · ` : ""}
-          {partner.nombre} {partner.apellidos} · {partner.email}
-          {partner.telefono ? ` · ${partner.telefono}` : ""}
-        </p>
-      </div>
+      <EncabezadoArea
+        icono={Briefcase}
+        etiqueta="Partner"
+        titulo={partner.razon_social}
+        volver={{ href: "/admin/partners", texto: "Partners" }}
+        descripcion={
+          <>
+            {partner.rfc ? `RFC ${partner.rfc} · ` : ""}
+            {partner.nombre} {partner.apellidos} · {partner.email}
+            {partner.telefono ? ` · ${partner.telefono}` : ""}
+          </>
+        }
+      />
 
       <section className="flex flex-col gap-3">
         <h2 className="text-xl font-bold">Vínculos con el grupo</h2>

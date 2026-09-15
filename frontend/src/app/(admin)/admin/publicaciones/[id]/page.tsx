@@ -1,7 +1,9 @@
+import { Newspaper } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PublicacionForm } from "@/components/admin/publicacion-form";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { ApiError } from "@/lib/api";
 import { NOMBRE_EMPRESA } from "@/lib/matriz-roles";
 import { apiConSesion } from "@/lib/sesion";
@@ -18,15 +20,16 @@ export default async function EditarPublicacionPage({ params }: { params: { id: 
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <Link href={`/admin/publicaciones?empresa=${p.empresa}`} className="text-xs text-muted-foreground hover:text-primary">
-          ← Publicaciones de {NOMBRE_EMPRESA[p.empresa]}
-        </Link>
-        <h1 className="text-[26px] font-bold">{p.titulo}</h1>
-        <p className="text-sm text-muted-foreground">
-          {NOMBRE_AUDIENCIA[p.audiencia]} · /{p.empresa}/{p.slug}
-        </p>
-      </div>
+      <EncabezadoArea
+        icono={Newspaper}
+        etiqueta="Publicación"
+        titulo={p.titulo}
+        volver={{
+          href: `/admin/publicaciones?empresa=${p.empresa}`,
+          texto: `Publicaciones de ${NOMBRE_EMPRESA[p.empresa]}`,
+        }}
+        descripcion={`${NOMBRE_AUDIENCIA[p.audiencia]} · /${p.empresa}/${p.slug}`}
+      />
       <PublicacionForm empresa={p.empresa} publicacion={p} />
     </div>
   );

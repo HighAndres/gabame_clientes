@@ -1,6 +1,8 @@
+import { LayoutGrid } from "lucide-react";
 import Link from "next/link";
 
 import { AvisoAcceso } from "@/components/portal/aviso-acceso";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Fila, Lista, TituloSeccion } from "@/components/ui/lista";
 import { leerAviso, PARAM_AVISO } from "@/lib/avisos-acceso";
 import { alcanceDe, NOMBRE_EMPRESA } from "@/lib/matriz-roles";
@@ -49,11 +51,12 @@ export default async function AdminPage({
   return (
     <div className="flex flex-col gap-7">
       {aviso && <AvisoAcceso motivo={aviso} />}
-      <div className="flex flex-col gap-1">
-        <p className="text-xs text-muted-foreground">{alcance} · Resumen</p>
-        <h1 className="text-[26px] font-bold">Administración</h1>
-        <p className="text-sm text-muted-foreground">Matriz de alcance provisional hasta que el grupo la confirme.</p>
-      </div>
+      <EncabezadoArea
+        icono={LayoutGrid}
+        etiqueta={`${alcance} · Resumen`}
+        titulo="Administración"
+        descripcion="Matriz de alcance provisional hasta que el grupo la confirme."
+      />
 
       <div className="flex flex-wrap gap-4">
         {r.medicos_pendientes !== null && (

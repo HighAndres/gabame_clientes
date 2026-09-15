@@ -1,7 +1,9 @@
+import { Stethoscope } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { DecisionBotones } from "@/components/admin/decision-botones";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { alcanceDe } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
@@ -32,30 +34,31 @@ export default async function AdminMedicosPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-xs text-muted-foreground">GABAME · Médicos</p>
-          <h1 className="text-[26px] font-bold">Acreditaciones profesionales</h1>
-        </div>
-        <nav className="flex gap-2 text-[13px]" aria-label="Filtrar por estado">
-          {ESTADOS.map((e) => (
-            <Link
-              key={e.valor}
-              href={`/admin/medicos?estado=${e.valor}`}
-              aria-current={e.valor === estado ? "page" : undefined}
-              className={cn(
-                "inline-flex h-[34px] items-center rounded-md px-3 font-bold",
-                e.valor === estado ? "bg-primary text-white" : "border text-heading hover:bg-background",
-              )}
-            >
-              {e.texto}
-            </Link>
-          ))}
-        </nav>
-      </div>
+      <EncabezadoArea
+        icono={Stethoscope}
+        etiqueta="GABAME · Médicos"
+        titulo="Acreditaciones profesionales"
+        acciones={
+          <nav className="flex gap-2 text-[13px]" aria-label="Filtrar por estado">
+            {ESTADOS.map((e) => (
+              <Link
+                key={e.valor}
+                href={`/admin/medicos?estado=${e.valor}`}
+                aria-current={e.valor === estado ? "page" : undefined}
+                className={cn(
+                  "inline-flex h-[34px] items-center rounded-md px-3 font-bold",
+                  e.valor === estado ? "bg-primary text-white" : "border text-heading hover:bg-background",
+                )}
+              >
+                {e.texto}
+              </Link>
+            ))}
+          </nav>
+        }
+      />
 
       <div className="overflow-hidden rounded-lg border bg-card">
-        <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1.2fr)_140px_130px_110px_220px] bg-background px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground md:grid">
+        <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1.2fr)_140px_130px_110px_220px] bg-background px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground xl:grid">
           <span>Profesional</span>
           <span>Contacto</span>
           <span>Cédula</span>
@@ -67,26 +70,26 @@ export default async function AdminMedicosPage({
         {medicos.map((m) => (
           <div
             key={m.usuario_id}
-            className="grid items-center gap-3 border-t px-5 py-3.5 text-sm md:grid-cols-[minmax(0,1.4fr)_minmax(0,1.2fr)_140px_130px_110px_220px]"
+            className="grid items-center gap-3 border-t px-5 py-3.5 text-sm xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1.2fr)_140px_130px_110px_220px]"
           >
             <div className="flex flex-col">
               <span className="font-bold">
                 {m.nombre} {m.apellidos}
               </span>
-              <span className="text-xs text-muted-foreground">{m.institucion ?? "Institucion no indicada"}</span>
+              <span className="text-xs text-muted-foreground">{m.institucion ?? "Institución no indicada"}</span>
             </div>
             <div className="flex min-w-0 flex-col">
               <span className="truncate">{m.email}</span>
-              <span className="text-xs text-muted-foreground">{m.telefono ?? "Sin telefono"}</span>
+              <span className="text-xs text-muted-foreground">{m.telefono ?? "Sin teléfono"}</span>
             </div>
             <span className="font-mono text-[13px]">{m.cedula_profesional}</span>
             <span className="truncate">{m.especialidad ?? "—"}</span>
             <span className="text-muted-foreground">{new Date(m.creado_en).toLocaleDateString("es-MX")}</span>
-            <div className="flex flex-col gap-2 md:items-end">
+            <div className="flex flex-col gap-2 xl:items-end">
               {m.estado !== "pendiente" && (
-                <Estado tono={tonoDeValidacion(m.estado)} className="md:self-end" />
+                <Estado tono={tonoDeValidacion(m.estado)} className="xl:self-end" />
               )}
-              {m.motivo_rechazo && <span className="text-xs text-[#b03535] md:text-right">{m.motivo_rechazo}</span>}
+              {m.motivo_rechazo && <span className="text-xs text-[#b03535] xl:text-right">{m.motivo_rechazo}</span>}
               <DecisionBotones
                 estado={m.estado}
                 rutaAprobar={`/admin/medicos/${m.usuario_id}/validar`}

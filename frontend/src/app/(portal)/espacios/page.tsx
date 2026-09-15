@@ -1,5 +1,8 @@
+import { Building2 } from "lucide-react";
+
 import { Ecosistema } from "@/components/portal/ecosistema";
 import { TarjetaEspacio } from "@/components/portal/tarjeta-espacio";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { EspacioMioOut } from "@/types/espacios";
 
@@ -12,14 +15,16 @@ export default async function EspaciosPage() {
 
   return (
     <div className="flex flex-col gap-9">
-      <div className="flex flex-col gap-1.5">
-        <h1 className="text-3xl font-bold">Empresas del grupo</h1>
-        <p className="text-[15px] text-muted-foreground">
-          {partner
+      <EncabezadoArea
+        icono={Building2}
+        etiqueta="El grupo"
+        titulo="Empresas del grupo"
+        descripcion={
+          partner
             ? "Lo que cada empresa comparte contigo según tu vínculo con ella."
-            : "Lo que cada empresa del grupo comparte contigo."}
-        </p>
-      </div>
+            : "Lo que cada empresa del grupo comparte contigo."
+        }
+      />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {espacios.map((e) => (
           <TarjetaEspacio key={e.empresa} e={e} />

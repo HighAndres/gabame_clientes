@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { LogoEmpresa } from "@/components/marca/logo-empresa";
 import { Card, CardContent } from "@/components/ui/card";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { ApiError } from "@/lib/api";
 import { EMPRESAS } from "@/lib/matriz-roles";
@@ -35,22 +36,20 @@ export default async function EspacioPage({ params }: { params: { empresa: strin
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <Link href="/espacios" className="text-xs text-muted-foreground hover:text-primary">
-          ← Empresas del grupo
-        </Link>
-        <div className="flex flex-wrap items-center gap-4">
-          <LogoEmpresa empresa={e.empresa} nombre={e.nombre} tamano="lg" />
-          <div className="flex flex-col gap-1">
-            <h1 className="text-3xl font-bold">{e.nombre}</h1>
-            {e.vinculo_estado && (
-              <Estado tono={tonoDeValidacion(e.vinculo_estado)} className="self-start">
-                Vínculo {TEXTO_VINCULO[e.vinculo_estado].toLowerCase()}
-              </Estado>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Aqui la marca del area es la de la empresa, no un icono: es su espacio. */}
+      <EncabezadoArea
+        marca={<LogoEmpresa empresa={e.empresa} nombre={e.nombre} tamano="lg" />}
+        etiqueta="Empresa del grupo"
+        titulo={e.nombre}
+        volver={{ href: "/espacios", texto: "Empresas del grupo" }}
+        estado={
+          e.vinculo_estado ? (
+            <Estado tono={tonoDeValidacion(e.vinculo_estado)}>
+              Vínculo {TEXTO_VINCULO[e.vinculo_estado].toLowerCase()}
+            </Estado>
+          ) : undefined
+        }
+      />
 
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="flex flex-col gap-8">

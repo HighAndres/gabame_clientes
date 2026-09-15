@@ -31,6 +31,8 @@ Sin sombras: las superficies se separan por borde y fondo.
   por linea, para elementos equivalentes que se recorren con la vista.
 - `components/portal/bloque-principal.tsx`: el bloque ancho que abre el inicio, con etiqueta,
   titulo, estado, cifras y una sola accion.
+- `components/ui/encabezado-area.tsx`: la franja con la que abre cada area. Marca (icono en azul
+  suave, o el logotipo de la empresa en su espacio), etiqueta, titulo, estado y accion principal.
 
 ## Shells
 
@@ -43,8 +45,14 @@ Sin sombras: las superficies se separan por borde y fondo.
 
 ## Patrones
 
+- **Cada area abre con su franja** (`EncabezadoArea`): asi se nota donde estas sin leer. El icono
+  es el mismo que usa la barra lateral para esa seccion, para que menu y pantalla digan lo mismo.
+  La identidad se da con marca y etiqueta, nunca con una paleta por seccion: la del portal es la
+  del grupo.
 - Tablas: contenedor con borde, cabecera en fondo de pagina con etiqueta en mayusculas, filas
-  con borde superior, acciones a la derecha. En movil las filas se apilan.
+  con borde superior, acciones a la derecha. En movil las filas se apilan. **El breakpoint del
+  panel es `xl`, no `md`**: sus tablas suman unos 600 px de columnas fijas y la barra lateral se
+  come 248 px, asi que a `md` las columnas flexibles se aplastan a 25 px y el texto se encima.
 - **Tarjeta o fila.** Una tarjeta pesa como un destino: se usa cuando hay pocos y cada uno vale
   por si mismo (las cuatro empresas, las piezas del ecosistema). Una coleccion de elementos
   equivalentes que se recorren con la vista va en `Lista`: doce tarjetas iguales no jerarquizan

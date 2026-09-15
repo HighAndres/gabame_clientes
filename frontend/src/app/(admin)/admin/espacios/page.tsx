@@ -1,6 +1,8 @@
+import { Building2 } from "lucide-react";
 import { EspacioForm } from "@/components/admin/espacio-form";
 import { RequisitosForm } from "@/components/admin/requisitos-form";
 import { Card, CardContent } from "@/components/ui/card";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { alcanceDe } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { EspacioOut, RequisitoDocumentalOut } from "@/types/admin";
@@ -20,13 +22,12 @@ export default async function EspaciosPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <p className="text-xs text-muted-foreground">Espacios</p>
-        <h1 className="text-[26px] font-bold">{espacios.length === 1 ? "Configuración de tu espacio" : "Configuración por empresa"}</h1>
-        <p className="text-sm text-muted-foreground">
-          Lo que cada empresa muestra a sus partners y qué módulos tiene habilitados. La marca del portal es la del grupo.
-        </p>
-      </div>
+      <EncabezadoArea
+        icono={Building2}
+        etiqueta="Espacios"
+        titulo={espacios.length === 1 ? "Configuración de tu espacio" : "Configuración por empresa"}
+        descripcion="Lo que cada empresa muestra a sus partners y qué módulos tiene habilitados. La marca del portal es la del grupo."
+      />
 
       <div className="flex flex-col gap-6">
         {espacios.map((e, i) => (

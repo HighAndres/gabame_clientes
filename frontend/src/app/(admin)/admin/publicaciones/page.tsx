@@ -1,8 +1,10 @@
+import { Newspaper } from "lucide-react";
 import Link from "next/link";
 
 import { PublicacionForm } from "@/components/admin/publicacion-form";
 import { TogglePublicada } from "@/components/admin/toggle-publicada";
 import { Card, CardContent } from "@/components/ui/card";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado } from "@/components/ui/estado";
 import { alcanceDe, NOMBRE_EMPRESA } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
@@ -29,30 +31,31 @@ export default async function PublicacionesPage({ searchParams }: { searchParams
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-xs text-muted-foreground">{NOMBRE_EMPRESA[empresa]} · Publicaciones</p>
-          <h1 className="text-[26px] font-bold">Publicaciones del espacio</h1>
-          <p className="text-sm text-muted-foreground">Cada publicación va a una audiencia; el portal la muestra solo a quien corresponde.</p>
-        </div>
-        {a.empresas.length > 1 && (
-          <nav className="flex flex-wrap gap-2 text-[13px]" aria-label="Empresa">
-            {a.empresas.map((e) => (
-              <Link
-                key={e}
-                href={`/admin/publicaciones?empresa=${e}`}
-                aria-current={e === empresa ? "page" : undefined}
-                className={cn(
-                  "inline-flex h-[34px] items-center rounded-md px-3 font-bold",
-                  e === empresa ? "bg-primary text-white" : "border text-heading hover:bg-background",
-                )}
-              >
-                {NOMBRE_EMPRESA[e]}
-              </Link>
-            ))}
-          </nav>
-        )}
-      </div>
+      <EncabezadoArea
+        icono={Newspaper}
+        etiqueta={`${NOMBRE_EMPRESA[empresa]} · Publicaciones`}
+        titulo="Publicaciones del espacio"
+        descripcion="Cada publicación va a una audiencia; el portal la muestra solo a quien corresponde."
+        acciones={
+          a.empresas.length > 1 && (
+            <nav className="flex flex-wrap gap-2 text-[13px]" aria-label="Empresa">
+              {a.empresas.map((e) => (
+                <Link
+                  key={e}
+                  href={`/admin/publicaciones?empresa=${e}`}
+                  aria-current={e === empresa ? "page" : undefined}
+                  className={cn(
+                    "inline-flex h-[34px] items-center rounded-md px-3 font-bold",
+                    e === empresa ? "bg-primary text-white" : "border text-heading hover:bg-background",
+                  )}
+                >
+                  {NOMBRE_EMPRESA[e]}
+                </Link>
+              ))}
+            </nav>
+          )
+        }
+      />
 
       <details className="rounded-lg border bg-card p-4">
         <summary className="cursor-pointer text-sm font-bold">Nueva publicación en {NOMBRE_EMPRESA[empresa]}</summary>

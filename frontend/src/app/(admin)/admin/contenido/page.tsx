@@ -1,3 +1,4 @@
+import { FileText } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -5,6 +6,7 @@ import { AreaForm } from "@/components/admin/area-form";
 import { FichaForm } from "@/components/admin/ficha-form";
 import { TogglePublicada } from "@/components/admin/toggle-publicada";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado } from "@/components/ui/estado";
 import { alcanceDe } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
@@ -22,11 +24,12 @@ export default async function AdminContenidoPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <p className="text-xs text-muted-foreground">GABAME · Contenido Rx</p>
-        <h1 className="text-[26px] font-bold">Fichas técnicas por área terapéutica</h1>
-        <p className="text-sm text-muted-foreground">Solo lo publicado llega a los profesionales validados.</p>
-      </div>
+      <EncabezadoArea
+        icono={FileText}
+        etiqueta="GABAME · Contenido Rx"
+        titulo="Fichas técnicas por área terapéutica"
+        descripcion="Solo lo publicado llega a los profesionales validados."
+      />
 
       <AreaForm />
 

@@ -1,9 +1,11 @@
+import { Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AccionesUsuario, RolesForm } from "@/components/admin/acciones-usuario";
 import { BitacoraLista } from "@/components/admin/bitacora-lista";
 import { Card, CardContent } from "@/components/ui/card";
+import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { ApiError } from "@/lib/api";
 import { alcanceDe, NOMBRE_EMPRESA, NOMBRE_ROL } from "@/lib/matriz-roles";
@@ -34,21 +36,26 @@ export default async function AdminUsuarioPage({ params }: { params: { id: strin
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <Link href="/admin/usuarios" className="text-xs text-muted-foreground hover:text-primary">
-          ← Usuarios
-        </Link>
-        <h1 className="flex flex-wrap items-center gap-3 text-[26px] font-bold">
-          {u.nombre} {u.apellidos}
-          {!u.activo && <Estado tono="rechazado">Inactiva</Estado>}
-          {estado && <Estado tono={tonoDeValidacion(estado)} />}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {u.email}
-          {!u.email_verificado ? " · correo sin verificar" : ""}
-          {u.telefono ? ` · ${u.telefono}` : ""} · alta el {new Date(u.creado_en).toLocaleDateString("es-MX")} · origen {u.origen_inicial}
-        </p>
-      </div>
+      <EncabezadoArea
+        icono={Users}
+        etiqueta="Usuario"
+        titulo={`${u.nombre} ${u.apellidos}`}
+        volver={{ href: "/admin/usuarios", texto: "Usuarios" }}
+        estado={
+          <>
+            {!u.activo && <Estado tono="rechazado">Inactiva</Estado>}
+            {estado && <Estado tono={tonoDeValidacion(estado)} />}
+          </>
+        }
+        descripcion={
+          <>
+            {u.email}
+            {!u.email_verificado ? " · correo sin verificar" : ""}
+            {u.telefono ? ` · ${u.telefono}` : ""} · alta el{" "}
+            {new Date(u.creado_en).toLocaleDateString("es-MX")} · origen {u.origen_inicial}
+          </>
+        }
+      />
 
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <Card>
