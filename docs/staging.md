@@ -100,3 +100,6 @@ git pull && ./scripts/staging.sh up   # actualizar a la ultima version
   cerrar staging se borra con `reset`.
 - Si el cliente quiere recibir los correos en su propio buzon, llena `SMTP_*` en `.env.staging`
   y reinicia; Mailhog deja de usarse.
+- `URL_FARMACIAS` dice donde vive hoy la tienda. Es lo unico que hay que cambiar cuando Farmacias
+  GABAME pase del entorno de pruebas a su dominio definitivo: de ahi salen el enlace del catalogo
+  del ecosistema y la lista de destinos que el panel acepta al capturar una promocion.

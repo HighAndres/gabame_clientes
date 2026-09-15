@@ -152,10 +152,11 @@ backend/          FastAPI
   app/core/errores.py  ErrorNegocio -> {detail: {codigo, mensaje}}; el frontend decide por codigo
   app/core/matriz.py   alcance de admins y editores por empresa (ADR-0008, pendiente 0.2); espejo en src/lib/matriz-roles.ts
   app/core/ecosistema.py catálogo de piezas del grupo (solo enlaces), expuesto en GET /ecosistema
+  app/core/dominios.py   allowlist de destinos del grupo para los enlaces que teclea un admin; espejo de dominios-grupo.ts
   app/core/requisitos_partner.py catálogo por defecto de requisitos; los reales son dato (`requisitos_documentales`, ADR-0009)
   app/core/ratelimit.py  límite de intentos en memoria por IP y por cuenta; nunca persistido ni logueado (ADR-0007)
-  app/services/   cuentas, sesion, tokens, origen, correo, validacion (transiciones + bitácora), validacion_medica (criterio 0.3), contenido (áreas/fichas Rx), documentos (archivos de partners en UPLOADS_DIR), espacios (modulos/contactos por empresa), vinculos (relacion partner-empresa), requisitos (documentales por empresa), publicaciones (por audiencia), administracion (altas de admins, roles, activar, reset), bitacora (lectura)
-  app/api/v1/     router.py + routers/{auth,usuarios,medicos,partners,admin,espacios}.py
+  app/services/   cuentas, sesion, tokens, origen, correo, validacion (transiciones + bitácora), validacion_medica (criterio 0.3), acreditacion (la del propio medico: enmascarar, corregir, reenviar; ADR-0012), contenido (áreas/fichas Rx), documentos (archivos de partners en UPLOADS_DIR), espacios (modulos/contactos por empresa), vinculos (relacion partner-empresa), requisitos (documentales por empresa), publicaciones (por audiencia), administracion (altas de admins, roles, activar, reset), bitacora (lectura)
+  app/api/v1/     router.py + routers/{auth,usuarios,medicos,acreditacion,partners,admin,espacios}.py
   app/seeds/      seed_dev.py — un usuario dummy por rol
   alembic/        migraciones
 frontend/         Next.js 14
@@ -174,6 +175,7 @@ frontend/         Next.js 14
   src/lib/guardas.ts  exigirAlcance(): guarda de layout de las secciones del panel admin
   src/lib/avisos-acceso.ts catalogo cerrado de motivos que explican una redireccion de guarda (ADR-0011)
   src/lib/novedades.ts reune en el inicio lo ya publicado para la persona; no decide permisos, solo junta
+  src/components/portal/acreditacion.tsx la acreditacion del propio medico; farmacias.tsx promociones de la tienda y salto a la app (ADR-0012)
   src/i18n/request.ts + src/messages/es.json  next-intl sin enrutado por locale; cadenas del shell
   src/app/api/sesion/route.ts  único lugar del frontend que ve tokens en claro
   src/app/api/backend/[...path]  proxy genérico al backend con el token de la cookie (lo usan los componentes cliente)
@@ -211,7 +213,7 @@ npx shadcn@latest add button input form  # componentes bajo demanda
 | 1 — Fundación local | **Cerrada.** Migración inicial, seed idempotente, pytest contra BD `_test` |
 | 2 — Auth y cuentas | **Cerrada** (ADR-0002, ADR-0003). Registro con bifurcación, verificación de email obligatoria, login/refresh rotativo/logout, recuperación, origen append-only, `?redirect=` con allowlist. Email inmutable (cambio con re-verificación queda como pieza aparte) |
 | 3 — Dashboard por rol | **Cerrada con matriz provisional** (ADR-0004, ADR-0008, ADR-0009). Colas de validación con bitácora y correo, usuarios por alcance con alta de admins/editores y roles, publicaciones por audiencia, configuración del espacio, bitácora visible. Falta que el cliente valide 0.2 y entregue URLs/contactos |
-| 4 — Área médica | **Estructura cerrada** (ADR-0005): áreas y fichas como datos con bandera `publicada`, admin de contenido, render markdown, interstitial. Vacía hasta que el cliente entregue 0.5; criterio de validación sigue en 0.3 |
+| 4 — Área médica | **Estructura cerrada** (ADR-0005, ADR-0012): áreas y fichas como datos con bandera `publicada`, admin de contenido, render markdown, interstitial; el médico ve y corrige su acreditación y reenvía tras un rechazo; sección Farmacias GABAME con promociones. Portafolio vacío hasta que el cliente entregue 0.5; criterio de validación sigue en 0.3 |
 | 5 — Área partners | **Estructura cerrada** (ADR-0006, ADR-0008, ADR-0009): vínculos por empresa con aprobación independiente, requisitos documentales editables por empresa desde el panel, revisión del admin con alcance y bitácora, contactos por espacio. Falta que el cliente capture 0.4 en el panel, contactos y URLs |
 | 6 — SSO del grupo | No se construye. Solo se respetan sus prerrequisitos de diseño |
 | 7 — QA y salida de local | **Cerrada en local** (ADR-0007): rate limiting en memoria, guardias de arranque, cabeceras de seguridad, accesibilidad del shell, next-intl preparado, vitest, CI y `docs/despliegue.md`. Faltan del cliente: dominio (0.6) para CSP, y dar de alta el remoto y el VPS |
