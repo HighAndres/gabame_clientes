@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { COOKIE_ACCESS } from "@/lib/cookies";
+import { cabecerasDeSalida } from "@/lib/proxy-cabeceras";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -37,17 +38,18 @@ async function reenviar(req: NextRequest, path: string[]) {
     );
   }
 
-  const salida = new Headers();
-  for (const nombre of ["content-type", "content-disposition", "content-length", "cache-control"]) {
-    const v = res.headers.get(nombre);
-    if (v) salida.set(nombre, v);
-  }
-  return new NextResponse(res.status === 204 ? null : res.body, { status: res.status, headers: salida });
+  return new NextResponse(res.status === 204 ? null : res.body, {
+    status: res.status,
+    headers: cabecerasDeSalida(res.headers),
+  });
 }
 
 type Ctx = { params: { path: string[] } };
 
+// Todos los metodos que el portal usa contra el backend. Falta uno y la funcion que lo use
+// responde 405 sin explicacion: asi estuvieron rotos guardar roles y guardar requisitos.
 export const GET = (req: NextRequest, ctx: Ctx) => reenviar(req, ctx.params.path);
 export const POST = (req: NextRequest, ctx: Ctx) => reenviar(req, ctx.params.path);
+export const PUT = (req: NextRequest, ctx: Ctx) => reenviar(req, ctx.params.path);
 export const PATCH = (req: NextRequest, ctx: Ctx) => reenviar(req, ctx.params.path);
 export const DELETE = (req: NextRequest, ctx: Ctx) => reenviar(req, ctx.params.path);

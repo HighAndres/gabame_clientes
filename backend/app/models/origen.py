@@ -12,7 +12,7 @@ from app.db.base import Base, enum_valores, nuevo_uuid
 class OrigenUsuario(Base):
     """Historial de por que pieza del ecosistema entro el usuario al portal. Append-only.
 
-    Un usuario llega por gabame.com, mas tarde vuelve desde tiendagabame.com y despues desde
+    Un usuario llega por gabame.com, mas tarde vuelve desde farmaciasgabame.com y despues desde
     Ordan: son tres filas, no un campo que se sobrescribe. `usuarios.origen_inicial` guarda el
     primer contacto por comodidad de consulta, pero **la fuente de verdad es esta tabla**.
 

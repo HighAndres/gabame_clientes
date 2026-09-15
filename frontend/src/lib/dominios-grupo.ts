@@ -11,7 +11,7 @@ export const DOMINIOS_GRUPO: readonly string[] = [
   "medinter.com.mx",
   "ordan.com.mx",
   "a7siete.com",
-  "tiendagabame.com", // Farmacias GABAME (producto, no empresa)
+  "farmaciasgabame.com", // Farmacias GABAME (producto, no empresa; la clave interna sigue siendo tiendagabame)
   // "aurashop.???" — Pendiente 0.6
 ];
 

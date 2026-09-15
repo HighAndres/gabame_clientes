@@ -12,7 +12,7 @@ describe("destinoSeguro", () => {
   it("acepta dominios del grupo y sus subdominios por https", () => {
     expect(destinoSeguro("https://gabame.com/conocer-mas")).toBe("https://gabame.com/conocer-mas");
     expect(destinoSeguro("https://www.medinter.com.mx/")).toBe("https://www.medinter.com.mx/");
-    expect(destinoSeguro("https://tiendagabame.com/cuenta")).toBe("https://tiendagabame.com/cuenta");
+    expect(destinoSeguro("https://farmaciasgabame.com/cuenta")).toBe("https://farmaciasgabame.com/cuenta");
   });
 
   it("rechaza hosts ajenos y trucos de parecido", () => {
