@@ -72,14 +72,14 @@ export function LoginForm({
   return (
     <form onSubmit={enviar} className="flex flex-col gap-5" noValidate>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="email">Correo electronico</Label>
+        <Label htmlFor="email">Correo electrónico</Label>
         <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password">Contrasena</Label>
+          <Label htmlFor="password">Contraseña</Label>
           <Link href={enlaceRecuperar} className="text-[13px] text-primary hover:text-primary-hover">
-            Olvide mi contrasena
+            Olvidé mi contraseña
           </Link>
         </div>
         <Input
@@ -99,7 +99,7 @@ export function LoginForm({
             <>
               {" "}
               <button type="button" onClick={reenviar} className="font-bold underline">
-                Reenviar correo de confirmacion
+                Reenviar correo de confirmación
               </button>
             </>
           )}
@@ -108,12 +108,12 @@ export function LoginForm({
       {aviso && <Aviso tipo="info">{aviso}</Aviso>}
 
       <Button type="submit" size="lg" className="w-full" disabled={cargando}>
-        {cargando ? "Entrando..." : "Iniciar sesion"}
+        {cargando ? "Entrando..." : "Iniciar sesión"}
       </Button>
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground" aria-hidden="true">
         <span className="h-px flex-1 bg-border" />
-        <span>¿Aun no tienes cuenta?</span>
+        <span>¿Aún no tienes cuenta?</span>
         <span className="h-px flex-1 bg-border" />
       </div>
 

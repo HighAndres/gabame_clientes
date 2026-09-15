@@ -229,6 +229,9 @@ Construye la estructura con placeholders explícitos, marca el punto con un come
   (Opción A / Opción B con trade-offs) y espera aprobación antes de generar código.
 - Cambios estructurales, no parches cosméticos, cuando algo no funciona.
 - Español en código, comentarios, nombres de tabla y UI. Los términos técnicos quedan en inglés.
+- **El texto que lee una persona va acentuado** ("Iniciar sesión", "Área médica", "contraseña").
+  Identificadores, rutas, claves de enum y clases CSS siguen sin tildes: son código, no copy.
+  Para revisar una pantalla nueva: renderízala y lee lo que sale, no el archivo.
 - Cada decisión de arquitectura que se cierre se escribe como ADR nuevo en `docs/decisiones/`.
   Una decisión no se edita cuando cambia: se supersede.
 - Antes de dar algo por terminado: `pytest`, `ruff check .`, `npm run typecheck`, `npm test`, `npm run lint`.

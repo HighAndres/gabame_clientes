@@ -10,8 +10,8 @@ export default function RestablecerPage({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Nueva contrasena</CardTitle>
-        <CardDescription>Elige una contrasena nueva para tu Cuenta GABAME.</CardDescription>
+        <CardTitle>Nueva contraseña</CardTitle>
+        <CardDescription>Elige una contraseña nueva para tu Cuenta GABAME.</CardDescription>
       </CardHeader>
       <CardContent>
         <RestablecerForm token={token} />

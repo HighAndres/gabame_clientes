@@ -24,13 +24,13 @@ export default async function AdminContenidoPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <p className="text-xs text-muted-foreground">GABAME · Contenido Rx</p>
-        <h1 className="text-[26px] font-bold">Fichas tecnicas por area terapeutica</h1>
+        <h1 className="text-[26px] font-bold">Fichas técnicas por área terapéutica</h1>
         <p className="text-sm text-muted-foreground">Solo lo publicado llega a los profesionales validados.</p>
       </div>
 
       <AreaForm />
 
-      {areas.length === 0 && <p className="text-sm text-muted-foreground">Sin areas todavia. Crea la primera arriba.</p>}
+      {areas.length === 0 && <p className="text-sm text-muted-foreground">Sin áreas todavía. Crea la primera arriba.</p>}
 
       <div className="flex flex-col gap-5">
         {areas.map((a) => (

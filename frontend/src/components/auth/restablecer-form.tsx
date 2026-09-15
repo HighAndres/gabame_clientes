@@ -49,11 +49,11 @@ export function RestablecerForm({ token }: { token: string | null }) {
   if (listo) {
     return (
       <div className="space-y-4">
-        <Aviso tipo="ok" titulo="Contrasena actualizada">
-          Tus sesiones anteriores se cerraron. Inicia sesion con la nueva contrasena.
+        <Aviso tipo="ok" titulo="Contraseña actualizada">
+          Tus sesiones anteriores se cerraron. Inicia sesión con la nueva contraseña.
         </Aviso>
         <Button asChild className="w-full">
-          <Link href="/login">Iniciar sesion</Link>
+          <Link href="/login">Iniciar sesión</Link>
         </Button>
       </div>
     );
@@ -62,7 +62,7 @@ export function RestablecerForm({ token }: { token: string | null }) {
   return (
     <form onSubmit={enviar} className="space-y-4" noValidate>
       <div className="space-y-2">
-        <Label htmlFor="password">Nueva contrasena</Label>
+        <Label htmlFor="password">Nueva contraseña</Label>
         <Input
           id="password"
           type="password"
@@ -74,7 +74,7 @@ export function RestablecerForm({ token }: { token: string | null }) {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="confirmar">Confirmar contrasena</Label>
+        <Label htmlFor="confirmar">Confirmar contraseña</Label>
         <Input
           id="confirmar"
           type="password"

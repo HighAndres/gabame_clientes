@@ -34,7 +34,7 @@ export default async function AdminMedicosPage({
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <p className="text-xs text-muted-foreground">GABAME · Medicos</p>
+          <p className="text-xs text-muted-foreground">GABAME · Médicos</p>
           <h1 className="text-[26px] font-bold">Acreditaciones profesionales</h1>
         </div>
         <nav className="flex gap-2 text-[13px]" aria-label="Filtrar por estado">
@@ -58,7 +58,7 @@ export default async function AdminMedicosPage({
         <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1.2fr)_140px_130px_110px_220px] bg-background px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground md:grid">
           <span>Profesional</span>
           <span>Contacto</span>
-          <span>Cedula</span>
+          <span>Cédula</span>
           <span>Especialidad</span>
           <span>Solicitud</span>
           <span />

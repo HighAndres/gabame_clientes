@@ -47,7 +47,7 @@ export function VerificarEmail({ token }: { token: string | null }) {
         <p className="text-sm text-muted-foreground">
           Si el enlace expiro,{" "}
           <Link href="/login" className="text-primary hover:underline">
-            inicia sesion
+            inicia sesión
           </Link>{" "}
           para pedir uno nuevo.
         </p>
@@ -62,7 +62,7 @@ export function VerificarEmail({ token }: { token: string | null }) {
         {mensaje}
       </Aviso>
       <Button asChild className="w-full">
-        <Link href={enlaceLogin}>Iniciar sesion</Link>
+        <Link href={enlaceLogin}>Iniciar sesión</Link>
       </Button>
     </div>
   );

@@ -33,7 +33,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Record
       {aviso && <AvisoAcceso motivo={aviso} />}
       <div className="flex flex-col gap-1">
         <p className="text-xs text-muted-foreground">{alcance} · Resumen</p>
-        <h1 className="text-[26px] font-bold">Administracion</h1>
+        <h1 className="text-[26px] font-bold">Administración</h1>
         <p className="text-sm text-muted-foreground">Matriz de alcance provisional hasta que el grupo la confirme.</p>
       </div>
 

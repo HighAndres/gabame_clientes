@@ -34,10 +34,10 @@ export function RecuperarForm() {
       <div className="space-y-4">
         <Aviso tipo="ok" titulo="Revisa tu correo">
           Si <strong>{email}</strong> tiene una Cuenta GABAME, enviamos un enlace para restablecer la
-          contrasena. Vence en 60 minutos.
+          contraseña. Vence en 60 minutos.
         </Aviso>
         <Link href="/login" className="text-sm text-primary hover:underline">
-          Volver a iniciar sesion
+          Volver a iniciar sesión
         </Link>
       </div>
     );
@@ -46,7 +46,7 @@ export function RecuperarForm() {
   return (
     <form onSubmit={enviar} className="space-y-4" noValidate>
       <div className="space-y-2">
-        <Label htmlFor="email">Correo electronico</Label>
+        <Label htmlFor="email">Correo electrónico</Label>
         <Input id="email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
       {error && <Aviso>{error}</Aviso>}
@@ -55,7 +55,7 @@ export function RecuperarForm() {
       </Button>
       <p className="text-center text-sm text-muted-foreground">
         <Link href="/login" className="text-primary hover:underline">
-          Volver a iniciar sesion
+          Volver a iniciar sesión
         </Link>
       </p>
     </form>

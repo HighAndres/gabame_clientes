@@ -42,11 +42,11 @@ export function AreaForm() {
   return (
     <form onSubmit={enviar} className="grid gap-3 rounded-lg border p-4 sm:grid-cols-[2fr,3fr,auto,auto] sm:items-end" noValidate>
       <div className="space-y-1">
-        <Label htmlFor="area-nombre">Nueva area terapeutica</Label>
+        <Label htmlFor="area-nombre">Nueva área terapéutica</Label>
         <Input id="area-nombre" required minLength={2} value={nombre} onChange={(e) => setNombre(e.target.value)} />
       </div>
       <div className="space-y-1">
-        <Label htmlFor="area-desc">Descripcion (opcional)</Label>
+        <Label htmlFor="area-desc">Descripción (opcional)</Label>
         <Input id="area-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} />
       </div>
       <div className="space-y-1">

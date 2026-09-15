@@ -21,8 +21,8 @@ export default function LoginPage({ searchParams }: { searchParams: Params }) {
     <section className="rounded-lg border bg-card p-7 md:p-9">
       <div className="mb-6 flex flex-col gap-1.5">
         {puerta && <p className="text-xs font-bold uppercase tracking-[0.08em] text-primary">{puerta.titulo}</p>}
-        <h1 className="text-[26px] font-bold">Iniciar sesion</h1>
-        <p className="text-sm text-muted-foreground">Entra con tu correo y contrasena.</p>
+        <h1 className="text-[26px] font-bold">Iniciar sesión</h1>
+        <p className="text-sm text-muted-foreground">Entra con tu correo y contraseña.</p>
       </div>
       <LoginForm
         destino={destino}

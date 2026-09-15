@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import type { DocumentoOut } from "@/types/partner";
 
-const TEXTO_ESTADO = { pendiente: "En revision", validado: "Aceptado", rechazado: "Rechazado" };
+const TEXTO_ESTADO = { pendiente: "En revisión", validado: "Aceptado", rechazado: "Rechazado" };
 
 function tamano(bytes: number): string {
   return bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;

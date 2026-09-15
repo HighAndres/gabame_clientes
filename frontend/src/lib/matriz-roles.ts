@@ -77,9 +77,9 @@ export interface ItemNav {
 export function navPara(u: UsuarioOut): ItemNav[] {
   const roles = u.roles.map((r) => r.rol);
   const items: ItemNav[] = [{ href: "/dashboard", texto: "Inicio" }, { href: "/espacios", texto: "Empresas" }];
-  if (roles.includes("medico")) items.push({ href: "/medico", texto: "Area medica" });
+  if (roles.includes("medico")) items.push({ href: "/medico", texto: "Área médica" });
   if (roles.includes("partner")) items.push({ href: "/partner", texto: "Partners" });
-  if (alcanceDe(u).esAdmin) items.push({ href: "/admin", texto: "Administracion" });
+  if (alcanceDe(u).esAdmin) items.push({ href: "/admin", texto: "Administración" });
   items.push({ href: "/perfil", texto: "Mi cuenta" });
   return items;
 }
@@ -88,12 +88,12 @@ export function navPara(u: UsuarioOut): ItemNav[] {
 export function navAdmin(u: UsuarioOut): ItemNav[] {
   const a = alcanceDe(u);
   const items: ItemNav[] = [{ href: "/admin", texto: "Resumen" }];
-  if (a.veMedicos) items.push({ href: "/admin/medicos", texto: "Medicos" });
+  if (a.veMedicos) items.push({ href: "/admin/medicos", texto: "Médicos" });
   if (a.editaContenidoRx) items.push({ href: "/admin/contenido", texto: "Contenido Rx" });
   items.push({ href: "/admin/publicaciones", texto: "Publicaciones" });
   if (a.administraAlguna) items.push({ href: "/admin/partners", texto: "Partners" });
   if (a.administraAlguna) items.push({ href: "/admin/usuarios", texto: "Usuarios" });
   items.push({ href: "/admin/espacios", texto: a.grupo || a.empresas.length > 1 ? "Espacios" : "Mi espacio" });
-  if (a.administraAlguna) items.push({ href: "/admin/bitacora", texto: "Bitacora" });
+  if (a.administraAlguna) items.push({ href: "/admin/bitacora", texto: "Bitácora" });
   return items;
 }

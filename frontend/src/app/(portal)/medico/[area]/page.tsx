@@ -31,13 +31,13 @@ export default async function AreaPage({ params }: { params: { area: string } })
       </div>
 
       {area.fichas.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Aun no hay fichas publicadas en esta area.</p>
+        <p className="text-sm text-muted-foreground">Aún no hay fichas publicadas en esta área.</p>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {area.fichas.map((f) => (
             <Card key={f.id}>
               <CardHeader className="pb-2">
-                <p className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">Ficha tecnica</p>
+                <p className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">Ficha técnica</p>
                 <CardTitle className="text-[17px]">{f.nombre}</CardTitle>
                 {f.resumen && <CardDescription>{f.resumen}</CardDescription>}
               </CardHeader>

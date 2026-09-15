@@ -12,7 +12,7 @@ export default function NotFound() {
       </header>
       <main id="contenido" className="container flex flex-1 flex-col items-start justify-center gap-4 pb-24">
         <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Error 404</p>
-        <h1 className="text-3xl font-bold">Esta pagina no existe</h1>
+        <h1 className="text-3xl font-bold">Esta página no existe</h1>
         <p className="max-w-md text-muted-foreground">
           El enlace puede estar incompleto o el contenido ya no esta disponible.
         </p>

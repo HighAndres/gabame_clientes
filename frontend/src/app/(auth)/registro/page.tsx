@@ -24,7 +24,7 @@ export default function RegistroPage({ searchParams }: { searchParams: Params })
       <CardHeader>
         {puerta && <p className="text-xs font-bold uppercase tracking-[0.08em] text-primary">{puerta.titulo}</p>}
         <CardTitle>Crear cuenta</CardTitle>
-        <CardDescription>{puerta ? "Completa tus datos para crear tu cuenta." : "Elige como te relacionas con el grupo GABAME."}</CardDescription>
+        <CardDescription>{puerta ? "Completa tus datos para crear tu cuenta." : "Elige cómo te relacionas con el grupo GABAME."}</CardDescription>
       </CardHeader>
       <CardContent>
         <RegistroForm

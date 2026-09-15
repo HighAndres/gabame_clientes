@@ -57,7 +57,7 @@ export default async function AdminPartnerDetallePage({ params }: { params: { id
       </div>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-bold">Vinculos con el grupo</h2>
+        <h2 className="text-xl font-bold">Vínculos con el grupo</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {partner.vinculos.map((v) => (
             <Card key={v.id}>
@@ -138,7 +138,7 @@ export default async function AdminPartnerDetallePage({ params }: { params: { id
           ))}
         </div>
         <p className="text-xs text-muted-foreground">
-          Los documentos son de la razon social: los revisa cualquiera de las empresas con las que tiene vinculo.
+          Los documentos son de la razón social: los revisa cualquiera de las empresas con las que tiene vínculo.
         </p>
       </section>
 

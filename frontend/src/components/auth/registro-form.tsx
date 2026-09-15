@@ -17,12 +17,12 @@ const TIPOS: { valor: TipoCuenta; titulo: string; detalle: string }[] = [
   {
     valor: "profesional",
     titulo: "Soy profesional de la salud",
-    detalle: "Contenido tecnico Rx tras validar tu cedula profesional.",
+    detalle: "Contenido técnico Rx tras validar tu cédula profesional.",
   },
   {
     valor: "empresa",
     titulo: "Soy empresa o distribuidor",
-    detalle: "Cuenta GABAME Partners, con aprobacion previa.",
+    detalle: "Cuenta GABAME Partners, con aprobación previa.",
   },
 ];
 
@@ -135,18 +135,18 @@ export function RegistroForm({
       <div className="space-y-4">
         <Aviso tipo="ok" titulo="Revisa tu correo">
           Enviamos un enlace de confirmacion a <strong>{listo.email}</strong>. Confirma tu correo para
-          iniciar sesion.
+          iniciar sesión.
           {listo.estado_medico === "pendiente" && (
-            <> Tu acreditacion profesional quedara en revision; te avisaremos cuando este validada.</>
+            <> Tu acreditación profesional quedara en revisión; te avisaremos cuando este validada.</>
           )}
           {listo.estado_partner === "pendiente" && (
-            <> Tu solicitud queda en revision; cada empresa te avisara por correo cuando la apruebe.</>
+            <> Tu solicitud queda en revisión; cada empresa te avisara por correo cuando la apruebe.</>
           )}
         </Aviso>
         <p className="text-sm text-muted-foreground">
           ¿No llego? Revisa spam o{" "}
           <Link href={enlaceLogin} className="text-primary hover:underline">
-            vuelve a iniciar sesion
+            vuelve a iniciar sesión
           </Link>{" "}
           para reenviarlo.
         </p>
@@ -171,7 +171,7 @@ export function RegistroForm({
         <p className="pt-2 text-center text-sm text-muted-foreground">
           ¿Ya tienes cuenta?{" "}
           <Link href={enlaceLogin} className="text-primary hover:underline">
-            Iniciar sesion
+            Iniciar sesión
           </Link>
         </p>
       </div>
@@ -195,19 +195,19 @@ export function RegistroForm({
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">Correo electronico</Label>
+        <Label htmlFor="email">Correo electrónico</Label>
         <Input id="email" type="email" required autoComplete="email" value={f.email} onChange={set("email")} />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="telefono">Telefono (opcional)</Label>
+        <Label htmlFor="telefono">Teléfono (opcional)</Label>
         <Input id="telefono" type="tel" autoComplete="tel" value={f.telefono} onChange={set("telefono")} />
       </div>
 
       {tipo === "profesional" && (
         <fieldset className="space-y-3 rounded-lg border p-4">
-          <legend className="px-1 text-sm font-medium">Acreditacion profesional</legend>
+          <legend className="px-1 text-sm font-medium">Acreditación profesional</legend>
           <div className="space-y-2">
-            <Label htmlFor="cedula">Cedula profesional</Label>
+            <Label htmlFor="cedula">Cédula profesional</Label>
             <Input id="cedula" required value={f.cedula} onChange={set("cedula")} />
             <p className="text-xs text-muted-foreground">
               Se usa solo para validar tu perfil. No se muestra publicamente.
@@ -218,7 +218,7 @@ export function RegistroForm({
             <Input id="especialidad" value={f.especialidad} onChange={set("especialidad")} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="institucion">Institucion (opcional)</Label>
+            <Label htmlFor="institucion">Institución (opcional)</Label>
             <Input id="institucion" value={f.institucion} onChange={set("institucion")} />
           </div>
         </fieldset>
@@ -228,7 +228,7 @@ export function RegistroForm({
         <fieldset className="space-y-3 rounded-lg border p-4">
           <legend className="px-1 text-sm font-medium">Datos de la empresa</legend>
           <div className="space-y-2">
-            <Label htmlFor="razon_social">Razon social</Label>
+            <Label htmlFor="razon_social">Razón social</Label>
             <Input id="razon_social" required value={f.razon_social} onChange={set("razon_social")} />
           </div>
           <div className="space-y-2">
@@ -279,7 +279,7 @@ export function RegistroForm({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="password">Contrasena</Label>
+          <Label htmlFor="password">Contraseña</Label>
           <Input
             id="password"
             type="password"

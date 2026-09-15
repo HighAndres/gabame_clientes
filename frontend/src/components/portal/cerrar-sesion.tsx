@@ -21,7 +21,7 @@ export function CerrarSesion() {
 
   return (
     <Button variant="outline" size="sm" onClick={salir} disabled={cargando}>
-      Cerrar sesion
+      Cerrar sesión
     </Button>
   );
 }

@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   try {
     cuerpo = await req.json();
   } catch {
-    return NextResponse.json({ detail: { codigo: "datos_invalidos", mensaje: "Cuerpo invalido" } }, { status: 400 });
+    return NextResponse.json({ detail: { codigo: "datos_invalidos", mensaje: "Cuerpo inválido" } }, { status: 400 });
   }
 
   // El origen se re-valida aqui: el navegador no decide que se guarda.

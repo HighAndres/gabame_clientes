@@ -45,7 +45,7 @@ export default async function AdminPartnersPage({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
           <p className="text-xs text-muted-foreground">{ambito} · Partners</p>
-          <h1 className="text-[26px] font-bold">Solicitudes de vinculo</h1>
+          <h1 className="text-[26px] font-bold">Solicitudes de vínculo</h1>
         </div>
         <nav className="flex gap-2 text-[13px]" aria-label="Filtrar por estado">
           {ESTADOS.map((e) => (
@@ -88,7 +88,7 @@ export default async function AdminPartnersPage({
 
       <div className="overflow-hidden rounded-lg border bg-card">
         <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,1.4fr)_130px_120px_110px_220px] bg-background px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground md:grid">
-          <span>Razon social</span>
+          <span>Razón social</span>
           <span>Contacto</span>
           <span>Tipo</span>
           <span>Documentos</span>

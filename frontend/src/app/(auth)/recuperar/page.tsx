@@ -5,7 +5,7 @@ export default function RecuperarPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recuperar contrasena</CardTitle>
+        <CardTitle>Recuperar contraseña</CardTitle>
         <CardDescription>Te enviamos un enlace al correo de tu cuenta.</CardDescription>
       </CardHeader>
       <CardContent>

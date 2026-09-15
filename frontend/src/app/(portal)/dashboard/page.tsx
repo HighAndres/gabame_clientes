@@ -12,11 +12,11 @@ import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { EspacioMioOut } from "@/types/espacios";
 
 const ESTADO_MEDICO = {
-  validado: "Tu acreditacion esta validada.",
-  pendiente: "Tu acreditacion profesional esta en revision.",
-  rechazado: "Tu acreditacion no fue aprobada.",
+  validado: "Tu acreditación está validada.",
+  pendiente: "Tu acreditación profesional está en revisión.",
+  rechazado: "Tu acreditación no fue aprobada.",
 };
-const ESTADO_VINCULO = { validado: "aprobado", pendiente: "en revision", rechazado: "no aprobado" };
+const ESTADO_VINCULO = { validado: "aprobado", pendiente: "en revisión", rechazado: "no aprobado" };
 
 function Tarjeta({ titulo, descripcion, href, accion, chip }: { titulo: string; descripcion: string; href: string; accion: string; chip?: React.ReactNode }) {
   return (
@@ -64,10 +64,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Re
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {roles.includes("medico") && (
           <Tarjeta
-            titulo="Area medica"
+            titulo="Área médica"
             descripcion={u.estado_medico ? ESTADO_MEDICO[u.estado_medico] : ""}
             href="/medico"
-            accion="Ir al area medica"
+            accion="Ir al área médica"
             chip={<Estado tono={tonoDeValidacion(u.estado_medico)} />}
           />
         )}
@@ -82,15 +82,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: Re
         )}
         {admin.esAdmin && (
           <Tarjeta
-            titulo="Administracion"
+            titulo="Administración"
             descripcion={admin.grupo ? "Alcance: todo el grupo." : `Alcance: ${admin.empresas.map((e) => NOMBRE_EMPRESA[e]).join(", ")}.`}
             href="/admin"
-            accion="Ir a administracion"
+            accion="Ir a administración"
           />
         )}
         <Tarjeta
           titulo="Mi cuenta"
-          descripcion="Nombre, telefono y contrasena."
+          descripcion="Nombre, teléfono y contraseña."
           href="/perfil"
           accion="Editar mi cuenta"
           chip={u.email_verificado ? <Estado tono="validado">Correo verificado</Estado> : <Estado tono="pendiente">Correo sin verificar</Estado>}

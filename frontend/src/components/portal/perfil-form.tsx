@@ -48,7 +48,7 @@ export function PerfilForm({ usuario }: { usuario: UsuarioOut }) {
   return (
     <form onSubmit={guardar} className="max-w-md space-y-4" noValidate>
       <div className="space-y-2">
-        <Label htmlFor="email">Correo electronico</Label>
+        <Label htmlFor="email">Correo electrónico</Label>
         <Input id="email" value={usuario.email} readOnly disabled />
         <p className="text-xs text-muted-foreground">
           Para cambiar tu correo, contacta a soporte.
@@ -70,7 +70,7 @@ export function PerfilForm({ usuario }: { usuario: UsuarioOut }) {
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="telefono">Telefono</Label>
+        <Label htmlFor="telefono">Teléfono</Label>
         <Input id="telefono" type="tel" value={f.telefono} onChange={(e) => setF({ ...f, telefono: e.target.value })} />
       </div>
       {estado && <Aviso tipo={estado.tipo}>{estado.texto}</Aviso>}

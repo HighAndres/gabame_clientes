@@ -53,7 +53,7 @@ export async function Ecosistema({ titulo = "Marcas y tiendas del grupo" }: { ti
                   <span className="sr-only">{p.nombre}, se abre en otra pestana</span>
                 </a>
               ) : (
-                <span className="text-[13px] text-muted-foreground">Proximamente</span>
+                <span className="text-[13px] text-muted-foreground">Próximamente</span>
               )}
             </CardContent>
           </Card>

@@ -66,7 +66,7 @@ export function SolicitarVinculo({ disponibles }: { disponibles: Empresa[] }) {
         </select>
       </div>
       <div className="min-w-[200px] space-y-1.5">
-        <Label htmlFor="vinculo-tipo">Tipo de relacion</Label>
+        <Label htmlFor="vinculo-tipo">Tipo de relación</Label>
         <select id="vinculo-tipo" className={selectClase} value={tipo} onChange={(e) => setTipo(e.target.value as SubtipoPartner)}>
           {(Object.keys(NOMBRE_SUBTIPO) as SubtipoPartner[]).map((s) => (
             <option key={s} value={s}>

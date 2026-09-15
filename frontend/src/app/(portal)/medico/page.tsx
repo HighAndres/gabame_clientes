@@ -34,7 +34,7 @@ export default async function MedicoPage() {
       </div>
       {areas.length === 0 ? (
         <p className="text-[15px] leading-relaxed text-muted-foreground">
-          Aun no hay contenido publicado. Las fichas tecnicas se publican por area terapeutica conforme el grupo las
+          Aún no hay contenido publicado. Las fichas técnicas se publican por área terapéutica conforme el grupo las
           libere.
         </p>
       ) : (

@@ -68,7 +68,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="flex h-10 items-center rounded-md border bg-card px-3 text-sm font-bold">{espacio}</div>
         </div>
 
-        <nav className="flex flex-col gap-0.5" aria-label="Administracion">
+        <nav className="flex flex-col gap-0.5" aria-label="Administración">
           {navAdmin(u).map((n) => {
             const Icono = ICONO[n.href] ?? LayoutGrid;
             const cuenta = pendientes[n.href];

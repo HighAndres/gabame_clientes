@@ -13,7 +13,7 @@ const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 async function reenviar(req: NextRequest, path: string[]) {
   const token = cookies().get(COOKIE_ACCESS)?.value;
   if (!token) {
-    return NextResponse.json({ detail: { codigo: "no_autenticado", mensaje: "Sin sesion" } }, { status: 401 });
+    return NextResponse.json({ detail: { codigo: "no_autenticado", mensaje: "Sin sesión" } }, { status: 401 });
   }
 
   const url = `${BASE}/api/v1/${path.map(encodeURIComponent).join("/")}${req.nextUrl.search}`;
