@@ -70,7 +70,7 @@ export const NOMBRE_SUBTIPO: Record<SubtipoPartner, string> = {
 };
 
 export const TEXTO_VINCULO: Record<EstadoValidacion, string> = {
-  pendiente: "En revision",
+  pendiente: "En revisión",
   validado: "Aprobado",
   rechazado: "No aprobado",
 };
