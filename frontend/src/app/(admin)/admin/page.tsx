@@ -39,10 +39,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Record
 
       <div className="grid gap-4 md:grid-cols-3">
         {r.medicos_pendientes !== null && (
-          <Cifra valor={r.medicos_pendientes} etiqueta="Medicos por validar" href="/admin/medicos" accion="Ver cola" />
+          <Cifra valor={r.medicos_pendientes} etiqueta="Médicos por validar" href="/admin/medicos" accion="Ver cola" />
         )}
         {a?.administraAlguna && (
-          <Cifra valor={r.partners_pendientes} etiqueta="Vinculos de partners por aprobar" href="/admin/partners" accion="Ver cola" />
+          <Cifra valor={r.partners_pendientes} etiqueta="Vínculos de partners por aprobar" href="/admin/partners" accion="Ver cola" />
         )}
         {a?.administraAlguna && (
           <Cifra
