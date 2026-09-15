@@ -1,10 +1,11 @@
 """Entradas y salidas de /admin y /ecosistema."""
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
+from app.core.dominios import es_del_grupo
 from app.core.enums import (
     Audiencia,
     Empresa,
@@ -25,6 +26,7 @@ from app.models import (
 )
 from app.schemas.auth import normalizar_email
 from app.schemas.usuario import UsuarioOut
+from app.services import publicaciones
 
 
 class UsuarioAdminOut(UsuarioOut):
@@ -308,22 +310,40 @@ class RequisitoDocumentalOut(BaseModel):
         )
 
 
-class PublicacionIn(BaseModel):
+class _CamposPublicacion(BaseModel):
+    """Lo comun entre alta y edicion, para que la regla del enlace no se escriba dos veces."""
+
+    @field_validator("url_externa", check_fields=False)
+    @classmethod
+    def _solo_del_grupo(cls, valor: str | None) -> str | None:
+        if valor is None or not valor.strip():
+            return None
+        valor = valor.strip()
+        if not es_del_grupo(valor):
+            raise ValueError("El enlace debe apuntar a un sitio o tienda del grupo")
+        return valor
+
+
+class PublicacionIn(_CamposPublicacion):
     audiencia: Audiencia
     titulo: str = Field(min_length=2, max_length=160)
     resumen: str | None = Field(default=None, max_length=500)
     contenido: str = Field(default="", max_length=100_000)
     orden: int = Field(default=0, ge=0, le=999)
     publicada: bool = False
+    vigencia_hasta: date | None = None
+    url_externa: str | None = Field(default=None, max_length=500)
 
 
-class PublicacionUpdate(BaseModel):
+class PublicacionUpdate(_CamposPublicacion):
     audiencia: Audiencia | None = None
     titulo: str | None = Field(default=None, min_length=2, max_length=160)
     resumen: str | None = Field(default=None, max_length=500)
     contenido: str | None = Field(default=None, max_length=100_000)
     orden: int | None = Field(default=None, ge=0, le=999)
     publicada: bool | None = None
+    vigencia_hasta: date | None = None
+    url_externa: str | None = Field(default=None, max_length=500)
 
 
 class PublicacionOut(BaseModel):
@@ -336,13 +356,17 @@ class PublicacionOut(BaseModel):
     contenido: str
     orden: int
     publicada: bool
+    vigencia_hasta: date | None
+    url_externa: str | None
+    vencida: bool
     actualizado_en: datetime
 
     @classmethod
     def desde_modelo(cls, p: Publicacion) -> "PublicacionOut":
         return cls(
             id=p.id, empresa=p.empresa, audiencia=p.audiencia, slug=p.slug, titulo=p.titulo, resumen=p.resumen,
-            contenido=p.contenido, orden=p.orden, publicada=p.publicada, actualizado_en=p.actualizado_en,
+            contenido=p.contenido, orden=p.orden, publicada=p.publicada, vigencia_hasta=p.vigencia_hasta,
+            url_externa=p.url_externa, vencida=publicaciones.vencida(p), actualizado_en=p.actualizado_en,
         )
 
 

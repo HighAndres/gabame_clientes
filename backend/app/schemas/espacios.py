@@ -1,7 +1,7 @@
 """Salidas de /espacios para quien usa el portal (corte 4): lo que cada persona ve de cada empresa."""
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel
 
@@ -17,13 +17,16 @@ class PublicacionResumenOut(BaseModel):
     titulo: str
     resumen: str | None
     orden: int
+    vigencia_hasta: date | None
+    url_externa: str | None
     actualizado_en: datetime
 
     @classmethod
     def desde_modelo(cls, p: Publicacion) -> "PublicacionResumenOut":
         return cls(
             id=p.id, audiencia=p.audiencia, slug=p.slug, titulo=p.titulo, resumen=p.resumen,
-            orden=p.orden, actualizado_en=p.actualizado_en,
+            orden=p.orden, vigencia_hasta=p.vigencia_hasta, url_externa=p.url_externa,
+            actualizado_en=p.actualizado_en,
         )
 
 

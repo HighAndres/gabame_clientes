@@ -12,8 +12,9 @@ Sin datos clinicos.
 """
 
 import uuid
+from datetime import date
 
-from sqlalchemy import Boolean, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Date, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -34,6 +35,12 @@ class Publicacion(Base, TimestampMixin):
     contenido: Mapped[str] = mapped_column(Text, default="", nullable=False)  # markdown
     orden: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     publicada: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # Una promocion sin fecha de fin se queda colgada para siempre; con vigencia se retira sola.
+    # None = sin caducidad (una publicacion institucional normal).
+    vigencia_hasta: Mapped[date | None] = mapped_column(Date)
+    # Adonde lleva, cuando lo que se anuncia vive fuera del portal (la tienda del grupo).
+    # Solo dominios del grupo: lo valida el esquema contra `app/core/dominios.py`.
+    url_externa: Mapped[str | None] = mapped_column(String(500))
 
 
 class RequisitoDocumental(Base, TimestampMixin):

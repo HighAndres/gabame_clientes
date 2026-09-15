@@ -14,11 +14,12 @@ ellas: roles, perfiles, vinculos, documentos, sesiones). Solo son datos de prueb
 """
 
 import os
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.enums import (
     Audiencia,
     Empresa,
@@ -92,7 +93,10 @@ def _vinculo(
     )
 
 
-def _publicacion(db: Session, empresa: Empresa, audiencia: Audiencia, slug: str, titulo: str, resumen: str) -> None:
+def _publicacion(
+    db: Session, empresa: Empresa, audiencia: Audiencia, slug: str, titulo: str, resumen: str,
+    *, dias_vigencia: int | None = None, url_externa: str | None = None,
+) -> None:
     existe = db.scalar(select(Publicacion.id).where(Publicacion.empresa == empresa, Publicacion.slug == slug))
     if existe:
         return
@@ -101,6 +105,9 @@ def _publicacion(db: Session, empresa: Empresa, audiencia: Audiencia, slug: str,
             empresa=empresa, audiencia=audiencia, slug=slug, titulo=titulo, resumen=resumen,
             contenido=f"# {titulo}\n\n{resumen}\n\nContenido de ejemplo del espacio de {espacios.NOMBRES[empresa]}.",
             publicada=True,
+            # Relativa a hoy: un seed con fechas fijas nace vencido al mes siguiente.
+            vigencia_hasta=(datetime.now(UTC).date() + timedelta(days=dias_vigencia)) if dias_vigencia else None,
+            url_externa=url_externa,
         )
     )
 
@@ -118,6 +125,19 @@ def main() -> None:
         _publicacion(
             db, Empresa.GABAME, Audiencia.PACIENTES, "nuestras-marcas", "Nuestras marcas",
             "Las marcas de GABAME y donde encontrarlas.",
+        )
+        # Promociones de Farmacias GABAME: publicaciones para medicos con vigencia y enlace a la
+        # tienda. Datos de ejemplo hasta que el cliente capture las suyas en el panel.
+        _publicacion(
+            db, Empresa.GABAME, Audiencia.MEDICOS, "precios-preferentes-profesionales",
+            "Precios preferentes para profesionales de la salud",
+            "Condiciones vigentes en Farmacias GABAME para personal de la salud acreditado.",
+            dias_vigencia=45, url_externa=settings.URL_FARMACIAS,
+        )
+        _publicacion(
+            db, Empresa.GABAME, Audiencia.MEDICOS, "novedades-del-catalogo", "Novedades del catalogo",
+            "Lo que entro este mes al catalogo de Farmacias GABAME.",
+            dias_vigencia=20, url_externa=settings.URL_FARMACIAS,
         )
 
         paciente = _usuario(db, "paciente@gabame.com", "Ana", "Paciente", Realm.ID)

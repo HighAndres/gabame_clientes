@@ -4,8 +4,9 @@ El alcance del admin y la puerta de cada audiencia se resuelven en `deps.py`; aq
 """
 
 import uuid
+from datetime import UTC, date, datetime
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.core.enums import Audiencia, Empresa
@@ -18,6 +19,21 @@ class PublicacionNoEncontrada(ErrorNegocio):
     status = 404
     codigo = "publicacion_no_encontrada"
     mensaje_por_defecto = "No existe esa publicacion."
+
+
+def hoy() -> date:
+    return datetime.now(UTC).date()
+
+
+def vencida(p: Publicacion) -> bool:
+    """Una publicacion con vigencia cumplida ya no se muestra, aunque siga marcada publicada.
+    Se marca, no se borra: el admin decide si la renueva o la retira."""
+    return p.vigencia_hasta is not None and p.vigencia_hasta < hoy()
+
+
+def _vigente():
+    """Sin fecha de fin, o con una que todavia no llega."""
+    return or_(Publicacion.vigencia_hasta.is_(None), Publicacion.vigencia_hasta >= hoy())
 
 
 def _existe(db: Session, empresa: Empresa, slug: str) -> bool:
@@ -69,7 +85,12 @@ def publicadas(db: Session, empresa: Empresa, audiencia: Audiencia) -> list[Publ
     return list(
         db.scalars(
             select(Publicacion)
-            .where(Publicacion.empresa == empresa, Publicacion.audiencia == audiencia, Publicacion.publicada.is_(True))
+            .where(
+                Publicacion.empresa == empresa,
+                Publicacion.audiencia == audiencia,
+                Publicacion.publicada.is_(True),
+                _vigente(),
+            )
             .order_by(Publicacion.orden, Publicacion.titulo)
         ).all()
     )
@@ -82,6 +103,7 @@ def publicada(db: Session, empresa: Empresa, audiencia: Audiencia, slug: str) ->
             Publicacion.audiencia == audiencia,
             Publicacion.slug == slug,
             Publicacion.publicada.is_(True),
+            _vigente(),
         )
     )
     if p is None:
