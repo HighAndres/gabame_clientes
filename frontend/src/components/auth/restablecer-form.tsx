@@ -40,7 +40,7 @@ export function RestablecerForm({ token }: { token: string | null }) {
       await api("/auth/restablecer", { method: "POST", body: JSON.stringify({ token, password }) });
       setListo(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "No se pudo restablecer la contrasena.");
+      setError(err instanceof ApiError ? err.message : "No se pudo restablecer la contraseña.");
     } finally {
       setCargando(false);
     }
@@ -87,7 +87,7 @@ export function RestablecerForm({ token }: { token: string | null }) {
       <p className="text-xs text-muted-foreground">Minimo 8 caracteres.</p>
       {error && <Aviso>{error}</Aviso>}
       <Button type="submit" className="w-full" disabled={cargando}>
-        {cargando ? "Guardando..." : "Guardar contrasena"}
+        {cargando ? "Guardando..." : "Guardar contraseña"}
       </Button>
     </form>
   );

@@ -182,5 +182,5 @@ export interface PaginaBitacora {
 export const NOMBRE_AUDIENCIA: Record<Audiencia, string> = {
   pacientes: "Pacientes y consumidores",
   medicos: "Profesionales de la salud validados",
-  partners: "Partners con vinculo aprobado",
+  partners: "Partners con vínculo aprobado",
 };

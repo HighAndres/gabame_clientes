@@ -35,7 +35,7 @@ export function DecisionBotones({
       });
       if (!res.ok) {
         const d = (await res.json().catch(() => null))?.detail;
-        setError(d?.mensaje ?? "No se pudo aplicar la decision.");
+        setError(d?.mensaje ?? "No se pudo aplicar la decisión.");
         return;
       }
       setModo("idle");

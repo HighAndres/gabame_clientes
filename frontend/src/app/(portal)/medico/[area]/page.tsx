@@ -24,7 +24,7 @@ export default async function AreaPage({ params }: { params: { area: string } })
         <div className="flex items-baseline justify-between gap-4">
           <h2 className="text-[22px] font-bold">{area.nombre}</h2>
           <span className="text-[13px] text-muted-foreground">
-            {area.fichas.length} {area.fichas.length === 1 ? "ficha tecnica" : "fichas tecnicas"}
+            {area.fichas.length} {area.fichas.length === 1 ? "ficha técnica" : "fichas técnicas"}
           </span>
         </div>
         {area.descripcion && <p className="text-sm text-muted-foreground">{area.descripcion}</p>}

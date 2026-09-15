@@ -28,7 +28,7 @@ export function AreaForm() {
       });
       if (!res.ok) {
         const d = (await res.json().catch(() => null))?.detail;
-        setError(d?.mensaje ?? "No se pudo crear el area.");
+        setError(d?.mensaje ?? "No se pudo crear el área.");
         return;
       }
       setNombre("");

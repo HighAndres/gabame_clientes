@@ -44,7 +44,7 @@ export default async function MedicoPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-[17px]">{a.nombre}</CardTitle>
                 <CardDescription>
-                  {a.fichas.length} {a.fichas.length === 1 ? "ficha tecnica" : "fichas tecnicas"}
+                  {a.fichas.length} {a.fichas.length === 1 ? "ficha técnica" : "fichas técnicas"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-2 text-sm">

@@ -45,7 +45,7 @@ export function LoginForm({
       if (!res.ok) {
         const cuerpo = await res.json().catch(() => null);
         const d = cuerpo?.detail ?? {};
-        setError({ codigo: d.codigo ?? "error", mensaje: d.mensaje ?? "No se pudo iniciar sesion." });
+        setError({ codigo: d.codigo ?? "error", mensaje: d.mensaje ?? "No se pudo iniciar sesión." });
         return;
       }
       if (esDestinoExterno(destino)) {
