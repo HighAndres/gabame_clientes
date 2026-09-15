@@ -50,3 +50,60 @@
     text-wrap: pretty;
   }
 }
+
+/**
+ * Movimiento. Discreto y con una sola intencion: guiar la mirada al entrar y confirmar que algo
+ * respondio al puntero. Nada gira, nada rebota, nada tarda mas de un cuarto de segundo.
+ *
+ * Todo se apaga con `prefers-reduced-motion`: para quien marco esa preferencia en su sistema
+ * (mareo, migrana, trastorno vestibular) el portal aparece quieto, sin perder nada de contenido.
+ */
+@layer utilities {
+  @keyframes aparecer {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .aparece {
+    animation: aparecer 0.36s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+
+  /* Escalonado para listas cortas: cada tarjeta entra un instante despues de la anterior. */
+  .aparece-1 { animation-delay: 0.04s; }
+  .aparece-2 { animation-delay: 0.1s; }
+  .aparece-3 { animation-delay: 0.16s; }
+
+  /* Tarjeta que responde al puntero sin sombras (docs/diseno.md): solo borde y un milimetro arriba. */
+  .tarjeta-enlace {
+    transition:
+      border-color 0.18s ease,
+      transform 0.18s ease;
+  }
+
+  .tarjeta-enlace:hover {
+    transform: translateY(-2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aparece,
+    .aparece-1,
+    .aparece-2,
+    .aparece-3 {
+      animation: none;
+    }
+
+    .tarjeta-enlace {
+      transition: none;
+    }
+
+    .tarjeta-enlace:hover {
+      transform: none;
+    }
+  }
+}

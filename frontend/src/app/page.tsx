@@ -1,17 +1,25 @@
-import { ModalLegal } from "@/components/legal/modal-legal";
 import { ArrowRight, Briefcase, type LucideIcon, Stethoscope, User } from "lucide-react";
 import Link from "next/link";
 
+import { ModalLegal } from "@/components/legal/modal-legal";
 import { Logo } from "@/components/marca/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { type Entrada, ENTRADAS } from "@/lib/entradas";
 import { cn } from "@/lib/utils";
 
-/** Las mismas puertas que enlazan los sitios del grupo (docs/puntos-de-entrada.md). */
-const PERFILES: { entrada: Entrada; icono: LucideIcon; detalle: string }[] = [
-  { entrada: "clientes", icono: User, detalle: "Marcas del grupo y farmacia en linea." },
-  { entrada: "medicos", icono: Stethoscope, detalle: "Informacion tecnica del portafolio, con cedula validada." },
-  { entrada: "empresas", icono: Briefcase, detalle: "Documentos, contactos comerciales y portales operativos." },
+/**
+ * Portada: un conmutador, no una pagina de venta. Quien llega aqui es quien no sabe por donde
+ * entrar; el trafico que ya sabe llega por las puertas directas desde los sitios del grupo
+ * (docs/puntos-de-entrada.md).
+ *
+ * Las tres puertas viven en UN solo lugar y con el mismo peso. El encabezado solo ofrece iniciar
+ * sesion: crear cuenta sin elegir perfil llevaria al selector generico, que es peor camino que
+ * cualquiera de las tres puertas, porque vuelve a preguntar lo que la tarjeta ya resolvio.
+ */
+const PUERTAS: { entrada: Entrada; icono: LucideIcon }[] = [
+  { entrada: "clientes", icono: User },
+  { entrada: "medicos", icono: Stethoscope },
+  { entrada: "empresas", icono: Briefcase },
 ];
 
 export default function Home() {
@@ -20,63 +28,48 @@ export default function Home() {
       <header className="border-b">
         <div className="container flex h-[72px] items-center justify-between">
           <Logo />
-          <nav className="flex items-center gap-3" aria-label="Acceso">
-            <Link href="/login" className={cn(buttonVariants({ variant: "ghost" }))}>
-              Iniciar sesion
-            </Link>
-            <Link href="/registro" className={cn(buttonVariants())}>
-              Crear cuenta
+          <nav aria-label="Acceso">
+            <Link href="/login" className={cn(buttonVariants({ variant: "outline" }))}>
+              Iniciar sesión
             </Link>
           </nav>
         </div>
       </header>
 
-      <main id="contenido" className="container grid flex-1 items-center gap-12 py-16 md:grid-cols-2 md:py-24">
-        <div className="flex flex-col gap-6">
+      <main id="contenido" className="container flex flex-1 flex-col justify-center gap-10 py-16 md:gap-14 md:py-20">
+        <div className="aparece flex max-w-2xl flex-col gap-5">
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">Cuenta GABAME</p>
-          <h1 className="max-w-xl text-4xl font-bold leading-[1.08] md:text-5xl">
+          <h1 className="text-4xl font-bold leading-[1.08] md:text-5xl">
             Portal de clientes y profesionales de la salud
           </h1>
-          <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
-            Verifica tu correo, completa tu perfil y entra a las marcas, tiendas y contenido que te corresponden.
+          <p className="text-lg leading-relaxed text-muted-foreground">
+            Elige cómo te relacionas con el grupo y entra directo a lo que te corresponde.
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Link href={ENTRADAS.medicos.ruta} className={cn(buttonVariants({ size: "lg" }))}>
-              {ENTRADAS.medicos.boton}
-            </Link>
-            <Link href={ENTRADAS.clientes.ruta} className={cn(buttonVariants({ size: "lg", variant: "outline" }))}>
-              {ENTRADAS.clientes.boton}
-            </Link>
-          </div>
         </div>
 
-        <div className="flex flex-col gap-4 rounded-2xl bg-background p-6 md:p-10">
-          <p className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">
-            ¿Como te relacionas con GABAME?
-          </p>
-          <ul className="flex flex-col gap-3">
-            {PERFILES.map((p) => {
-              const e = ENTRADAS[p.entrada];
-              return (
-                <li key={p.entrada}>
-                  <Link
-                    href={e.ruta}
-                    className="flex items-center gap-4 rounded-lg border bg-white px-5 py-4 transition-colors hover:border-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary">
-                      <p.icono className="h-5 w-5" strokeWidth={1.5} aria-hidden="true" />
-                    </span>
-                    <span className="flex flex-1 flex-col">
-                      <span className="text-[15px] font-bold text-foreground">{e.boton}</span>
-                      <span className="text-[13px] text-muted-foreground">{p.detalle}</span>
-                    </span>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+        <ul className="grid gap-5 md:grid-cols-3">
+          {PUERTAS.map(({ entrada, icono: Icono }, i) => {
+            const e = ENTRADAS[entrada];
+            return (
+              <li key={entrada} className={`aparece aparece-${i + 1}`}>
+                <Link
+                  href={e.ruta}
+                  className="tarjeta-enlace group flex h-full flex-col gap-3 rounded-xl border bg-card p-6 hover:border-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <span className="flex h-11 w-11 items-center justify-center rounded-md bg-primary-soft text-primary">
+                    <Icono className="h-[22px] w-[22px]" strokeWidth={1.5} aria-hidden="true" />
+                  </span>
+                  <span className="text-lg font-bold text-heading">{e.boton}</span>
+                  <span className="text-sm leading-relaxed text-muted-foreground">{e.resumen}</span>
+                  <span className="mt-auto inline-flex items-center gap-1.5 pt-2 text-sm font-bold text-primary">
+                    Entrar
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </main>
 
       <footer className="container flex flex-wrap items-center justify-between gap-3 border-t py-8 text-[13px] text-muted-foreground">
@@ -84,7 +77,7 @@ export default function Home() {
         <span className="flex gap-6">
           <ModalLegal documento="aviso-privacidad" />
           <ModalLegal documento="terminos" />
-          <a href="https://gabame.com" className="text-primary hover:text-primary-hover">
+          <a href="https://gabame.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary-hover">
             Contacto
           </a>
         </span>

@@ -14,6 +14,7 @@ export interface DefinicionEntrada {
   ruta: string; // URL publica de la puerta
   boton: string; // texto del boton en el sitio
   titulo: string;
+  resumen: string; // una linea, para las tarjetas de la portada
   descripcion: string;
   tipo: TipoCuenta; // tipo de cuenta que preselecciona el registro
   destino: string; // a donde va la persona al entrar
@@ -26,6 +27,7 @@ export const ENTRADAS: Record<Entrada, DefinicionEntrada> = {
     ruta: "/medicos",
     boton: "Área médica",
     titulo: "Área médica",
+    resumen: "Información técnica del portafolio, con cédula validada.",
     descripcion:
       "Información técnica del portafolio para profesionales de la salud. Entra con tu cuenta o crea una con tu cédula profesional; el acceso se activa cuando el grupo valida tu acreditación.",
     tipo: "profesional",
@@ -37,6 +39,7 @@ export const ENTRADAS: Record<Entrada, DefinicionEntrada> = {
     ruta: "/clientes",
     boton: "Portal de clientes",
     titulo: "Portal de clientes",
+    resumen: "Marcas del grupo y farmacia en línea.",
     descripcion: "Las marcas, tiendas y novedades del grupo en un solo lugar. Entra con tu cuenta o crea una en un minuto.",
     tipo: "paciente",
     destino: "/dashboard",
@@ -47,6 +50,7 @@ export const ENTRADAS: Record<Entrada, DefinicionEntrada> = {
     ruta: "/empresas",
     boton: "Empresas y distribuidores",
     titulo: "Empresas y distribuidores",
+    resumen: "Documentos, contactos comerciales y portales operativos.",
     descripcion:
       "Distribuidores, mayoristas y clientes institucionales: documentos, contactos comerciales y portales operativos de cada empresa del grupo. La relación con cada empresa se aprueba por separado.",
     tipo: "empresa",
