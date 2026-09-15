@@ -48,7 +48,7 @@ class DocumentoBloqueado(ErrorNegocio):
 class TransicionInvalida(ErrorNegocio):
     status = 409
     codigo = "transicion_invalida"
-    mensaje_por_defecto = "El documento ya esta en ese estado."
+    mensaje_por_defecto = "El documento ya está en ese estado."
 
 
 class MotivoRequerido(ErrorNegocio):

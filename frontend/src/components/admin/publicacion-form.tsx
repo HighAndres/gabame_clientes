@@ -21,6 +21,8 @@ export function PublicacionForm({ empresa, publicacion }: { empresa: Empresa; pu
   const [contenido, setContenido] = useState(publicacion?.contenido ?? "");
   const [orden, setOrden] = useState(publicacion?.orden ?? 0);
   const [publicada, setPublicada] = useState(publicacion?.publicada ?? false);
+  const [vigenciaHasta, setVigenciaHasta] = useState(publicacion?.vigencia_hasta ?? "");
+  const [urlExterna, setUrlExterna] = useState(publicacion?.url_externa ?? "");
   const [estado, setEstado] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
   const [cargando, setCargando] = useState(false);
 
@@ -32,7 +34,11 @@ export function PublicacionForm({ empresa, publicacion }: { empresa: Empresa; pu
       const res = await fetch(edicion ? `/api/backend/admin/publicaciones/${publicacion!.id}` : `/api/backend/admin/espacios/${empresa}/publicaciones`, {
         method: edicion ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audiencia, titulo, resumen: resumen || null, contenido, orden, publicada }),
+        body: JSON.stringify({
+          audiencia, titulo, resumen: resumen || null, contenido, orden, publicada,
+          vigencia_hasta: vigenciaHasta || null,
+          url_externa: urlExterna.trim() || null,
+        }),
       });
       if (!res.ok) {
         const d = (await res.json().catch(() => null))?.detail;
@@ -45,6 +51,8 @@ export function PublicacionForm({ empresa, publicacion }: { empresa: Empresa; pu
         setResumen("");
         setContenido("");
         setPublicada(false);
+        setVigenciaHasta("");
+        setUrlExterna("");
       }
       router.refresh();
     } finally {
@@ -103,10 +111,40 @@ export function PublicacionForm({ empresa, publicacion }: { empresa: Empresa; pu
           onChange={(e) => setContenido(e.target.value)}
         />
       </div>
+      <fieldset className="grid gap-3 rounded-md border p-3 sm:grid-cols-2">
+        <legend className="px-1 text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">
+          Promoción (opcional)
+        </legend>
+        <div className="space-y-1">
+          <Label htmlFor="p-vigencia">Vigente hasta</Label>
+          <Input id="p-vigencia" type="date" value={vigenciaHasta} onChange={(e) => setVigenciaHasta(e.target.value)} />
+          <p className="text-xs text-muted-foreground">
+            El último día en que se muestra. Sin fecha, no caduca.
+          </p>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="p-url">Enlace</Label>
+          <Input
+            id="p-url"
+            type="url"
+            placeholder="https://farmaciasgabame.com/..."
+            value={urlExterna}
+            onChange={(e) => setUrlExterna(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Solo sitios y tiendas del grupo, con https.
+          </p>
+        </div>
+      </fieldset>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" className="h-4 w-4 accent-primary" checked={publicada} onChange={(e) => setPublicada(e.target.checked)} />
         Publicada (visible en el portal para su audiencia)
       </label>
+      {publicacion?.vencida && (
+        <p className="text-xs text-destructive">
+          Su vigencia ya terminó, así que dejó de mostrarse. Cambia la fecha para volver a publicarla.
+        </p>
+      )}
       {estado && <p className={`text-xs ${estado.tipo === "error" ? "text-destructive" : "text-muted-foreground"}`}>{estado.texto}</p>}
       <div className="flex flex-wrap gap-2">
         <Button type="submit" size="sm" disabled={cargando || titulo.trim().length < 2}>

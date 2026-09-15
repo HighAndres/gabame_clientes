@@ -155,6 +155,12 @@ export interface PublicacionOut {
   contenido: string;
   orden: number;
   publicada: boolean;
+  /** Último día en que se muestra. null = no caduca. */
+  vigencia_hasta: string | null;
+  /** Adónde lleva, cuando lo que anuncia vive fuera del portal. Solo dominios del grupo. */
+  url_externa: string | null;
+  /** Su vigencia ya terminó: el admin la ve, su audiencia no. */
+  vencida: boolean;
   actualizado_en: string;
 }
 

@@ -89,7 +89,16 @@ def test_renovar_la_fecha_la_devuelve_a_la_vista(client, grupo):
     ],
 )
 def test_un_enlace_fuera_del_grupo_no_se_guarda(client, grupo, url):
-    assert _promo(client, grupo, "Oferta", url=url).status_code == 422
+    r = _promo(client, grupo, "Oferta", url=url)
+    assert r.status_code == 422
+    # Con codigo, para que el panel pueda decir por que y no un "no se pudo guardar".
+    assert r.json()["detail"]["codigo"] == "enlace_fuera_del_grupo"
+
+
+def test_tampoco_se_cuela_al_editar(client, grupo):
+    p = _promo(client, grupo, "Oferta", url=None).json()
+    r = client.patch(f"{BASE}/publicaciones/{p['id']}", json={"url_externa": "https://ejemplo-ajeno.com"}, headers=grupo)
+    assert r.status_code == 422 and r.json()["detail"]["codigo"] == "enlace_fuera_del_grupo"
 
 
 @pytest.mark.parametrize(

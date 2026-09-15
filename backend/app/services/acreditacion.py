@@ -22,13 +22,13 @@ MINIMO_PARA_MOSTRAR = 6  # por debajo de esto no se revela nada: no ayuda a reco
 class CedulaBloqueada(ErrorNegocio):
     status = 409
     codigo = "cedula_bloqueada"
-    mensaje_por_defecto = "Una acreditacion validada no cambia de cedula; escribe al equipo del grupo."
+    mensaje_por_defecto = "Una acreditación validada no cambia de cédula; escribe al equipo del grupo."
 
 
 class NadaQueReenviar(ErrorNegocio):
     status = 409
     codigo = "nada_que_reenviar"
-    mensaje_por_defecto = "Solo se puede reenviar una acreditacion rechazada."
+    mensaje_por_defecto = "Solo se puede reenviar una acreditación rechazada."
 
 
 def enmascarar(cedula: str) -> str:

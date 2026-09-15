@@ -9,6 +9,7 @@ from datetime import UTC, date, datetime
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
+from app.core.dominios import es_del_grupo
 from app.core.enums import Audiencia, Empresa
 from app.core.errores import ErrorNegocio
 from app.models import Publicacion
@@ -18,7 +19,24 @@ from app.services.contenido import _slug_unico, slugify
 class PublicacionNoEncontrada(ErrorNegocio):
     status = 404
     codigo = "publicacion_no_encontrada"
-    mensaje_por_defecto = "No existe esa publicacion."
+    mensaje_por_defecto = "No existe esa publicación."
+
+
+class EnlaceFueraDelGrupo(ErrorNegocio):
+    status = 422
+    codigo = "enlace_fuera_del_grupo"
+    mensaje_por_defecto = "El enlace debe apuntar a un sitio o tienda del grupo, con https."
+
+
+def _revisar_enlace(datos: dict) -> None:
+    """Un enlace que sale del portal lo teclea una persona: se valida antes de guardarlo.
+
+    Va aqui y no en el esquema para que el panel reciba un codigo y pueda explicar el porque;
+    un 422 de pydantic solo trae la lista cruda de errores.
+    """
+    url = datos.get("url_externa")
+    if url and not es_del_grupo(url):
+        raise EnlaceFueraDelGrupo()
 
 
 def hoy() -> date:
@@ -43,6 +61,7 @@ def _existe(db: Session, empresa: Empresa, slug: str) -> bool:
 
 
 def crear(db: Session, empresa: Empresa, datos: dict) -> Publicacion:
+    _revisar_enlace(datos)
     slug = _slug_unico(db, slugify(datos["titulo"]), lambda s: _existe(db, empresa, s))
     p = Publicacion(empresa=empresa, slug=slug, **datos)
     db.add(p)
@@ -59,6 +78,7 @@ def obtener(db: Session, publicacion_id: uuid.UUID) -> Publicacion:
 
 
 def actualizar(db: Session, p: Publicacion, cambios: dict) -> Publicacion:
+    _revisar_enlace(cambios)
     for campo, valor in cambios.items():
         setattr(p, campo, valor)
     db.commit()

@@ -27,17 +27,17 @@ PIEZAS: tuple[Pieza, ...] = (
     Pieza(Producto.MEDINTER, "Medinter", "sitio", Empresa.MEDINTER, "https://medinter.com.mx",
           (Realm.PARTNERS,), "Sector institucional y licitaciones."),
     Pieza(Producto.ORDAN, "Ordan", "sitio", Empresa.ORDAN, "https://ordan.com.mx",
-          (Realm.ID, Realm.PARTNERS), "Distribucion de Babe y Sheglam."),
+          (Realm.ID, Realm.PARTNERS), "Distribución de Babé y Sheglam."),
     Pieza(Producto.A7, "A7 Pharmaceutical Distributor", "sitio", Empresa.A7, "https://a7siete.com",
-          (Realm.PARTNERS,), "Logistica y distribucion."),
+          (Realm.PARTNERS,), "Logística y distribución."),
     Pieza(Producto.TIENDAGABAME, "Farmacias GABAME", "tienda", Empresa.GABAME, settings.URL_FARMACIAS,
-          (Realm.ID, Realm.PARTNERS), "Farmacia en linea Rx y OTC."),
+          (Realm.ID, Realm.PARTNERS), "Farmacia en línea Rx y OTC."),
     # Pendiente 0.6 — dominio de Aurashop no documentado
     Pieza(Producto.AURASHOP, "Aurashop", "tienda", Empresa.ORDAN, None,
           (Realm.ID,), "Marketplace de belleza de Ordan."),
     # MB-V005: no existe todavia
     Pieza(Producto.APP_PACIENTE, "App de paciente", "app", None, None,
-          (Realm.ID,), "Proximamente."),
+          (Realm.ID,), "Próximamente."),
 )
 
 

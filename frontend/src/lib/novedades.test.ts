@@ -20,6 +20,8 @@ function espacio(empresa: Empresa, nombre: string, pubs: [string, Audiencia, str
       titulo,
       resumen: null,
       orden: 0,
+      vigencia_hasta: null,
+      url_externa: null,
       actualizado_en: fecha,
     })),
   };

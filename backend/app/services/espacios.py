@@ -31,7 +31,7 @@ MODULOS_POR_DEFECTO: dict[Empresa, list[str]] = {
 class ModuloNoHabilitado(ErrorNegocio):
     status = 403
     codigo = "modulo_no_habilitado"
-    mensaje_por_defecto = "Esta empresa no tiene habilitado ese modulo."
+    mensaje_por_defecto = "Esta empresa no tiene habilitado ese módulo."
 
 
 def obtener(db: Session, empresa: Empresa) -> Espacio:

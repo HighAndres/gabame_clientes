@@ -19,7 +19,7 @@ from app.models import RequisitoDocumental, Usuario
 class RequisitoInvalido(ErrorNegocio):
     status = 422
     codigo = "requisito_invalido"
-    mensaje_por_defecto = "Requisito invalido."
+    mensaje_por_defecto = "Requisito inválido."
 
 
 def clave_de(texto: str) -> str:

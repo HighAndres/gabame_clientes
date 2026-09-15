@@ -68,7 +68,7 @@ AlcanceAdmin = Annotated[Alcance, Depends(get_alcance_admin)]
 def require_alcance_medicos(alcance: AlcanceAdmin) -> Alcance:
     """Cola de validacion de medicos: quien administra GABAME."""
     if not alcance.ve_medicos:
-        raise _prohibido("Sin alcance sobre la validacion de medicos")
+        raise _prohibido("Sin alcance sobre la validación de médicos")
     return alcance
 
 
@@ -121,7 +121,7 @@ def acceso_audiencia(empresa: Empresa, audiencia: Audiencia, usuario: UsuarioAct
     if audiencia == Audiencia.MEDICOS:
         return require_medico_validado(usuario)
     if audiencia not in audiencias_permitidas(usuario, empresa):
-        raise _prohibido("Solo partners con vinculo aprobado con esta empresa")
+        raise _prohibido("Solo partners con vínculo aprobado con esta empresa")
     return usuario
 
 
@@ -133,7 +133,7 @@ def require_perfil_medico(usuario: UsuarioActual) -> Usuario:
     ningun contenido Rx.
     """
     if not usuario.tiene_rol(Rol.MEDICO) or usuario.perfil_medico is None:
-        raise _prohibido("Solo profesionales de la salud con acreditacion registrada")
+        raise _prohibido("Solo profesionales de la salud con acreditación registrada")
     return usuario
 
 

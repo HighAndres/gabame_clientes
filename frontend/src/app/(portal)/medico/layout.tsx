@@ -1,13 +1,18 @@
+import Link from "next/link";
+
+import { NavLink } from "@/components/portal/nav-link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
-import { NavLink } from "@/components/portal/nav-link";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { AreaOut } from "@/types/contenido";
 
 /**
- * Area medica (lienzo aprobado): columna izquierda con las areas terapeuticas y el estado de la
- * acreditacion; a la derecha, el contenido. Solo el rol medico llega aqui (middleware); el
- * contenido lo sirve el backend detras de `require_medico_validado`, nunca esta pantalla.
+ * Area medica: columna izquierda con las areas terapeuticas y el estado de la acreditacion;
+ * a la derecha, el contenido. Solo el rol medico llega aqui (middleware); el contenido lo
+ * sirve el backend detras de `require_medico_validado`, nunca esta pantalla.
+ *
+ * Quien todavia no esta validado ve aqui que sigue, no una puerta cerrada: el detalle de su
+ * acreditacion (y el boton de reenviar tras un rechazo) vive en Mi cuenta.
  */
 export default async function MedicoLayout({ children }: { children: React.ReactNode }) {
   const u = await leerUsuarioActual();
@@ -15,18 +20,26 @@ export default async function MedicoLayout({ children }: { children: React.React
 
   if (u.estado_medico !== "validado") {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex max-w-2xl flex-col gap-6">
         <h1 className="text-[26px] font-bold">Área médica</h1>
         <Alert>
-          <AlertTitle>Contenido exclusivo para profesionales de la salud</AlertTitle>
+          <AlertTitle>
+            {u.estado_medico === "pendiente" && "Tu acreditación está en revisión"}
+            {u.estado_medico === "rechazado" && "Tu acreditación no fue aprobada"}
+            {u.estado_medico === null && "No encontramos tu acreditación"}
+          </AlertTitle>
           <AlertDescription>
             {u.estado_medico === "pendiente" &&
-              "Tu acreditación profesional está en revisión. Te avisaremos por correo cuando esté validada."}
+              "El contenido técnico se abre en cuanto validemos tu cédula profesional. Te avisamos por correo; mientras tanto puedes revisar y corregir tus datos."}
             {u.estado_medico === "rechazado" &&
-              "Tu acreditación no fue aprobada. Si crees que es un error, contacta al equipo del grupo."}
-            {u.estado_medico === null && "No encontramos una acreditación profesional asociada a tu cuenta."}
+              "En Mi cuenta te decimos por qué y puedes corregir tus datos para que la revisemos otra vez."}
+            {u.estado_medico === null &&
+              "No hay una acreditación profesional asociada a tu cuenta. Escríbenos y la damos de alta."}
           </AlertDescription>
         </Alert>
+        <Link href="/perfil" className="text-sm font-bold text-primary hover:text-primary-hover">
+          Ver mi acreditación
+        </Link>
       </div>
     );
   }
@@ -47,18 +60,20 @@ export default async function MedicoLayout({ children }: { children: React.React
             Acreditación validada
           </Estado>
         </div>
-        <p className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">Áreas terapéuticas</p>
-        {areas.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Aún no hay áreas publicadas.</p>
-        ) : (
-          <nav className="flex flex-col gap-1" aria-label="Áreas terapéuticas">
-            {areas.map((a) => (
-              <NavLink key={a.id} href={`/medico/${a.slug}`} className="h-10 justify-between">
-                <span>{a.nombre}</span>
-                <span className="text-xs text-muted-foreground">{a.fichas.length}</span>
-              </NavLink>
-            ))}
-          </nav>
+        {areas.length > 0 && (
+          <>
+            <p className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground">
+              Áreas terapéuticas
+            </p>
+            <nav className="flex flex-col gap-1" aria-label="Áreas terapéuticas">
+              {areas.map((a) => (
+                <NavLink key={a.id} href={`/medico/${a.slug}`} className="h-10 justify-between">
+                  <span>{a.nombre}</span>
+                  <span className="text-xs text-muted-foreground">{a.fichas.length}</span>
+                </NavLink>
+              ))}
+            </nav>
+          </>
         )}
         <p className="rounded-md border bg-card px-4 py-3 text-xs leading-relaxed text-muted-foreground">
           Información dirigida exclusivamente a profesionales de la salud.

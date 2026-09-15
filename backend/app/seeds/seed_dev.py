@@ -120,11 +120,11 @@ def main() -> None:
             requisitos.listar(db, empresa)  # catalogo generico de documentos
             _publicacion(
                 db, empresa, Audiencia.PARTNERS, "bienvenida-partners", f"Bienvenido a {espacios.NOMBRES[empresa]}",
-                "Como trabajamos con nuestros distribuidores y clientes.",
+                "Cómo trabajamos con nuestros distribuidores y clientes.",
             )
         _publicacion(
             db, Empresa.GABAME, Audiencia.PACIENTES, "nuestras-marcas", "Nuestras marcas",
-            "Las marcas de GABAME y donde encontrarlas.",
+            "Las marcas de GABAME y dónde encontrarlas.",
         )
         # Promociones de Farmacias GABAME: publicaciones para medicos con vigencia y enlace a la
         # tienda. Datos de ejemplo hasta que el cliente capture las suyas en el panel.
@@ -135,8 +135,8 @@ def main() -> None:
             dias_vigencia=45, url_externa=settings.URL_FARMACIAS,
         )
         _publicacion(
-            db, Empresa.GABAME, Audiencia.MEDICOS, "novedades-del-catalogo", "Novedades del catalogo",
-            "Lo que entro este mes al catalogo de Farmacias GABAME.",
+            db, Empresa.GABAME, Audiencia.MEDICOS, "novedades-del-catalogo", "Novedades del catálogo",
+            "Lo que entró este mes al catálogo de Farmacias GABAME.",
             dias_vigencia=20, url_externa=settings.URL_FARMACIAS,
         )
 

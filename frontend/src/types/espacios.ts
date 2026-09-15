@@ -10,6 +10,10 @@ export interface PublicacionResumenOut {
   titulo: string;
   resumen: string | null;
   orden: number;
+  /** Último día en que se muestra; el backend ya filtró las vencidas. */
+  vigencia_hasta: string | null;
+  /** Adónde lleva fuera del portal (la tienda del grupo). */
+  url_externa: string | null;
   actualizado_en: string;
 }
 

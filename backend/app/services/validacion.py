@@ -19,7 +19,7 @@ from app.services import correo
 class TransicionInvalida(ErrorNegocio):
     status = 409
     codigo = "transicion_invalida"
-    mensaje_por_defecto = "Ya esta en ese estado."
+    mensaje_por_defecto = "Ya está en ese estado."
 
 
 class MotivoRequerido(ErrorNegocio):

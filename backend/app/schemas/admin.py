@@ -5,7 +5,6 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
-from app.core.dominios import es_del_grupo
 from app.core.enums import (
     Audiencia,
     Empresa,
@@ -311,17 +310,13 @@ class RequisitoDocumentalOut(BaseModel):
 
 
 class _CamposPublicacion(BaseModel):
-    """Lo comun entre alta y edicion, para que la regla del enlace no se escriba dos veces."""
+    """Lo comun entre alta y edicion. Que el enlace sea del grupo lo decide el servicio, que es
+    quien puede responder con un codigo que el panel sepa explicar."""
 
     @field_validator("url_externa", check_fields=False)
     @classmethod
-    def _solo_del_grupo(cls, valor: str | None) -> str | None:
-        if valor is None or not valor.strip():
-            return None
-        valor = valor.strip()
-        if not es_del_grupo(valor):
-            raise ValueError("El enlace debe apuntar a un sitio o tienda del grupo")
-        return valor
+    def _sin_espacios(cls, valor: str | None) -> str | None:
+        return (valor or "").strip() or None
 
 
 class PublicacionIn(_CamposPublicacion):

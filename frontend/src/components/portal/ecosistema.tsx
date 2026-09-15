@@ -50,7 +50,7 @@ export async function Ecosistema({ titulo = "Marcas y tiendas del grupo" }: { ti
                   className="inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-hover"
                 >
                   Visitar <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span className="sr-only">{p.nombre}, se abre en otra pestana</span>
+                  <span className="sr-only">{p.nombre}, se abre en otra pestaña</span>
                 </a>
               ) : (
                 <span className="text-[13px] text-muted-foreground">Próximamente</span>
