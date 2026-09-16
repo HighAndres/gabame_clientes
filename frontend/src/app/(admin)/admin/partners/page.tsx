@@ -1,7 +1,9 @@
 import { Briefcase } from "lucide-react";
 import Link from "next/link";
 
+import { BarraFiltros, type SelectFiltro } from "@/components/admin/barra-filtros";
 import { DecisionBotones } from "@/components/admin/decision-botones";
+import { Celda, FilaTabla, Tabla } from "@/components/admin/tabla";
 import { buttonVariants } from "@/components/ui/button";
 import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
@@ -19,8 +21,10 @@ const ESTADOS: { valor: EstadoValidacion; texto: string }[] = [
   { valor: "rechazado", texto: "Rechazados" },
 ];
 
-function primero(v: string | string[] | undefined): string | undefined {
-  return Array.isArray(v) ? v[0] : v;
+const COLUMNAS = "minmax(0,1.5fr) minmax(0,1.3fr) 110px 90px 96px 250px";
+
+function texto(v: string | string[] | undefined): string {
+  return (Array.isArray(v) ? v[0] : v)?.trim() ?? "";
 }
 
 /** Cola de vinculos de partners: una fila por empresa solicitada (ADR-0008). El backend filtra por alcance. */
@@ -31,118 +35,96 @@ export default async function AdminPartnersPage({
 }) {
   const u = await leerUsuarioActual();
   const alcance = u ? alcanceDe(u) : null;
-  const estadoParam = primero(searchParams.estado);
+  const estadoParam = texto(searchParams.estado);
   const estado = (ESTADOS.some((e) => e.valor === estadoParam) ? estadoParam : "pendiente") as EstadoValidacion;
-  const empresasFiltro = alcance ? alcance.admin.length > 1 || alcance.grupo ? alcance.empresas : [] : [];
-  const empresaParam = primero(searchParams.empresa);
+  // El filtro por empresa solo tiene sentido para quien administra mas de una.
+  const empresasFiltro = alcance && (alcance.grupo || alcance.admin.length > 1) ? alcance.empresas : [];
+  const empresaParam = texto(searchParams.empresa);
   const empresa = empresasFiltro.includes(empresaParam as Empresa) ? (empresaParam as Empresa) : null;
+  const buscar = texto(searchParams.buscar);
 
   const query = new URLSearchParams({ estado });
   if (empresa) query.set("empresa", empresa);
-  const vinculos = await apiConSesion<VinculoAdminOut[]>(`/admin/partners?${query.toString()}`);
+  if (buscar) query.set("buscar", buscar);
+  const vinculos = await apiConSesion<VinculoAdminOut[]>(`/admin/partners?${query}`);
   const ambito = alcance?.grupo ? "Todo el grupo" : alcance?.admin.map((e) => NOMBRE_EMPRESA[e]).join(", ");
-  const enlace = (e: EstadoValidacion, emp: Empresa | null) => `/admin/partners?estado=${e}${emp ? `&empresa=${emp}` : ""}`;
+
+  const selects: SelectFiltro[] = [
+    { nombre: "estado", etiqueta: "Estado", valor: estado, opciones: ESTADOS },
+  ];
+  if (empresasFiltro.length > 0) {
+    selects.push({
+      nombre: "empresa",
+      etiqueta: "Empresa",
+      valor: empresa ?? "",
+      opciones: [{ valor: "", texto: "Todas las empresas" }, ...empresasFiltro.map((e) => ({ valor: e, texto: NOMBRE_EMPRESA[e] }))],
+    });
+  }
 
   return (
-    <div className="flex flex-col gap-6">
-      <EncabezadoArea
-        icono={Briefcase}
-        etiqueta={`${ambito} · Partners`}
-        titulo="Solicitudes de vínculo"
-        acciones={
-          <nav className="flex gap-2 text-[13px]" aria-label="Filtrar por estado">
-            {ESTADOS.map((e) => (
-              <Link
-                key={e.valor}
-                href={enlace(e.valor, empresa)}
-                aria-current={e.valor === estado ? "page" : undefined}
-                className={cn(
-                  "inline-flex h-[34px] items-center rounded-md px-3 font-bold",
-                  e.valor === estado ? "bg-primary text-white" : "border text-heading hover:bg-background",
-                )}
-              >
-                {e.texto}
-              </Link>
-            ))}
-          </nav>
-        }
+    <div className="flex flex-col gap-5">
+      <EncabezadoArea icono={Briefcase} etiqueta={`${ambito} · Partners`} titulo="Solicitudes de vínculo" />
+
+      <BarraFiltros
+        accion="/admin/partners"
+        busqueda={{ nombre: "buscar", valor: buscar, placeholder: "Razón social, RFC, nombre o correo" }}
+        selects={selects}
       />
 
-      {empresasFiltro.length > 0 && (
-        <nav className="flex flex-wrap gap-2 text-[13px]" aria-label="Filtrar por empresa">
-          <Link
-            href={enlace(estado, null)}
-            aria-current={empresa === null ? "page" : undefined}
-            className={cn("rounded-full px-3 py-1", empresa === null ? "bg-primary-soft font-bold text-primary-soft-foreground" : "text-muted-foreground hover:text-heading")}
-          >
-            Todas
-          </Link>
-          {empresasFiltro.map((e) => (
-            <Link
-              key={e}
-              href={enlace(estado, e)}
-              aria-current={empresa === e ? "page" : undefined}
-              className={cn("rounded-full px-3 py-1", empresa === e ? "bg-primary-soft font-bold text-primary-soft-foreground" : "text-muted-foreground hover:text-heading")}
-            >
-              {NOMBRE_EMPRESA[e]}
-            </Link>
-          ))}
-        </nav>
-      )}
-
-      <div className="overflow-hidden rounded-lg border bg-card">
-        <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,1.4fr)_130px_120px_110px_220px] bg-background px-5 py-2.5 text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground xl:grid">
-          <span>Razón social</span>
-          <span>Contacto</span>
-          <span>Tipo</span>
-          <span>Documentos</span>
-          <span>Solicitud</span>
-          <span />
-        </div>
-        {vinculos.length === 0 && <p className="px-5 py-8 text-center text-sm text-muted-foreground">Nadie en este estado.</p>}
+      <Tabla
+        columnas={COLUMNAS}
+        cabeceras={["Razón social", "Contacto", "Tipo", "Archivos", "Solicitud", ""]}
+        cantidad={vinculos.length}
+        vacio={buscar ? "Nadie coincide con la búsqueda." : "Nadie en este estado."}
+        pie={<span>{vinculos.length} {vinculos.length === 1 ? "solicitud" : "solicitudes"}</span>}
+      >
         {vinculos.map((v) => (
-          <div
-            key={v.vinculo_id}
-            className="grid items-center gap-3 border-t px-5 py-3.5 text-sm xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1.4fr)_130px_120px_110px_220px]"
-          >
-            <div className="flex min-w-0 flex-col">
+          <FilaTabla key={v.vinculo_id}>
+            <Celda>
               <Link href={`/admin/partners/${v.usuario_id}`} className="truncate font-bold hover:text-primary">
                 {v.razon_social}
               </Link>
-              <span className="text-xs text-muted-foreground">Vinculo con {NOMBRE_EMPRESA[v.empresa]}</span>
-            </div>
-            <div className="flex min-w-0 flex-col">
+              <span className="truncate text-xs text-muted-foreground">
+                Vínculo con {NOMBRE_EMPRESA[v.empresa]}
+                {v.rfc ? ` · ${v.rfc}` : ""}
+              </span>
+            </Celda>
+            <Celda etiqueta="Contacto">
               <span className="truncate">
                 {v.nombre} {v.apellidos}
               </span>
               <span className="truncate text-xs text-muted-foreground">{v.email}</span>
-            </div>
-            <span>{NOMBRE_SUBTIPO[v.tipo]}</span>
-            <Link href={`/admin/partners/${v.usuario_id}`} className="font-bold text-primary hover:text-primary-hover">
-              {v.documentos} {v.documentos === 1 ? "archivo" : "archivos"}
-            </Link>
-            <span className="text-muted-foreground">{fecha(v.creado_en)}</span>
-            <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-              {v.estado !== "pendiente" && <Estado tono={tonoDeValidacion(v.estado)} />}
-              <Link href={`/admin/partners/${v.usuario_id}`} className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-                Revisar
-              </Link>
-              {v.estado === "pendiente" && (
-                <DecisionBotones
-                  estado={v.estado}
-                  rutaAprobar={`/admin/vinculos/${v.vinculo_id}/aprobar`}
-                  rutaRechazar={`/admin/vinculos/${v.vinculo_id}/rechazar`}
-                />
-              )}
-            </div>
-          </div>
+            </Celda>
+            <Celda etiqueta="Tipo">
+              <span>{NOMBRE_SUBTIPO[v.tipo]}</span>
+            </Celda>
+            <Celda etiqueta="Archivos">
+              <span className={v.documentos === 0 ? "text-muted-foreground" : undefined}>{v.documentos}</span>
+            </Celda>
+            <Celda etiqueta="Solicitud">
+              <span className="text-muted-foreground">{fecha(v.creado_en)}</span>
+            </Celda>
+            <Celda className="pt-1 xl:pt-0">
+              <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                {v.estado !== "pendiente" && <Estado tono={tonoDeValidacion(v.estado)} />}
+                <Link
+                  href={`/admin/partners/${v.usuario_id}`}
+                  className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                >
+                  Revisar
+                </Link>
+                {v.estado === "pendiente" && (
+                  <DecisionBotones
+                    estado={v.estado}
+                    rutaAprobar={`/admin/vinculos/${v.vinculo_id}/aprobar`}
+                    rutaRechazar={`/admin/vinculos/${v.vinculo_id}/rechazar`}
+                  />
+                )}
+              </div>
+            </Celda>
+          </FilaTabla>
         ))}
-        <div className="flex items-center justify-between border-t px-5 py-3 text-[13px] text-muted-foreground">
-          <span>
-            {vinculos.length} {vinculos.length === 1 ? "solicitud" : "solicitudes"}
-          </span>
-        </div>
-      </div>
+      </Tabla>
     </div>
   );
 }

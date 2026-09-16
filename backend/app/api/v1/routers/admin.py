@@ -75,6 +75,16 @@ def _prohibido(mensaje: str) -> HTTPException:
     return HTTPException(status.HTTP_403_FORBIDDEN, {"codigo": "prohibido", "mensaje": mensaje})
 
 
+def _patron_busqueda(texto: str) -> str:
+    """Texto libre -> patron LIKE. Escapa `%`, `_` y la barra para que se busquen literalmente."""
+    limpio = texto.strip().lower().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{limpio}%"
+
+
+def _coincide(patron: str, *columnas):
+    return or_(*(func.lower(c).like(patron, escape="\\") for c in columnas))
+
+
 def _filtro_vinculos(alcance: Alcance, q):
     if alcance.empresas_partner is not None:
         q = q.where(VinculoEmpresa.empresa.in_(alcance.empresas_partner))
@@ -171,15 +181,8 @@ def listar_usuarios(
     base = _usuarios_visibles(db, alcance)
     if rol is not None:
         base = base.where(Usuario.id.in_(select(UsuarioRol.usuario_id).where(UsuarioRol.rol == rol)))
-    if q:
-        patron = f"%{q.strip().lower()}%"
-        base = base.where(
-            or_(
-                func.lower(Usuario.email).like(patron),
-                func.lower(Usuario.nombre).like(patron),
-                func.lower(Usuario.apellidos).like(patron),
-            )
-        )
+    if q and q.strip():
+        base = base.where(_coincide(_patron_busqueda(q), Usuario.email, Usuario.nombre, Usuario.apellidos))
     total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
     items = db.scalars(base.order_by(Usuario.creado_en.desc()).limit(limit).offset(offset)).all()
     return PaginaUsuarios(total=total, items=[UsuarioAdminOut.desde_modelo(u) for u in items])
@@ -193,10 +196,20 @@ def listar_medicos(
     alcance: AlcanceMedicos,
     db: DbSession,
     estado: EstadoValidacion | None = EstadoValidacion.PENDIENTE,
+    buscar: Annotated[str | None, Query(max_length=120)] = None,
 ) -> list[MedicoAdminOut]:
     q = select(Usuario, PerfilMedico).join(PerfilMedico, PerfilMedico.usuario_id == Usuario.id)
     if estado is not None:
         q = q.where(PerfilMedico.estado == estado)
+    if buscar and buscar.strip():
+        # La cedula entra en la busqueda: quien ve esta cola ya la ve completa, y es lo que se
+        # teclea cuando llega una consulta del medico.
+        q = q.where(
+            _coincide(
+                _patron_busqueda(buscar), Usuario.nombre, Usuario.apellidos, Usuario.email,
+                PerfilMedico.cedula_profesional,
+            )
+        )
     filas = db.execute(q.order_by(PerfilMedico.creado_en)).all()
     return [MedicoAdminOut.desde_modelo(u, p) for u, p in filas]
 
@@ -226,6 +239,7 @@ def listar_vinculos(
     db: DbSession,
     estado: EstadoValidacion | None = EstadoValidacion.PENDIENTE,
     empresa: Empresa | None = None,
+    buscar: Annotated[str | None, Query(max_length=120)] = None,
 ) -> list[VinculoAdminOut]:
     """Una fila por vinculo usuario-empresa dentro del alcance del admin."""
     q = (
@@ -238,6 +252,13 @@ def listar_vinculos(
         q = q.where(VinculoEmpresa.empresa == empresa)
     if estado is not None:
         q = q.where(VinculoEmpresa.estado == estado)
+    if buscar and buscar.strip():
+        q = q.where(
+            _coincide(
+                _patron_busqueda(buscar), PerfilPartner.razon_social, PerfilPartner.rfc, Usuario.nombre,
+                Usuario.apellidos, Usuario.email,
+            )
+        )
     filas = db.execute(q.order_by(VinculoEmpresa.creado_en)).all()
     return [VinculoAdminOut.desde_modelo(u, p, v) for u, p, v in filas]
 
@@ -511,12 +532,13 @@ def listar_bitacora(
     alcance: AlcanceCuentas,
     db: DbSession,
     objetivo_id: uuid.UUID | None = None,
+    tipo: bitacora.TipoMovimiento | None = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 25,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> PaginaBitacora:
     """Quien hizo que sobre quien, dentro del alcance del admin. Solo lectura: nadie la edita."""
     total, filas = bitacora.listar(
-        db, alcance, _usuarios_visibles(db, alcance), objetivo_id=objetivo_id, limit=limit, offset=offset
+        db, alcance, _usuarios_visibles(db, alcance), objetivo_id=objetivo_id, tipo=tipo, limit=limit, offset=offset
     )
     return PaginaBitacora(
         total=total,

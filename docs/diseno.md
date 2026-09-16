@@ -31,6 +31,10 @@ Sin sombras: las superficies se separan por borde y fondo.
   por linea, para elementos equivalentes que se recorren con la vista.
 - `components/portal/bloque-principal.tsx`: el bloque ancho que abre el inicio, con etiqueta,
   titulo, estado, cifras y una sola accion.
+- `components/admin/tabla.tsx`: `Tabla`, `FilaTabla`, `Celda`, `Paginacion`. La plantilla de columnas se
+  declara una vez; a partir de `xl` es tabla y por debajo cada celda se apila con su etiqueta.
+- `components/admin/barra-filtros.tsx`: busqueda y listas como formulario GET; los filtros viven en la
+  URL y una lista filtra al cambiarla.
 - `components/ui/encabezado-area.tsx`: la franja con la que abre cada area. Marca (icono en azul
   suave, o el logotipo de la empresa en su espacio), etiqueta, titulo, estado y accion principal.
 
