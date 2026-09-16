@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { NOMBRE_EMPRESA } from "@/lib/matriz-roles";
+import { enviar as enviarAlPortal, mensajeDeError } from "@/lib/peticion";
 import type { Empresa, SubtipoPartner } from "@/types/auth";
 import { NOMBRE_SUBTIPO } from "@/types/partner";
 
@@ -28,14 +29,13 @@ export function SolicitarVinculo({ disponibles }: { disponibles: Empresa[] }) {
     setError(null);
     setCargando(true);
     try {
-      const res = await fetch("/api/backend/partners/me/vinculos", {
+      const res = await enviarAlPortal("/api/backend/partners/me/vinculos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ empresa, tipo }),
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null))?.detail;
-        setError(d?.mensaje ?? "No se pudo enviar la solicitud.");
+        setError(await mensajeDeError(res, "No se pudo enviar la solicitud."));
         return;
       }
       setAbierto(false);

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { enviar as enviarAlPortal, mensajeDeError } from "@/lib/peticion";
 
 /** Alta de area terapeutica (admin de contenido). Nace sin publicar. */
 export function AreaForm() {
@@ -21,14 +22,13 @@ export function AreaForm() {
     setError(null);
     setCargando(true);
     try {
-      const res = await fetch("/api/backend/admin/contenido/areas", {
+      const res = await enviarAlPortal("/api/backend/admin/contenido/areas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre, descripcion: descripcion || null, orden, publicada: false }),
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null))?.detail;
-        setError(d?.mensaje ?? "No se pudo crear el área.");
+        setError(await mensajeDeError(res, "No se pudo crear el área."));
         return;
       }
       setNombre("");

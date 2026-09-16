@@ -67,6 +67,9 @@ services:
     environment:
       JWT_SECRET: ${SECRET_KEY}
       NEXT_PUBLIC_API_URL: https://${DOMINIO}
+      # Llamadas del servidor de Next al backend por la red interna, no por internet: el servidor
+      # web del portal bloquea PUT/PATCH/DELETE y comprime por su cuenta (lib/backend-url.ts).
+      API_URL_INTERNA: http://backend:8000
 
   caddy:
     image: caddy:2-alpine

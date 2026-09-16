@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { ApiError } from "@/lib/api";
+import { fecha } from "@/lib/fechas";
 import { alcanceDe, NOMBRE_EMPRESA, NOMBRE_ROL } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { PaginaBitacora, UsuarioAdminOut } from "@/types/admin";
@@ -52,7 +53,7 @@ export default async function AdminUsuarioPage({ params }: { params: { id: strin
             {u.email}
             {!u.email_verificado ? " · correo sin verificar" : ""}
             {u.telefono ? ` · ${u.telefono}` : ""} · alta el{" "}
-            {new Date(u.creado_en).toLocaleDateString("es-MX")} · origen {u.origen_inicial}
+            {fecha(u.creado_en)} · origen {u.origen_inicial}
           </>
         }
       />

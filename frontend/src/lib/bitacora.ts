@@ -3,6 +3,11 @@ import type { BitacoraOut } from "@/types/admin";
 import type { Empresa, Rol } from "@/types/auth";
 
 const ESTADO = { validado: "aprobado", rechazado: "rechazado", pendiente: "pendiente" } as const;
+const CAMPO_ACREDITACION: Record<string, string> = {
+  cedula_profesional: "cédula",
+  especialidad: "especialidad",
+  institucion: "institución",
+};
 
 function rolTexto(r: { rol: Rol; empresa: Empresa | null }): string {
   return `${NOMBRE_ROL[r.rol]}${r.empresa ? ` de ${NOMBRE_EMPRESA[r.empresa]}` : ""}`;
@@ -45,6 +50,13 @@ export function describirAccion(b: BitacoraOut): string {
       return "Reactivó la cuenta.";
     case "restablecimiento_enviado":
       return "Envió un enlace para restablecer la contraseña.";
+    case "acreditacion_actualizada": {
+      // Que campos, nunca su valor: el backend no guarda la cedula en la bitacora.
+      const campos = ((d.campos as string[] | undefined) ?? []).map((c) => CAMPO_ACREDITACION[c] ?? c);
+      return `Actualizó su acreditación${campos.length ? ` (${campos.join(", ")})` : ""}.`;
+    }
+    case "acreditacion_reenviada":
+      return "Corrigió su acreditación y la volvió a enviar a revisión.";
     default:
       return b.accion.replace(/_/g, " ");
   }

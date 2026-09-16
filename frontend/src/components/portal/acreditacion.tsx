@@ -7,14 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { fecha } from "@/lib/fechas";
+import { enviarJson, mensajeDeError } from "@/lib/peticion";
 import type { AcreditacionOut } from "@/types/medico";
 
 // Pendiente 0.3 — buzon real de acreditaciones; lo entrega el cliente con el criterio de validacion.
 const CONTACTO = "acreditaciones@gabame.com";
-
-function fecha(iso: string): string {
-  return new Date(iso).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
-}
+const LARGA: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" };
 
 /**
  * La acreditacion del propio medico: consultarla, corregirla y reenviarla tras un rechazo.
@@ -37,17 +36,12 @@ export function Acreditacion({ inicial }: { inicial: AcreditacionOut }) {
     setEstado(null);
     setCargando(true);
     try {
-      const res = await fetch(`/api/backend/medicos/me/acreditacion${ruta}`, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: body ? JSON.stringify(body) : undefined,
-      });
-      const cuerpo = await res.json().catch(() => null);
+      const res = await enviarJson(`/api/backend/medicos/me/acreditacion${ruta}`, method, body);
       if (!res.ok) {
-        setEstado({ tipo: "error", texto: cuerpo?.detail?.mensaje ?? "No se pudo guardar." });
+        setEstado({ tipo: "error", texto: await mensajeDeError(res) });
         return false;
       }
-      setA(cuerpo as AcreditacionOut);
+      setA((await res.json()) as AcreditacionOut);
       setF((v) => ({ ...v, cedula_profesional: "" }));
       router.refresh();
       return true;
@@ -84,7 +78,7 @@ export function Acreditacion({ inicial }: { inicial: AcreditacionOut }) {
 
       {a.estado === "pendiente" && (
         <p className="text-sm leading-relaxed text-muted-foreground">
-          En revisión desde el {fecha(a.solicitada_en)}. Te avisamos por correo en cuanto haya respuesta;
+          En revisión desde el {fecha(a.solicitada_en, LARGA)}. Te avisamos por correo en cuanto haya respuesta;
           mientras tanto puedes corregir tus datos aquí. ¿Dudas?{" "}
           <a href={`mailto:${CONTACTO}`} className="font-bold text-primary hover:text-primary-hover">
             {CONTACTO}
@@ -93,7 +87,7 @@ export function Acreditacion({ inicial }: { inicial: AcreditacionOut }) {
       )}
       {a.estado === "validado" && (
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Validada{a.validado_en ? ` el ${fecha(a.validado_en)}` : ""}. Para cambiar tu cédula escribe a{" "}
+          Validada{a.validado_en ? ` el ${fecha(a.validado_en, LARGA)}` : ""}. Para cambiar tu cédula escribe a{" "}
           <a href={`mailto:${CONTACTO}`} className="font-bold text-primary hover:text-primary-hover">
             {CONTACTO}
           </a>

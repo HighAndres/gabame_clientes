@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { enviar as enviarAlPortal, mensajeDeError } from "@/lib/peticion";
 import type { FichaOut } from "@/types/contenido";
 
 /**
@@ -27,7 +28,7 @@ export function FichaForm({ areaId, ficha }: { areaId?: string; ficha?: FichaOut
     setEstado(null);
     setCargando(true);
     try {
-      const res = await fetch(edicion ? `/api/backend/admin/contenido/fichas/${ficha!.id}` : "/api/backend/admin/contenido/fichas", {
+      const res = await enviarAlPortal(edicion ? `/api/backend/admin/contenido/fichas/${ficha!.id}` : "/api/backend/admin/contenido/fichas", {
         method: edicion ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -39,8 +40,7 @@ export function FichaForm({ areaId, ficha }: { areaId?: string; ficha?: FichaOut
         }),
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null))?.detail;
-        setEstado({ tipo: "error", texto: d?.mensaje ?? "No se pudo guardar la ficha." });
+        setEstado({ tipo: "error", texto: await mensajeDeError(res, "No se pudo guardar la ficha.") });
         return;
       }
       setEstado({ tipo: "ok", texto: "Ficha guardada." });

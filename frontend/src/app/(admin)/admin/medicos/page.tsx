@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { DecisionBotones } from "@/components/admin/decision-botones";
 import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
+import { fecha } from "@/lib/fechas";
 import { alcanceDe } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import { cn } from "@/lib/utils";
@@ -84,7 +85,7 @@ export default async function AdminMedicosPage({
             </div>
             <span className="font-mono text-[13px]">{m.cedula_profesional}</span>
             <span className="truncate">{m.especialidad ?? "—"}</span>
-            <span className="text-muted-foreground">{new Date(m.creado_en).toLocaleDateString("es-MX")}</span>
+            <span className="text-muted-foreground">{fecha(m.creado_en)}</span>
             <div className="flex flex-col gap-2 xl:items-end">
               {m.estado !== "pendiente" && (
                 <Estado tono={tonoDeValidacion(m.estado)} className="xl:self-end" />

@@ -5,6 +5,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { Input } from "@/components/ui/input";
+import { fecha } from "@/lib/fechas";
 import { NOMBRE_ROL } from "@/lib/matriz-roles";
 import { cn } from "@/lib/utils";
 import { apiConSesion } from "@/lib/sesion";
@@ -106,14 +107,14 @@ export default async function AdminUsuariosPage({
               </span>
               <span>{estado ? <Estado tono={tonoDeValidacion(estado)} /> : <span className="text-muted-foreground">—</span>}</span>
               <span className="text-muted-foreground">{u.origen_inicial}</span>
-              <span className="text-muted-foreground">{new Date(u.creado_en).toLocaleDateString("es-MX")}</span>
+              <span className="text-muted-foreground">{fecha(u.creado_en)}</span>
             </div>
           );
         })}
 
         <div className="flex items-center justify-between border-t px-5 py-3 text-[13px] text-muted-foreground">
           <span>
-            Pagina {pagina} de {paginas}
+            Página {pagina} de {paginas}
           </span>
           <span className="flex gap-4">
             {pagina > 1 && (

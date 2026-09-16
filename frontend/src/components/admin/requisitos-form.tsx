@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { enviar, mensajeDeError } from "@/lib/peticion";
 import type { RequisitoDocumentalIn, RequisitoDocumentalOut } from "@/types/admin";
 import type { Empresa, SubtipoPartner } from "@/types/auth";
 import { NOMBRE_SUBTIPO } from "@/types/partner";
@@ -33,7 +34,7 @@ export function RequisitosForm({ empresa, iniciales, habilitado }: { empresa: Em
     setEstado(null);
     setCargando(true);
     try {
-      const res = await fetch(`/api/backend/admin/espacios/${empresa}/requisitos`, {
+      const res = await enviar(`/api/backend/admin/espacios/${empresa}/requisitos`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -41,8 +42,7 @@ export function RequisitosForm({ empresa, iniciales, habilitado }: { empresa: Em
         }),
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null))?.detail;
-        setEstado({ tipo: "error", texto: d?.mensaje ?? "No se pudo guardar." });
+        setEstado({ tipo: "error", texto: await mensajeDeError(res, "No se pudo guardar.") });
         return;
       }
       setEstado({ tipo: "ok", texto: "Requisitos guardados." });

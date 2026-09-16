@@ -2,17 +2,21 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { ApiError, api } from "@/lib/api";
+import { metodoEfectivo } from "@/lib/metodo";
 import { leerOrigen } from "@/lib/origen";
 import { COOKIE_REFRESH, borrarSesion, guardarSesion } from "@/lib/sesion";
 import type { OrigenIn, TokenOut } from "@/types/auth";
 
 /**
  * POST /api/sesion  — login: pide tokens al backend y los guarda en cookies httpOnly.
- * DELETE /api/sesion — logout: revoca el refresh en el backend y borra las cookies.
+ * DELETE /api/sesion — logout: revoca el refresh en el backend y borra las cookies. En el portal
+ *   llega como POST con `x-metodo: DELETE` (lib/metodo.ts): el firewall del servidor no deja
+ *   pasar DELETE, y por eso cerrar sesion no hacia nada.
  *
  * Es el unico lugar del frontend que ve un token en claro.
  */
 export async function POST(req: Request) {
+  if (metodoEfectivo(req) === "DELETE") return DELETE();
   let cuerpo: { email?: string; password?: string; origen?: OrigenIn | null };
   try {
     cuerpo = await req.json();

@@ -1,4 +1,5 @@
 import { Fila, Lista, TituloSeccion } from "@/components/ui/lista";
+import { fecha } from "@/lib/fechas";
 import { ETIQUETA_AUDIENCIA, novedadesDe } from "@/lib/novedades";
 import type { EspacioMioOut } from "@/types/espacios";
 
@@ -36,7 +37,7 @@ export function Novedades({ espacios, limite = 6 }: { espacios: EspacioMioOut[];
                   {n.resumen ? ` · ${n.resumen}` : ""}
                 </>
               }
-              derecha={new Date(n.actualizado_en).toLocaleDateString("es-MX")}
+              derecha={fecha(n.actualizado_en)}
             />
           );
         })}

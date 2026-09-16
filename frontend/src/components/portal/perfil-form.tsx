@@ -7,6 +7,7 @@ import { Aviso } from "@/components/auth/aviso";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { enviarJson, mensajeDeError } from "@/lib/peticion";
 import type { UsuarioOut } from "@/types/auth";
 
 /**
@@ -28,14 +29,9 @@ export function PerfilForm({ usuario }: { usuario: UsuarioOut }) {
     setEstado(null);
     setCargando(true);
     try {
-      const res = await fetch("/api/perfil", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...f, telefono: f.telefono || null }),
-      });
+      const res = await enviarJson("/api/perfil", "PATCH", { ...f, telefono: f.telefono || null });
       if (!res.ok) {
-        const cuerpo = await res.json().catch(() => null);
-        setEstado({ tipo: "error", texto: cuerpo?.detail?.mensaje ?? "No se pudo guardar." });
+        setEstado({ tipo: "error", texto: await mensajeDeError(res) });
         return;
       }
       setEstado({ tipo: "ok", texto: "Datos guardados." });

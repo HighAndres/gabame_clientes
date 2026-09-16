@@ -5,6 +5,7 @@ import { DecisionBotones } from "@/components/admin/decision-botones";
 import { buttonVariants } from "@/components/ui/button";
 import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
+import { fecha } from "@/lib/fechas";
 import { alcanceDe, NOMBRE_EMPRESA } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import { cn } from "@/lib/utils";
@@ -120,7 +121,7 @@ export default async function AdminPartnersPage({
             <Link href={`/admin/partners/${v.usuario_id}`} className="font-bold text-primary hover:text-primary-hover">
               {v.documentos} {v.documentos === 1 ? "archivo" : "archivos"}
             </Link>
-            <span className="text-muted-foreground">{new Date(v.creado_en).toLocaleDateString("es-MX")}</span>
+            <span className="text-muted-foreground">{fecha(v.creado_en)}</span>
             <div className="flex flex-wrap items-center gap-2 xl:justify-end">
               {v.estado !== "pendiente" && <Estado tono={tonoDeValidacion(v.estado)} />}
               <Link href={`/admin/partners/${v.usuario_id}`} className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>

@@ -6,7 +6,20 @@ from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.errores import ErrorNegocio
 
-app = FastAPI(title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_PREFIX}/openapi.json")
+
+def documentacion(entorno: str) -> dict:
+    """Esquema y documentacion interactiva solo fuera de produccion.
+
+    En el portal, /api/v1/openapi.json era publico: cualquiera podia listar cada endpoint del
+    panel, sus parametros y sus esquemas. No abre nada por si mismo (el backend autoriza cada
+    llamada), pero es el mapa completo para quien busca por donde entrar.
+    """
+    if entorno == "production":
+        return {"openapi_url": None, "docs_url": None, "redoc_url": None}
+    return {"openapi_url": f"{settings.API_V1_PREFIX}/openapi.json"}
+
+
+app = FastAPI(title=settings.PROJECT_NAME, **documentacion(settings.ENVIRONMENT))
 
 app.add_middleware(
     CORSMiddleware,

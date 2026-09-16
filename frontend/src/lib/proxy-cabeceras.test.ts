@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cabecerasDeSalida } from "@/lib/proxy-cabeceras";
+import { cabecerasDeSalida, rutaBackend } from "@/lib/proxy-cabeceras";
 
 describe("cabecerasDeSalida", () => {
   it("nunca reenvia content-length ni content-encoding", () => {
@@ -32,5 +32,24 @@ describe("cabecerasDeSalida", () => {
 
   it("no inventa cabeceras que el backend no mando", () => {
     expect([...cabecerasDeSalida(new Headers()).keys()]).toEqual([]);
+  });
+});
+
+describe("rutaBackend", () => {
+  it("arma la ruta con cada segmento codificado", () => {
+    expect(rutaBackend(["admin", "usuarios", "a b"])).toBe("admin/usuarios/a%20b");
+  });
+
+  it("rechaza segmentos que sacarian la peticion de /api/v1", () => {
+    // Next entrega %2e%2e ya decodificado como ".."; con fetch, la URL se normalizaria hacia arriba.
+    expect(rutaBackend(["..", "..", "openapi.json"])).toBeNull();
+    expect(rutaBackend(["admin", ".", "usuarios"])).toBeNull();
+    expect(rutaBackend(["admin", ""])).toBeNull();
+    expect(rutaBackend([])).toBeNull();
+  });
+
+  it("un punto dentro de un segmento es legitimo", () => {
+    expect(rutaBackend(["archivo.pdf"])).toBe("archivo.pdf");
+    expect(rutaBackend(["..a"])).toBe("..a");
   });
 });

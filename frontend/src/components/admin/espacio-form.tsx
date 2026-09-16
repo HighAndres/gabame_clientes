@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { enviar, mensajeDeError } from "@/lib/peticion";
 import type { EspacioOut, EspacioUpdate } from "@/types/admin";
 import type { Modulo } from "@/types/auth";
 
@@ -44,14 +45,13 @@ export function EspacioForm({ espacio, puedeModulos }: { espacio: EspacioOut; pu
     };
     setCargando(true);
     try {
-      const res = await fetch(`/api/backend/admin/espacios/${espacio.empresa}`, {
+      const res = await enviar(`/api/backend/admin/espacios/${espacio.empresa}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos),
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null))?.detail;
-        setEstado({ tipo: "error", texto: d?.mensaje ?? "No se pudo guardar." });
+        setEstado({ tipo: "error", texto: await mensajeDeError(res, "No se pudo guardar.") });
         return;
       }
       setEstado({ tipo: "ok", texto: "Espacio guardado." });

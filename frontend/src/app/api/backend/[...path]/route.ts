@@ -1,10 +1,10 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { urlBackend } from "@/lib/backend-url";
 import { COOKIE_ACCESS } from "@/lib/cookies";
-import { cabecerasDeSalida } from "@/lib/proxy-cabeceras";
-
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { metodoEfectivo } from "@/lib/metodo";
+import { cabecerasDeSalida, rutaBackend } from "@/lib/proxy-cabeceras";
 
 /**
  * Proxy generico: /api/backend/<ruta> -> backend /api/v1/<ruta> con el access token de la cookie.
@@ -17,16 +17,23 @@ async function reenviar(req: NextRequest, path: string[]) {
     return NextResponse.json({ detail: { codigo: "no_autenticado", mensaje: "Sin sesión" } }, { status: 401 });
   }
 
-  const url = `${BASE}/api/v1/${path.map(encodeURIComponent).join("/")}${req.nextUrl.search}`;
+  const ruta = rutaBackend(path);
+  if (ruta === null) {
+    return NextResponse.json({ detail: { codigo: "ruta_invalida", mensaje: "Ruta inválida" } }, { status: 400 });
+  }
+
+  const url = `${urlBackend()}/api/v1/${ruta}${req.nextUrl.search}`;
   const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
   const contentType = req.headers.get("content-type");
   if (contentType) headers["Content-Type"] = contentType;
 
-  const conCuerpo = req.method !== "GET" && req.method !== "HEAD";
+  // El navegador manda PUT/PATCH/DELETE como POST con cabecera (lib/metodo.ts); aqui se restituye.
+  const metodo = metodoEfectivo(req);
+  const conCuerpo = metodo !== "GET" && metodo !== "HEAD";
   let res: Response;
   try {
     res = await fetch(url, {
-      method: req.method,
+      method: metodo,
       headers,
       body: conCuerpo ? await req.arrayBuffer() : undefined,
       cache: "no-store",
@@ -48,6 +55,7 @@ type Ctx = { params: { path: string[] } };
 
 // Todos los metodos que el portal usa contra el backend. Falta uno y la funcion que lo use
 // responde 405 sin explicacion: asi estuvieron rotos guardar roles y guardar requisitos.
+// PUT/PATCH/DELETE directos siguen aceptandose (local y pruebas), pero en el portal llegan por POST.
 export const GET = (req: NextRequest, ctx: Ctx) => reenviar(req, ctx.params.path);
 export const POST = (req: NextRequest, ctx: Ctx) => reenviar(req, ctx.params.path);
 export const PUT = (req: NextRequest, ctx: Ctx) => reenviar(req, ctx.params.path);

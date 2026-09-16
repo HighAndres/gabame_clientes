@@ -39,6 +39,11 @@ def es_del_grupo(url: str) -> bool:
     host = (partes.hostname or "").lower()
     if not host:
         return False
-    if partes.scheme != "https" and host not in ("localhost", "127.0.0.1"):
+    local = host in ("localhost", "127.0.0.1")
+    if local and settings.ENVIRONMENT == "production":
+        # Un enlace a localhost en el portal real no lleva a ningun lado, o lleva a la maquina
+        # de quien lo abre.
+        return False
+    if partes.scheme != "https" and not local:
         return False
     return any(host == p or host.endswith("." + p) for p in hosts_permitidos())

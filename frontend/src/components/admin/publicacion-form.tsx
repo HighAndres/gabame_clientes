@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { enviar as enviarAlPortal, mensajeDeError } from "@/lib/peticion";
 import { NOMBRE_AUDIENCIA, type PublicacionOut } from "@/types/admin";
 import type { Audiencia, Empresa } from "@/types/auth";
 
@@ -31,7 +32,7 @@ export function PublicacionForm({ empresa, publicacion }: { empresa: Empresa; pu
     setEstado(null);
     setCargando(true);
     try {
-      const res = await fetch(edicion ? `/api/backend/admin/publicaciones/${publicacion!.id}` : `/api/backend/admin/espacios/${empresa}/publicaciones`, {
+      const res = await enviarAlPortal(edicion ? `/api/backend/admin/publicaciones/${publicacion!.id}` : `/api/backend/admin/espacios/${empresa}/publicaciones`, {
         method: edicion ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -41,8 +42,7 @@ export function PublicacionForm({ empresa, publicacion }: { empresa: Empresa; pu
         }),
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null))?.detail;
-        setEstado({ tipo: "error", texto: d?.mensaje ?? "No se pudo guardar." });
+        setEstado({ tipo: "error", texto: await mensajeDeError(res) });
         return;
       }
       setEstado({ tipo: "ok", texto: "Publicación guardada." });
@@ -64,9 +64,9 @@ export function PublicacionForm({ empresa, publicacion }: { empresa: Empresa; pu
     if (!publicacion || !window.confirm("¿Eliminar esta publicación? No se puede deshacer.")) return;
     setCargando(true);
     try {
-      const res = await fetch(`/api/backend/admin/publicaciones/${publicacion.id}`, { method: "DELETE" });
+      const res = await enviarAlPortal(`/api/backend/admin/publicaciones/${publicacion.id}`, { method: "DELETE" });
       if (!res.ok) {
-        setEstado({ tipo: "error", texto: "No se pudo eliminar." });
+        setEstado({ tipo: "error", texto: await mensajeDeError(res, "No se pudo eliminar.") });
         return;
       }
       router.push(`/admin/publicaciones?empresa=${empresa}`);

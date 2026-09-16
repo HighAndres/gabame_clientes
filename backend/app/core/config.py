@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # Farmacias GABAME vive hoy en un entorno de pruebas y manana en su dominio definitivo.
     # Va por configuracion para poder moverla sin tocar codigo ni volver a desplegar el catalogo.
     URL_FARMACIAS: str = "https://farmaciasgabame.com"
+    # Zona del grupo para lo que depende del dia de calendario (vigencia de promociones). En UTC,
+    # una promocion que vence hoy dejaba de verse a las 18:00 de Mexico.
+    ZONA_HORARIA: str = "America/Mexico_City"
 
     SMTP_HOST: str = "localhost"
     SMTP_PORT: int = 1025

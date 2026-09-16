@@ -26,7 +26,7 @@ export default async function BitacoraPage({ searchParams }: { searchParams: Rec
         <BitacoraLista items={datos.items} />
         <div className="flex items-center justify-between border-t px-5 py-3 text-[13px] text-muted-foreground">
           <span>
-            {datos.total} movimientos · página {pagina} de {paginas}
+            {datos.total} {datos.total === 1 ? "movimiento" : "movimientos"} · página {pagina} de {paginas}
           </span>
           <span className="flex gap-4">
             {pagina > 1 && (

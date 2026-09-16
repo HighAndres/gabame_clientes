@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { type MotivoAviso, PARAM_AVISO } from "@/lib/avisos-acceso";
+import { urlBackend } from "@/lib/backend-url";
 import { COOKIE_ACCESS, COOKIE_REFRESH, borrarSesion, guardarSesion } from "@/lib/cookies";
 import { verificarAccessToken } from "@/lib/jwt";
 import { destinoSeguro } from "@/lib/redirect";
@@ -23,15 +24,13 @@ const PUERTAS: readonly (readonly [string, MotivoAviso, readonly Rol[]])[] = [
 ];
 const RUTAS_AUTH = ["/login", "/registro"];
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
 function coincide(pathname: string, prefijo: string): boolean {
   return pathname === prefijo || pathname.startsWith(`${prefijo}/`);
 }
 
 async function refrescar(refresh: string): Promise<TokenOut | null> {
   try {
-    const res = await fetch(`${API}/api/v1/auth/refresh`, {
+    const res = await fetch(`${urlBackend()}/api/v1/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: refresh }),

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { Markdown } from "@/components/portal/markdown";
 import { ApiError } from "@/lib/api";
+import { fecha } from "@/lib/fechas";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { FichaOut } from "@/types/contenido";
 
@@ -36,7 +37,7 @@ export default async function FichaPage({ params }: { params: { area: string; fi
 
       <p className="border-t pt-3 text-xs text-muted-foreground">
         Informacion dirigida exclusivamente a profesionales de la salud. Actualizada el{" "}
-        {new Date(ficha.actualizado_en).toLocaleDateString("es-MX")}.
+        {fecha(ficha.actualizado_en)}.
       </p>
     </article>
   );

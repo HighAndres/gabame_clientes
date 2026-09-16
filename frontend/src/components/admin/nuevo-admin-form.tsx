@@ -8,6 +8,7 @@ import { Aviso } from "@/components/auth/aviso";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { enviar as enviarAlPortal, mensajeDeError } from "@/lib/peticion";
 import type { AdminNuevoIn, RolAsignado, UsuarioAdminOut } from "@/types/admin";
 import type { Empresa } from "@/types/auth";
 
@@ -32,14 +33,13 @@ export function NuevoAdminForm({ grupo, empresas }: { grupo: boolean; empresas: 
     const datos: AdminNuevoIn = { ...f, roles };
     setCargando(true);
     try {
-      const res = await fetch("/api/backend/admin/usuarios", {
+      const res = await enviarAlPortal("/api/backend/admin/usuarios", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos),
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null))?.detail;
-        setError(d?.mensaje ?? "No se pudo crear la cuenta.");
+        setError(await mensajeDeError(res, "No se pudo crear la cuenta."));
         return;
       }
       setCreado((await res.json()) as UsuarioAdminOut);

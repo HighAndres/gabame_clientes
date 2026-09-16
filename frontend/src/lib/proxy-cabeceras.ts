@@ -20,3 +20,16 @@ export function cabecerasDeSalida(origen: Headers): Headers {
   }
   return salida;
 }
+
+/**
+ * Ruta del backend a partir de los segmentos de /api/backend/*, o null si no es aceptable.
+ *
+ * Un segmento "." o ".." (que llega asi aunque se mande como %2e%2e) haria que la URL final se
+ * normalice fuera de /api/v1 y el proxy alcanzara, con el token de la persona, rutas del backend
+ * que no son la API. Se rechaza en vez de limpiarse: ninguna ruta legitima los usa.
+ */
+export function rutaBackend(segmentos: string[]): string | null {
+  if (segmentos.length === 0) return null;
+  if (segmentos.some((s) => s === "" || s === "." || s === "..")) return null;
+  return segmentos.map(encodeURIComponent).join("/");
+}

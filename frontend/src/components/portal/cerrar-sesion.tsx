@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { enviar, mensajeDeError } from "@/lib/peticion";
 
 export function CerrarSesion() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export function CerrarSesion() {
   async function salir() {
     setCargando(true);
     try {
-      await fetch("/api/sesion", { method: "DELETE" });
+      await enviar("/api/sesion", { method: "DELETE" });
     } finally {
       router.replace("/login");
       router.refresh();

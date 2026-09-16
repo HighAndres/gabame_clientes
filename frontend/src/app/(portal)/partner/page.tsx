@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { ApiError } from "@/lib/api";
+import { fecha } from "@/lib/fechas";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { EstadoPartnerOut, VinculoOut } from "@/types/partner";
 import { NOMBRE_SUBTIPO, TEXTO_VINCULO } from "@/types/partner";
@@ -127,7 +128,7 @@ function TarjetaVinculo({ v }: { v: VinculoOut }) {
           <p className="text-[13px] text-[#b03535]">{v.motivo_rechazo ?? "Contacta al equipo comercial de la empresa."}</p>
         )}
         {aprobado && v.aprobado_en && (
-          <p className="text-[13px] text-muted-foreground">Aprobado el {new Date(v.aprobado_en).toLocaleDateString("es-MX")}.</p>
+          <p className="text-[13px] text-muted-foreground">Aprobado el {fecha(v.aprobado_en)}.</p>
         )}
         {aprobado && (
           <Link href={`/espacios/${v.empresa}`} className="text-sm font-bold text-primary hover:text-primary-hover">

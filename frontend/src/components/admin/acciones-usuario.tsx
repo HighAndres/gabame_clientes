@@ -5,20 +5,15 @@ import { useState } from "react";
 
 import { RolesMatriz } from "@/components/admin/roles-matriz";
 import { Button } from "@/components/ui/button";
+import { enviarJson, mensajeDeError } from "@/lib/peticion";
 import type { RolAsignado, UsuarioAdminOut } from "@/types/admin";
 import type { Empresa } from "@/types/auth";
 
 const ADMINISTRABLES = new Set(["admin_grupo", "admin_empresa", "editor_empresa"]);
 
 async function llamar(ruta: string, method: string, cuerpo?: unknown): Promise<string | null> {
-  const res = await fetch(`/api/backend${ruta}`, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
-  });
-  if (res.ok) return null;
-  const d = (await res.json().catch(() => null))?.detail;
-  return d?.mensaje ?? "No se pudo aplicar el cambio.";
+  const res = await enviarJson(`/api/backend${ruta}`, method, cuerpo);
+  return res.ok ? null : mensajeDeError(res, "No se pudo aplicar el cambio.");
 }
 
 /** Roles administrativos del usuario (dentro del alcance del actor). */

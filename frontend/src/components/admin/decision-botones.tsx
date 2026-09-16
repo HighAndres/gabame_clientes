@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { enviar as enviarAlPortal, mensajeDeError } from "@/lib/peticion";
 
 /**
  * Aprobar / rechazar un perfil. Llama al backend via el proxy con el token de la cookie.
@@ -28,14 +29,13 @@ export function DecisionBotones({
     setError(null);
     setCargando(true);
     try {
-      const res = await fetch(`/api/backend${ruta}`, {
+      const res = await enviarAlPortal(`/api/backend${ruta}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cuerpo),
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null))?.detail;
-        setError(d?.mensaje ?? "No se pudo aplicar la decisión.");
+        setError(await mensajeDeError(res, "No se pudo aplicar la decisión."));
         return;
       }
       setModo("idle");

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { describirAccion } from "@/lib/bitacora";
+import { fechaHora } from "@/lib/fechas";
 import type { BitacoraOut } from "@/types/admin";
 
 /** Filas de bitacora (server component). `conObjetivo` muestra sobre quien fue la accion. */
@@ -13,7 +14,7 @@ export function BitacoraLista({ items, conObjetivo = true }: { items: BitacoraOu
       {items.map((b) => (
         <li key={b.id} className="grid gap-1 px-5 py-3 text-sm md:grid-cols-[150px_minmax(0,1fr)] md:gap-4">
           <span className="text-xs text-muted-foreground">
-            {new Date(b.creado_en).toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" })}
+            {fechaHora(b.creado_en)}
           </span>
           <span className="flex min-w-0 flex-col gap-0.5">
             <span>

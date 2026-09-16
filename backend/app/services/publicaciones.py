@@ -4,11 +4,13 @@ El alcance del admin y la puerta de cada audiencia se resuelven en `deps.py`; aq
 """
 
 import uuid
-from datetime import UTC, date, datetime
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.dominios import es_del_grupo
 from app.core.enums import Audiencia, Empresa
 from app.core.errores import ErrorNegocio
@@ -40,7 +42,8 @@ def _revisar_enlace(datos: dict) -> None:
 
 
 def hoy() -> date:
-    return datetime.now(UTC).date()
+    """El dia de calendario en la zona del grupo: la vigencia se lee como la lee quien la captura."""
+    return datetime.now(ZoneInfo(settings.ZONA_HORARIA)).date()
 
 
 def vencida(p: Publicacion) -> bool:

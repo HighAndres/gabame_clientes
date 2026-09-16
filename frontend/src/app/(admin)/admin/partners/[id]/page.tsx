@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { ApiError } from "@/lib/api";
+import { fecha } from "@/lib/fechas";
 import { NOMBRE_EMPRESA } from "@/lib/matriz-roles";
 import { apiConSesion } from "@/lib/sesion";
 import type { PaginaBitacora, PartnerAdminOut } from "@/types/admin";
@@ -70,7 +71,7 @@ export default async function AdminPartnerDetallePage({ params }: { params: { id
                   <div className="flex flex-col">
                     <span className="text-[15px] font-bold">{NOMBRE_EMPRESA[v.empresa]}</span>
                     <span className="text-xs text-muted-foreground">
-                      {NOMBRE_SUBTIPO[v.tipo]} · solicitado el {new Date(v.creado_en).toLocaleDateString("es-MX")}
+                      {NOMBRE_SUBTIPO[v.tipo]} · solicitado el {fecha(v.creado_en)}
                     </span>
                   </div>
                   <Estado tono={tonoDeValidacion(v.estado)} />
@@ -78,7 +79,7 @@ export default async function AdminPartnerDetallePage({ params }: { params: { id
                 {v.motivo_rechazo && <span className="text-[13px] text-[#b03535]">{v.motivo_rechazo}</span>}
                 {v.aprobado_en && v.estado === "validado" && (
                   <span className="text-[13px] text-muted-foreground">
-                    Aprobado el {new Date(v.aprobado_en).toLocaleDateString("es-MX")}
+                    Aprobado el {fecha(v.aprobado_en)}
                   </span>
                 )}
                 {v.decidible ? (
@@ -130,7 +131,7 @@ export default async function AdminPartnerDetallePage({ params }: { params: { id
                 <span className="text-xs text-muted-foreground">{tamano(d.tamano_bytes)}</span>
               </div>
               <Estado tono={tonoDeValidacion(d.estado)} className="justify-self-start" />
-              <span className="text-muted-foreground">{new Date(d.subido_en).toLocaleDateString("es-MX")}</span>
+              <span className="text-muted-foreground">{fecha(d.subido_en)}</span>
               <div className="md:justify-self-end">
                 <DecisionBotones
                   estado={d.estado}

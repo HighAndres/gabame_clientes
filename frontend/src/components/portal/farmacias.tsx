@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { dia } from "@/lib/fechas";
 import { apiConSesion } from "@/lib/sesion";
 import type { PiezaOut } from "@/types/admin";
 import type { PublicacionResumenOut } from "@/types/espacios";
@@ -12,11 +13,7 @@ const APP = "app_paciente";
 
 function vigencia(hasta: string | null): string | null {
   if (!hasta) return null;
-  const [anio, mes, dia] = hasta.split("-").map(Number);
-  return `Vigente hasta el ${new Date(anio, mes - 1, dia).toLocaleDateString("es-MX", {
-    day: "numeric",
-    month: "long",
-  })}`;
+  return `Vigente hasta el ${dia(hasta)}`;
 }
 
 /**

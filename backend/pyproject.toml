@@ -13,6 +13,8 @@ dependencies = [
   "pydantic-settings>=2.6",
   "python-jose[cryptography]>=3.3",
   "argon2-cffi>=23.1",
+  # Zonas horarias en la imagen slim, que no trae la base del sistema (vigencia de promociones).
+  "tzdata>=2024.1",
   "python-multipart>=0.0.12",
   "email-validator>=2.2",
 ]

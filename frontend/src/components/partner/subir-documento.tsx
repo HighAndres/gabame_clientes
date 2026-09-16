@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
+import { enviar, mensajeDeError } from "@/lib/peticion";
 import type { DocumentoOut } from "@/types/partner";
 
 const TEXTO_ESTADO = { pendiente: "En revisión", validado: "Aceptado", rechazado: "Rechazado" };
@@ -54,10 +55,9 @@ export function FilaRequisito({
     fd.set("archivo", archivo);
     setCargando(true);
     try {
-      const res = await fetch("/api/backend/partners/me/documentos", { method: "POST", body: fd });
+      const res = await enviar("/api/backend/partners/me/documentos", { method: "POST", body: fd });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null))?.detail;
-        setError(d?.mensaje ?? "No se pudo subir el archivo.");
+        setError(await mensajeDeError(res, "No se pudo subir el archivo."));
         return;
       }
       router.refresh();
@@ -69,10 +69,9 @@ export function FilaRequisito({
 
   async function retirar(id: string) {
     setError(null);
-    const res = await fetch(`/api/backend/partners/me/documentos/${id}`, { method: "DELETE" });
+    const res = await enviar(`/api/backend/partners/me/documentos/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      const d = (await res.json().catch(() => null))?.detail;
-      setError(d?.mensaje ?? "No se pudo retirar.");
+      setError(await mensajeDeError(res, "No se pudo retirar."));
       return;
     }
     router.refresh();

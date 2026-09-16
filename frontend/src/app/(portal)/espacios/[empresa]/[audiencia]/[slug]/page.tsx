@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { Markdown } from "@/components/portal/markdown";
 import { ApiError } from "@/lib/api";
+import { fecha } from "@/lib/fechas";
 import { EMPRESAS, NOMBRE_EMPRESA } from "@/lib/matriz-roles";
 import { apiConSesion } from "@/lib/sesion";
 import type { PublicacionOut } from "@/types/admin";
@@ -35,7 +36,7 @@ export default async function PublicacionPage({ params }: { params: { empresa: s
       {p.resumen && <p className="text-[15px] text-muted-foreground">{p.resumen}</p>}
       <Markdown>{p.contenido}</Markdown>
       <p className="border-t pt-3 text-xs text-muted-foreground">
-        Publicado por {NOMBRE_EMPRESA[p.empresa]}. Actualizado el {new Date(p.actualizado_en).toLocaleDateString("es-MX")}.
+        Publicado por {NOMBRE_EMPRESA[p.empresa]}. Actualizado el {fecha(p.actualizado_en)}.
       </p>
     </article>
   );

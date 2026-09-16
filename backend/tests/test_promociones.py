@@ -4,11 +4,13 @@ Son publicaciones normales con dos campos mas, asi que lo que se prueba aqui es 
 cambia: que la vigencia retire sola la promocion vencida y que el enlace no pueda salir del grupo.
 """
 
-from datetime import UTC, date, datetime, timedelta
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import pytest
 
 from app.core.enums import EstadoValidacion, Realm, Rol
+from app.services import publicaciones
 from tests.conftest import auth, crear_usuario, login
 
 BASE = "/api/v1/admin"
@@ -44,7 +46,7 @@ def _titulos_del_medico(client) -> list[str]:
 
 
 def test_la_promocion_vencida_deja_de_verse_sola(client, grupo):
-    hoy = datetime.now(UTC).date()
+    hoy = publicaciones.hoy()
     _promo(client, grupo, "Vence manana", hasta=hoy + timedelta(days=1))
     _promo(client, grupo, "Vence hoy", hasta=hoy)  # el ultimo dia todavia cuenta
     vencida = _promo(client, grupo, "Vencio ayer", hasta=hoy - timedelta(days=1)).json()
@@ -65,11 +67,11 @@ def test_la_promocion_vencida_deja_de_verse_sola(client, grupo):
 
 
 def test_renovar_la_fecha_la_devuelve_a_la_vista(client, grupo):
-    ayer = datetime.now(UTC).date() - timedelta(days=1)
+    ayer = publicaciones.hoy() - timedelta(days=1)
     p = _promo(client, grupo, "Promocion de temporada", hasta=ayer).json()
     assert _titulos_del_medico(client) == []
 
-    nueva = (datetime.now(UTC).date() + timedelta(days=30)).isoformat()
+    nueva = (publicaciones.hoy() + timedelta(days=30)).isoformat()
     r = client.patch(f"{BASE}/publicaciones/{p['id']}", json={"vigencia_hasta": nueva}, headers=grupo)
     assert r.status_code == 200 and r.json()["vencida"] is False
     assert _titulos_del_medico(client) == ["Promocion de temporada"]
@@ -123,3 +125,23 @@ def test_el_enlace_configurable_de_la_tienda_tambien_vale(client, grupo, monkeyp
 def test_sin_enlace_sigue_siendo_una_publicacion_normal(client, grupo):
     r = _promo(client, grupo, "Comunicado", url=None)
     assert r.status_code == 201 and r.json()["url_externa"] is None
+
+
+# ---------- el dia se cuenta en la zona del grupo ----------
+
+
+def test_hoy_es_el_dia_de_mexico_y_no_el_de_utc():
+    """Entre las 18:00 y la medianoche de Mexico, UTC ya va en el dia siguiente: con UTC, una
+    promocion que vence hoy desaparecia seis horas antes."""
+    assert publicaciones.hoy() == datetime.now(ZoneInfo("America/Mexico_City")).date()
+
+
+def test_localhost_no_vale_como_enlace_en_produccion(monkeypatch):
+    from app.core.config import settings
+    from app.core.dominios import es_del_grupo
+
+    assert es_del_grupo("http://localhost:3000/x")  # en local si, para probar
+    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    assert not es_del_grupo("http://localhost:3000/x")
+    assert not es_del_grupo("https://127.0.0.1/x")
+    assert es_del_grupo("https://farmaciasgabame.com/es")

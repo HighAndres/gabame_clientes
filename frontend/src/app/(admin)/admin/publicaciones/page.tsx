@@ -6,6 +6,7 @@ import { TogglePublicada } from "@/components/admin/toggle-publicada";
 import { Card, CardContent } from "@/components/ui/card";
 import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado } from "@/components/ui/estado";
+import { dia, fecha } from "@/lib/fechas";
 import { alcanceDe, NOMBRE_EMPRESA } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import { cn } from "@/lib/utils";
@@ -14,11 +15,7 @@ import type { Audiencia, Empresa } from "@/types/auth";
 
 const AUDIENCIAS: Audiencia[] = ["pacientes", "medicos", "partners"];
 
-/** La vigencia es una fecha sin hora: construirla con `new Date(iso)` la correria un dia por la zona. */
-function fechaCorta(iso: string): string {
-  const [anio, mes, dia] = iso.split("-").map(Number);
-  return new Date(anio, mes - 1, dia).toLocaleDateString("es-MX", { day: "numeric", month: "short" });
-}
+
 
 /** Lo que cada empresa publica dentro de su espacio, por audiencia. Solo lo publicado llega al portal. */
 export default async function PublicacionesPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
@@ -87,11 +84,11 @@ export default async function PublicacionesPage({ searchParams }: { searchParams
                         ) : (
                           p.vigencia_hasta && (
                             <span className="whitespace-nowrap text-xs text-muted-foreground">
-                              Hasta el {fechaCorta(p.vigencia_hasta)}
+                              Hasta el {dia(p.vigencia_hasta, { day: "numeric", month: "short" })}
                             </span>
                           )
                         )}
-                        <span className="text-xs text-muted-foreground">{new Date(p.actualizado_en).toLocaleDateString("es-MX")}</span>
+                        <span className="text-xs text-muted-foreground">{fecha(p.actualizado_en)}</span>
                       </span>
                       <TogglePublicada ruta={`/admin/publicaciones/${p.id}`} publicada={p.publicada} />
                     </li>

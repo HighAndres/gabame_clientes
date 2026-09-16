@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EncabezadoArea } from "@/components/ui/encabezado-area";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { ApiError } from "@/lib/api";
+import { fecha } from "@/lib/fechas";
 import { EMPRESAS } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { Empresa } from "@/types/auth";
@@ -69,7 +70,7 @@ export default async function EspacioPage({ params }: { params: { empresa: strin
                             {p.titulo}
                           </Link>
                           {p.resumen && <p className="text-[13px] leading-relaxed text-muted-foreground">{p.resumen}</p>}
-                          <span className="text-xs text-muted-foreground">{new Date(p.actualizado_en).toLocaleDateString("es-MX")}</span>
+                          <span className="text-xs text-muted-foreground">{fecha(p.actualizado_en)}</span>
                         </CardContent>
                       </Card>
                     ))}

@@ -179,6 +179,9 @@ frontend/         Next.js 14
   src/i18n/request.ts + src/messages/es.json  next-intl sin enrutado por locale; cadenas del shell
   src/app/api/sesion/route.ts  único lugar del frontend que ve tokens en claro
   src/app/api/backend/[...path]  proxy genérico al backend con el token de la cookie (lo usan los componentes cliente)
+  src/lib/peticion.ts  toda llamada de un componente cliente pasa por aquí: PUT/PATCH/DELETE van como POST + `x-metodo` (lib/metodo.ts, ADR-0013); nunca `fetch` directo
+  src/lib/backend-url.ts  el servidor de Next llama al backend por `API_URL_INTERNA`, no por el dominio público (ADR-0013)
+  src/lib/fechas.ts  toda fecha en pantalla, en la zona del grupo; `dia()` para fechas de calendario sin hora
   src/types/auth.ts  espejo de los enums del backend
 docs/             plan, arquitectura, modelo de datos, ADRs
 scripts/          bootstrap.ps1 (una vez), dev.ps1 (uso diario), staging.sh y desplegar.sh (VPS)
