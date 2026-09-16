@@ -1,8 +1,10 @@
+import { DatosEmpresa } from "@/components/partner/datos-empresa";
 import { Acreditacion } from "@/components/portal/acreditacion";
 import { PerfilForm } from "@/components/portal/perfil-form";
 import { NOMBRE_ROL } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
 import type { AcreditacionOut } from "@/types/medico";
+import type { EstadoPartnerOut } from "@/types/partner";
 
 /** Sin datos clinicos: aqui solo identidad, contacto y la acreditacion del profesional. */
 export default async function PerfilPage() {
@@ -20,6 +22,16 @@ export default async function PerfilPage() {
     }
   }
 
+  // Razon social y RFC: los ve el partner aqui, junto a sus datos personales (ADR-0014).
+  let partner: EstadoPartnerOut | null = null;
+  if (u.roles.some((r) => r.rol === "partner")) {
+    try {
+      partner = await apiConSesion<EstadoPartnerOut>("/partners/me");
+    } catch {
+      partner = null;
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -30,6 +42,7 @@ export default async function PerfilPage() {
       </div>
       <PerfilForm usuario={u} />
       {acreditacion && <Acreditacion inicial={acreditacion} />}
+      {partner && <DatosEmpresa partner={partner} />}
     </div>
   );
 }

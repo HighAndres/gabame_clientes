@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.core.enums import Empresa, EstadoValidacion, SubtipoPartner
 from app.models import DocumentoPartner, Espacio, PerfilPartner, RequisitoDocumental, VinculoEmpresa
@@ -111,6 +111,8 @@ class EstadoPartnerOut(BaseModel):
     tipos_permitidos: list[str]
     # Empresas con las que aun no hay vinculo y aceptan solicitudes
     empresas_disponibles: list[Empresa]
+    # Razon social y RFC se corrigen mientras ninguna empresa aprobo el vinculo
+    puede_editar_datos: bool
 
     @classmethod
     def desde_modelo(
@@ -123,6 +125,7 @@ class EstadoPartnerOut(BaseModel):
         limite_mb: int,
         tipos_permitidos: list[str],
         empresas_disponibles: list[Empresa],
+        puede_editar_datos: bool,
     ) -> "EstadoPartnerOut":
         return cls(
             razon_social=p.razon_social,
@@ -133,12 +136,38 @@ class EstadoPartnerOut(BaseModel):
             limite_mb=limite_mb,
             tipos_permitidos=tipos_permitidos,
             empresas_disponibles=empresas_disponibles,
+            puede_editar_datos=puede_editar_datos,
         )
 
 
 class SolicitarVinculoIn(BaseModel):
     empresa: Empresa
     tipo: SubtipoPartner
+
+
+class ReenviarVinculoIn(BaseModel):
+    """Al volver a solicitar se puede corregir el tipo de relacion; si no viene, se conserva."""
+
+    tipo: SubtipoPartner | None = None
+
+
+class DatosPartnerUpdate(BaseModel):
+    """Razon social y RFC del propio partner. El RFC vacio se borra (es opcional)."""
+
+    razon_social: str | None = Field(default=None, min_length=2, max_length=200)
+    rfc: str | None = Field(default=None, min_length=12, max_length=13)
+
+    @field_validator("razon_social", mode="before")
+    @classmethod
+    def _razon_limpia(cls, valor: object) -> object:
+        return valor.strip() if isinstance(valor, str) else valor
+
+    @field_validator("rfc", mode="before")
+    @classmethod
+    def _rfc_limpio(cls, valor: object) -> object:
+        if isinstance(valor, str):
+            return valor.strip().upper() or None
+        return valor
 
 
 class DecisionDocumentoIn(BaseModel):

@@ -1,6 +1,7 @@
 import { ArrowUpRight, Briefcase } from "lucide-react";
 import Link from "next/link";
 
+import { ReenviarVinculo } from "@/components/partner/reenviar-vinculo";
 import { SolicitarVinculo } from "@/components/partner/solicitar-vinculo";
 import { FilaRequisito } from "@/components/partner/subir-documento";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -17,7 +18,7 @@ import { NOMBRE_SUBTIPO, TEXTO_VINCULO } from "@/types/partner";
  * Area Partners (ADR-0008): una tarjeta por empresa del grupo con la que la razon social se
  * relaciona, cada una con su estado y, cuando esta aprobada, su contacto comercial. Debajo, los
  * documentos, que son de la razon social y los revisa cualquiera de esas empresas.
- * # Pendiente 0.4 — requisitos documentales provisionales del backend.
+ * Los requisitos documentales son dato de cada empresa, capturados en el panel (ADR-0009).
  * # Pendiente — contactos y portales operativos: los captura cada empresa en su espacio.
  */
 export default async function PartnerPage() {
@@ -52,7 +53,14 @@ export default async function PartnerPage() {
         icono={Briefcase}
         etiqueta="GABAME Partners"
         titulo={p.razon_social}
-        descripcion={p.rfc ? `RFC ${p.rfc}` : undefined}
+        descripcion={
+          <>
+            {p.rfc ? `RFC ${p.rfc} · ` : "Sin RFC capturado · "}
+            <Link href="/perfil" className="font-bold text-primary hover:text-primary-hover">
+              {p.puede_editar_datos ? "Corregir datos" : "Ver datos"}
+            </Link>
+          </>
+        }
         acciones={<SolicitarVinculo disponibles={p.empresas_disponibles} />}
       />
 
@@ -94,7 +102,7 @@ export default async function PartnerPage() {
         </div>
         <p className="text-xs text-muted-foreground">
           PDF, JPG o PNG, hasta {p.limite_mb} MB por archivo. Los mismos documentos sirven para todas las empresas con las que
-          trabajas. Lista provisional hasta que el grupo confirme los requisitos por tipo de partner.
+          trabajas.
         </p>
       </section>
     </div>
@@ -121,11 +129,16 @@ function TarjetaVinculo({ v }: { v: VinculoOut }) {
 
         {v.estado === "pendiente" && (
           <p className="text-[13px] text-muted-foreground">
-            El equipo de {v.empresa_nombre} revisara tu solicitud y tus documentos. Te avisaremos por correo.
+            El equipo de {v.empresa_nombre} revisará tu solicitud y tus documentos. Te avisaremos por correo.
           </p>
         )}
         {v.estado === "rechazado" && (
-          <p className="text-[13px] text-[#b03535]">{v.motivo_rechazo ?? "Contacta al equipo comercial de la empresa."}</p>
+          <>
+            <p className="text-[13px] text-[#b03535]">
+              {v.motivo_rechazo ?? "No se indicó el motivo. Revisa tus documentos antes de volver a solicitar."}
+            </p>
+            <ReenviarVinculo vinculoId={v.id} empresaNombre={v.empresa_nombre} tipoActual={v.tipo} />
+          </>
         )}
         {aprobado && v.aprobado_en && (
           <p className="text-[13px] text-muted-foreground">Aprobado el {fecha(v.aprobado_en)}.</p>

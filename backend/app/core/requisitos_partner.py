@@ -18,8 +18,8 @@ class Requisito:
 
 
 POR_DEFECTO: tuple[Requisito, ...] = (
-    Requisito("constancia_fiscal", "Constancia de situacion fiscal", "Emitida por el SAT, vigente.", True),
-    Requisito("identificacion_representante", "Identificacion del representante", "INE o pasaporte vigente.", True),
+    Requisito("constancia_fiscal", "Constancia de situación fiscal", "Emitida por el SAT, vigente.", True),
+    Requisito("identificacion_representante", "Identificación del representante", "INE o pasaporte vigente.", True),
     Requisito("comprobante_domicilio", "Comprobante de domicilio", "No mayor a 3 meses.", True),
     Requisito("otro", "Otro documento", "Cualquier otro documento que te soliciten.", False),
 )

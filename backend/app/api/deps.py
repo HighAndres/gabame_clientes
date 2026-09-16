@@ -15,7 +15,7 @@ from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.enums import Audiencia, Empresa, EstadoValidacion, Rol
+from app.core.enums import Audiencia, Empresa, EstadoValidacion, Realm, Rol
 from app.core.matriz import Alcance, alcance_de
 from app.core.security import decode_token
 from app.db.session import get_db
@@ -105,9 +105,13 @@ def require_partner(usuario: UsuarioActual) -> Usuario:
 
 
 def audiencias_permitidas(usuario: Usuario, empresa: Empresa) -> list[Audiencia]:
-    """Que audiencias de un espacio puede ver la persona: pacientes = cualquier sesion; medicos =
-    medico validado (misma regla que el contenido Rx); partners = vinculo aprobado con ESA empresa."""
-    salida = [Audiencia.PACIENTES]
+    """Que audiencias de un espacio puede ver la persona (ADR-0014):
+    pacientes = cuentas GABAME ID (pacientes y medicos); medicos = medico validado (misma regla que
+    el contenido Rx); partners = vinculo aprobado con ESA empresa.
+
+    Un distribuidor no es el publico de "Nuestras marcas y donde encontrarlas": verlo en su inicio
+    era ruido. Las cuentas del realm Partners (partners y administradores) no reciben pacientes."""
+    salida = [Audiencia.PACIENTES] if usuario.realm == Realm.ID else []
     perfil = usuario.perfil_medico
     if perfil is not None and perfil.estado == EstadoValidacion.VALIDADO:
         salida.append(Audiencia.MEDICOS)

@@ -15,8 +15,15 @@ from app.api.deps import DbSession, require_partner
 from app.core.config import settings
 from app.core.enums import Empresa, EstadoValidacion, Modulo
 from app.models import Usuario
-from app.schemas.partner import DocumentoOut, EstadoPartnerOut, SolicitarVinculoIn, VinculoOut
-from app.services import documentos, espacios, requisitos, vinculos
+from app.schemas.partner import (
+    DatosPartnerUpdate,
+    DocumentoOut,
+    EstadoPartnerOut,
+    ReenviarVinculoIn,
+    SolicitarVinculoIn,
+    VinculoOut,
+)
+from app.services import documentos, espacios, perfil_partner, requisitos, vinculos
 
 router = APIRouter()
 
@@ -42,6 +49,7 @@ def _estado(db, usuario: Usuario) -> EstadoPartnerOut:
         limite_mb=settings.UPLOAD_MAX_MB,
         tipos_permitidos=sorted(documentos.TIPOS_PERMITIDOS),
         empresas_disponibles=disponibles,
+        puede_editar_datos=perfil_partner.puede_editar(usuario),
     )
 
 
@@ -55,6 +63,22 @@ def estado(usuario: Partner, db: DbSession) -> EstadoPartnerOut:
 def solicitar_vinculo(datos: SolicitarVinculoIn, usuario: Partner, db: DbSession) -> EstadoPartnerOut:
     """Pide relacion con otra empresa del grupo. Nace en `pendiente`; la aprueba el admin de esa empresa."""
     vinculos.solicitar(db, usuario, datos.empresa, datos.tipo)
+    return _estado(db, usuario)
+
+
+@router.patch("/me", response_model=EstadoPartnerOut)
+def actualizar_datos(datos: DatosPartnerUpdate, usuario: Partner, db: DbSession) -> EstadoPartnerOut:
+    """Corrige razon social y RFC mientras ninguna empresa aprobo el vinculo (ADR-0014)."""
+    perfil_partner.actualizar(db, usuario, datos.model_dump(exclude_unset=True, exclude_none=False))
+    return _estado(db, usuario)
+
+
+@router.post("/me/vinculos/{vinculo_id}/reenviar", response_model=EstadoPartnerOut)
+def reenviar_vinculo(
+    vinculo_id: uuid.UUID, datos: ReenviarVinculoIn, usuario: Partner, db: DbSession
+) -> EstadoPartnerOut:
+    """Tras un rechazo: vuelve a la cola de esa empresa, con bitacora (ADR-0014)."""
+    vinculos.reenviar(db, usuario, vinculo_id, datos.tipo)
     return _estado(db, usuario)
 
 

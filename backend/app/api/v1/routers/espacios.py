@@ -1,7 +1,7 @@
 """Router: espacios. Lo que cada empresa muestra dentro de su espacio a quien usa el portal
 (corte 3 y 4).
 
-La puerta es `acceso_audiencia` / `audiencias_permitidas` en deps: pacientes = cualquier sesion;
+La puerta es `acceso_audiencia` / `audiencias_permitidas` en deps: pacientes = cuentas GABAME ID (ADR-0014);
 medicos = medico validado (la misma regla que el contenido Rx); partners = vinculo aprobado
 con ESA empresa. El contacto comercial solo viaja con vinculo aprobado y modulo `contactos`.
 """

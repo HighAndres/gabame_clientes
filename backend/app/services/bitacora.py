@@ -21,7 +21,7 @@ class TipoMovimiento(StrEnum):
 # Prefijos de `accion` por familia. Una accion nueva que no encaje aqui cae en "cuentas".
 PREFIJOS: dict[TipoMovimiento, tuple[str, ...]] = {
     TipoMovimiento.MEDICOS: ("medico_", "acreditacion_"),
-    TipoMovimiento.PARTNERS: ("vinculo_", "documento_"),
+    TipoMovimiento.PARTNERS: ("vinculo_", "documento_", "partner_"),
 }
 
 

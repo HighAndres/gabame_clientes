@@ -54,6 +54,12 @@ export default async function EspacioPage({ params }: { params: { empresa: strin
 
       <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="flex flex-col gap-8">
+          {/* Sin audiencias no hay listas vacias que mostrar: se dice una vez (ADR-0014). */}
+          {e.audiencias.length === 0 && !vinculoPendiente && (
+            <p className="text-[15px] leading-relaxed text-muted-foreground">
+              {e.nombre} no tiene publicaciones para tu cuenta por ahora.
+            </p>
+          )}
           {AUDIENCIAS.filter((a) => e.audiencias.includes(a)).map((a) => {
             const lista = e.publicaciones.filter((p) => p.audiencia === a);
             return (

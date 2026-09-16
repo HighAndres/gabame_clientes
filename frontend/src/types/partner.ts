@@ -56,6 +56,8 @@ export interface EstadoPartnerOut {
   tipos_permitidos: string[];
   /** Empresas con las que aun no hay vinculo y aceptan solicitudes. */
   empresas_disponibles: Empresa[];
+  /** Razon social y RFC se corrigen mientras ninguna empresa aprobo el vinculo (ADR-0014). */
+  puede_editar_datos: boolean;
 }
 
 export interface SolicitarVinculoIn {

@@ -18,3 +18,4 @@ Una decision no se edita cuando cambia: se escribe un ADR nuevo que la supersede
 | 0011 | Avisos de acceso: la guarda redirige con un motivo de catalogo cerrado, sin pantalla de error | Aceptado |
 | 0012 | El medico ve, corrige y reenvia su acreditacion; las promociones son publicaciones con vigencia y enlace | Aceptado |
 | 0013 | PUT/PATCH/DELETE viajan dentro de un POST (el firewall del portal los bloquea); Next llama al backend por red interna | Aceptado |
+| 0014 | El partner vuelve a solicitar tras un rechazo y corrige razon social y RFC; la audiencia pacientes es de GABAME ID | Aceptado (supersede una regla de 0009) |

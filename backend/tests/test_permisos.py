@@ -139,7 +139,7 @@ def test_partner_en_revision_no_ve_contacto_ni_publicaciones_de_su_empresa(clien
 
     pendiente = espacio("pendiente@ejemplo.com")
     assert pendiente["contacto"] is None
-    assert pendiente["audiencias"] == ["pacientes"]
+    assert pendiente["audiencias"] == []  # ni pacientes (ADR-0014) ni partners (vinculo en revision)
     assert pendiente["publicaciones"] == []
 
     aprobado = espacio("aprobado@ejemplo.com")

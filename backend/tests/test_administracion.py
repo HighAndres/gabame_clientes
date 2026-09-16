@@ -216,9 +216,12 @@ def test_lectura_por_audiencia(client, actores):
     def leer(headers, empresa, audiencia):
         return client.get(f"/api/v1/espacios/{empresa}/publicaciones/{audiencia}", headers=headers)
 
-    # pacientes: cualquier sesion, solo lo publicado
+    # pacientes: cuentas GABAME ID (ADR-0014), solo lo publicado
     r = leer(actores["paciente"], "gabame", "pacientes")
     assert r.status_code == 200 and [p["titulo"] for p in r.json()] == ["Para todos"]
+    assert [p["titulo"] for p in leer(actores["med"], "gabame", "pacientes").json()] == ["Para todos"]
+    assert leer(actores["partner"], "gabame", "pacientes").status_code == 403
+    assert leer(actores["grupo"], "gabame", "pacientes").status_code == 403  # el panel es su vista
     # medicos: solo validados
     assert leer(actores["paciente"], "gabame", "medicos").status_code == 403
     assert leer(actores["med.pend"], "gabame", "medicos").status_code == 403
@@ -286,9 +289,11 @@ def test_mis_espacios_segun_quien_soy(client, actores):
     assert mios(actores["med.pend"])["ordan"]["audiencias"] == ["pacientes"]
 
     pa = mios(actores["partner"])
-    assert pa["ordan"]["audiencias"] == ["pacientes", "partners"] and pa["ordan"]["vinculo_estado"] == "validado"
+    # ADR-0014: la audiencia pacientes es de GABAME ID; un partner ve lo de partners de su empresa.
+    assert pa["ordan"]["audiencias"] == ["partners"] and pa["ordan"]["vinculo_estado"] == "validado"
+    assert [x["titulo"] for x in pa["ordan"]["publicaciones"]] == ["Solo partners"]
     assert pa["ordan"]["contacto"] is not None and pa["ordan"]["contacto"]["pendiente"] is True
-    assert pa["a7"]["audiencias"] == ["pacientes"] and pa["a7"]["vinculo_estado"] == "pendiente"
+    assert pa["a7"]["audiencias"] == [] and pa["a7"]["vinculo_estado"] == "pendiente"
     assert pa["a7"]["publicaciones"] == [] and pa["a7"]["contacto"] is None
 
     r = client.get("/api/v1/espacios/ordan/mio", headers=actores["partner"])

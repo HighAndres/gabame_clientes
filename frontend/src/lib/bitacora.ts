@@ -55,6 +55,14 @@ export function describirAccion(b: BitacoraOut): string {
       const campos = ((d.campos as string[] | undefined) ?? []).map((c) => CAMPO_ACREDITACION[c] ?? c);
       return `Actualizó su acreditación${campos.length ? ` (${campos.join(", ")})` : ""}.`;
     }
+    case "vinculo_reenviado": {
+      const empresa = d.empresa as Empresa | undefined;
+      return `Volvió a solicitar el vínculo con ${empresa ? NOMBRE_EMPRESA[empresa] : "la empresa"} tras un rechazo.`;
+    }
+    case "partner_datos_actualizados": {
+      const campos = ((d.campos as string[] | undefined) ?? []).map((c) => (c === "razon_social" ? "razón social" : c.toUpperCase()));
+      return `Corrigió los datos de su empresa${campos.length ? ` (${campos.join(", ")})` : ""}.`;
+    }
     case "acreditacion_reenviada":
       return "Corrigió su acreditación y la volvió a enviar a revisión.";
     default:
