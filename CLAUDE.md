@@ -148,7 +148,9 @@ backend/          FastAPI
   app/db/         Base declarativa, sesión
   app/models/     usuario, medico, partner, auditoria, token, sesion, origen, contenido
   app/schemas/    Pydantic v2 (auth, usuario, comun)
-  app/api/deps.py dependencias de permiso; toda regla vive aqui y protege al menos un endpoint (ADR-0010)
+  app/api/deps.py dependencias de permiso; toda regla vive aqui y protege al menos un endpoint (ADR-0010).
+                  `empresas_visibles()` decide que empresas existen para cada cuenta en el portal (ADR-0015):
+                  solo el admin del grupo ve las cuatro; el paciente, aquellas por las que entro (sus origenes)
   app/core/errores.py  ErrorNegocio -> {detail: {codigo, mensaje}}; el frontend decide por codigo
   app/core/matriz.py   alcance de admins y editores por empresa (ADR-0008, pendiente 0.2); espejo en src/lib/matriz-roles.ts
   app/core/ecosistema.py catálogo de piezas del grupo (solo enlaces), expuesto en GET /ecosistema

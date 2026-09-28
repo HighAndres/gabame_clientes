@@ -15,8 +15,9 @@ from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.ecosistema import empresa_de
 from app.core.enums import Audiencia, Empresa, EstadoValidacion, Realm, Rol
-from app.core.matriz import Alcance, alcance_de
+from app.core.matriz import EMPRESA_ANCLA, EMPRESA_DUENA_MEDICOS, Alcance, alcance_de
 from app.core.security import decode_token
 from app.db.session import get_db
 from app.models import Usuario
@@ -104,6 +105,44 @@ def require_partner(usuario: UsuarioActual) -> Usuario:
     return usuario
 
 
+def empresas_visibles(usuario: Usuario) -> frozenset[Empresa]:
+    """Que empresas del grupo existen para esta persona dentro del portal (ADR-0015).
+
+    Solo el administrador del grupo ve las cuatro; cualquier otra cuenta ve unicamente aquellas
+    con las que tiene algo que ver:
+
+    - administradores y editores: las de su alcance;
+    - partner: aquellas con las que tiene vinculo, en el estado que sea (si no, no podria ver
+      en que va su solicitud);
+    - medico: GABAME, duena del area medica y de Farmacias GABAME;
+    - paciente: aquellas por las que entro al portal, segun su historial de origenes. Quien
+      llego directo, sin pasar por ningun sitio del grupo, ve GABAME, que es el sitio ancla.
+
+    No es una regla de secreto —lo que se publica para pacientes es institucional— sino de
+    pertinencia: a un consumidor que llego por Ordan no le habla el espacio de A7.
+    """
+    alcance = alcance_de(usuario)
+    if alcance.es_admin:
+        return alcance.empresas
+
+    visibles: set[Empresa] = {v.empresa for v in usuario.vinculos}
+    if usuario.tiene_rol(Rol.MEDICO):
+        visibles.add(EMPRESA_DUENA_MEDICOS)
+    if usuario.tiene_rol(Rol.PACIENTE):
+        visibles |= {e for e in (empresa_de(o.producto) for o in usuario.origenes) if e is not None}
+        inicial = empresa_de(usuario.origen_inicial)
+        if inicial is not None:
+            visibles.add(inicial)
+        if not visibles:
+            visibles.add(EMPRESA_ANCLA)
+    return frozenset(visibles)
+
+
+def exigir_empresa_visible(usuario: Usuario, empresa: Empresa) -> None:
+    if empresa not in empresas_visibles(usuario):
+        raise _prohibido("Esta empresa del grupo no forma parte de tu cuenta")
+
+
 def audiencias_permitidas(usuario: Usuario, empresa: Empresa) -> list[Audiencia]:
     """Que audiencias de un espacio puede ver la persona (ADR-0014):
     pacientes = cuentas GABAME ID (pacientes y medicos); medicos = medico validado (misma regla que
@@ -111,6 +150,8 @@ def audiencias_permitidas(usuario: Usuario, empresa: Empresa) -> list[Audiencia]
 
     Un distribuidor no es el publico de "Nuestras marcas y donde encontrarlas": verlo en su inicio
     era ruido. Las cuentas del realm Partners (partners y administradores) no reciben pacientes."""
+    if empresa not in empresas_visibles(usuario):
+        return []
     salida = [Audiencia.PACIENTES] if usuario.realm == Realm.ID else []
     perfil = usuario.perfil_medico
     if perfil is not None and perfil.estado == EstadoValidacion.VALIDADO:

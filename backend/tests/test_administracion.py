@@ -239,11 +239,11 @@ def test_lectura_por_audiencia(client, actores):
 def test_listado_de_espacios_no_expone_contacto(client, db, actores):
     from app.services import espacios
 
-    espacios.actualizar(db, Empresa.ORDAN, {"contacto_email": "ventas@ordan.test", "portal_url": "https://portal.ordan.test"})
+    espacios.actualizar(db, Empresa.GABAME, {"contacto_email": "ventas@gabame.test", "portal_url": "https://portal.gabame.test"})
     r = client.get("/api/v1/espacios", headers=actores["paciente"])
     assert r.status_code == 200
-    ordan = next(e for e in r.json() if e["empresa"] == "ordan")
-    assert ordan["contacto_email"] is None and ordan["portal_url"] == "https://portal.ordan.test"
+    gabame = next(e for e in r.json() if e["empresa"] == "gabame")
+    assert gabame["contacto_email"] is None and gabame["portal_url"] == "https://portal.gabame.test"
 
 
 # ---------- bitacora ----------
@@ -269,9 +269,12 @@ def test_bitacora_respeta_alcance(client, db, actores):
 
 
 def test_mis_espacios_segun_quien_soy(client, actores):
-    _crear_publicacion(client, actores["grupo"], "ordan", "pacientes", "Para todos")
+    """Que ve cada quien dentro de un espacio. Que empresas existen para cada cuenta se prueba
+    en test_alcance_portal.py (ADR-0015): aqui el paciente y el medico van por GABAME, que es lo
+    que ambos ven, y el partner por las empresas de sus vinculos."""
+    _crear_publicacion(client, actores["grupo"], "gabame", "pacientes", "Para todos")
+    _crear_publicacion(client, actores["grupo"], "gabame", "medicos", "Solo medicos")
     _crear_publicacion(client, actores["grupo"], "ordan", "partners", "Solo partners")
-    _crear_publicacion(client, actores["grupo"], "ordan", "medicos", "Solo medicos")
     _crear_publicacion(client, actores["grupo"], "a7", "partners", "A7 partners")
 
     def mios(headers):
@@ -280,15 +283,17 @@ def test_mis_espacios_segun_quien_soy(client, actores):
         return {e["empresa"]: e for e in r.json()}
 
     p = mios(actores["paciente"])
-    assert p["ordan"]["audiencias"] == ["pacientes"] and [x["titulo"] for x in p["ordan"]["publicaciones"]] == ["Para todos"]
-    assert p["ordan"]["vinculo_estado"] is None and p["ordan"]["contacto"] is None
+    assert list(p) == ["gabame"]
+    assert p["gabame"]["audiencias"] == ["pacientes"] and [x["titulo"] for x in p["gabame"]["publicaciones"]] == ["Para todos"]
+    assert p["gabame"]["vinculo_estado"] is None and p["gabame"]["contacto"] is None
 
     m = mios(actores["med"])
-    assert m["ordan"]["audiencias"] == ["pacientes", "medicos"]
-    assert sorted(x["titulo"] for x in m["ordan"]["publicaciones"]) == ["Para todos", "Solo medicos"]
-    assert mios(actores["med.pend"])["ordan"]["audiencias"] == ["pacientes"]
+    assert m["gabame"]["audiencias"] == ["pacientes", "medicos"]
+    assert sorted(x["titulo"] for x in m["gabame"]["publicaciones"]) == ["Para todos", "Solo medicos"]
+    assert mios(actores["med.pend"])["gabame"]["audiencias"] == ["pacientes"]
 
     pa = mios(actores["partner"])
+    assert sorted(pa) == ["a7", "ordan"]  # solo sus vinculos, ni siquiera GABAME (ADR-0015)
     # ADR-0014: la audiencia pacientes es de GABAME ID; un partner ve lo de partners de su empresa.
     assert pa["ordan"]["audiencias"] == ["partners"] and pa["ordan"]["vinculo_estado"] == "validado"
     assert [x["titulo"] for x in pa["ordan"]["publicaciones"]] == ["Solo partners"]

@@ -23,6 +23,9 @@ from app.models import Usuario
 # Empresa "duena" del modulo medico mientras no se decida otra cosa.
 EMPRESA_DUENA_MEDICOS = Empresa.GABAME
 
+# Sitio ancla del grupo: lo que ve quien llego al portal sin pasar por ninguna otra pieza.
+EMPRESA_ANCLA = Empresa.GABAME
+
 
 @dataclass(frozen=True)
 class Alcance:

@@ -3,7 +3,7 @@
 import pytest
 from sqlalchemy import select
 
-from app.core.enums import Empresa, EstadoValidacion, Realm, Rol
+from app.core.enums import Empresa, EstadoValidacion, Producto, Realm, Rol
 from app.models import BitacoraValidacion
 from app.services import correo, espacios
 from tests.conftest import auth, crear_usuario, login
@@ -268,4 +268,14 @@ def test_ecosistema_por_realm(client, db):
     productos = {p["producto"]: p for p in r.json()}
     assert "gabame" in productos and "tiendagabame" in productos
     assert "medinter" not in productos  # solo partners
+    assert "aurashop" not in productos  # es de Ordan, y esta cuenta no llego por Ordan (ADR-0015)
+
+    # La misma pieza si aparece para quien entro por Ordan, y sigue marcada como pendiente.
+    ordan = crear_usuario(db, "o@ejemplo.com")
+    ordan.origen_inicial = Producto.ORDAN
+    db.commit()
+    productos = {p["producto"]: p for p in client.get(
+        "/api/v1/ecosistema", headers=auth(login(client, "o@ejemplo.com"))
+    ).json()}
     assert productos["aurashop"]["pendiente"] is True and productos["aurashop"]["url"] is None
+    assert "tiendagabame" not in productos

@@ -11,7 +11,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import DbSession, UsuarioActual, acceso_audiencia, audiencias_permitidas
+from app.api.deps import (
+    DbSession,
+    UsuarioActual,
+    acceso_audiencia,
+    audiencias_permitidas,
+    empresas_visibles,
+    exigir_empresa_visible,
+)
 from app.core.enums import Audiencia, Empresa, EstadoValidacion, Modulo
 from app.models import Espacio, Usuario
 from app.schemas.admin import EspacioOut, PublicacionOut
@@ -40,8 +47,11 @@ def _mio(db: Session, usuario: Usuario, e: Espacio) -> EspacioMioOut:
 @router.get("", response_model=list[EspacioOut])
 def listar_espacios(usuario: UsuarioActual, db: DbSession) -> list[EspacioOut]:
     """Nombre y modulos de cada espacio. El contacto solo viaja por el vinculo aprobado."""
+    visibles = empresas_visibles(usuario)
     salida = []
     for e in espacios.listar(db):
+        if e.empresa not in visibles:
+            continue
         out = EspacioOut.desde_modelo(e, administra=False, edita=False)
         out.contacto_nombre = out.contacto_email = out.contacto_telefono = None
         salida.append(out)
@@ -50,12 +60,17 @@ def listar_espacios(usuario: UsuarioActual, db: DbSession) -> list[EspacioOut]:
 
 @router.get("/mios", response_model=list[EspacioMioOut])
 def mis_espacios(usuario: UsuarioActual, db: DbSession) -> list[EspacioMioOut]:
-    """Cada espacio con lo que la persona actual puede ver en el (corte 4)."""
-    return [_mio(db, usuario, e) for e in espacios.listar(db)]
+    """Cada espacio con lo que la persona actual puede ver en el (corte 4).
+
+    Solo las empresas que forman parte de su cuenta (ADR-0015); el administrador del grupo las ve
+    todas."""
+    visibles = empresas_visibles(usuario)
+    return [_mio(db, usuario, e) for e in espacios.listar(db) if e.empresa in visibles]
 
 
 @router.get("/{empresa}/mio", response_model=EspacioMioOut)
 def mi_espacio(empresa: Empresa, usuario: UsuarioActual, db: DbSession) -> EspacioMioOut:
+    exigir_empresa_visible(usuario, empresa)
     return _mio(db, usuario, espacios.obtener(db, empresa))
 
 

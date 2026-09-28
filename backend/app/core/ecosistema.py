@@ -41,5 +41,12 @@ PIEZAS: tuple[Pieza, ...] = (
 )
 
 
+def empresa_de(producto: Producto) -> Empresa | None:
+    """Empresa duena de una pieza. Farmacias GABAME es de GABAME y Aurashop es de Ordan: una
+    tienda no es una empresa del grupo, es un producto suyo. `directo` y las piezas del grupo
+    (la app) no pertenecen a ninguna."""
+    return next((p.empresa for p in PIEZAS if p.producto == producto), None)
+
+
 def piezas_para(realm: Realm) -> list[Pieza]:
     return [p for p in PIEZAS if realm in p.realms]
