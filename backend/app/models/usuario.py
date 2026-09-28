@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Index, String, UniqueConstraint, func, text
+from sqlalchemy import DateTime, ForeignKey, Index, String, Text, UniqueConstraint, func, text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -32,6 +32,11 @@ class Usuario(Base, TimestampMixin):
 
     realm: Mapped[Realm] = mapped_column(enum_valores(Realm, "realm"), nullable=False)
     activo: Mapped[bool] = mapped_column(default=True, nullable=False)
+
+    # Derecho de cancelacion (LFPDPPP, ADR-0016). Al solicitarla se cierra el acceso; el borrado
+    # lo confirma un administrador, porque la retencion de documentos y bitacora no esta definida.
+    baja_solicitada_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    baja_motivo: Mapped[str | None] = mapped_column(Text)
 
     # Primer contacto con el ecosistema. Se escribe una vez en el registro y no se toca mas.
     # El historial completo vive en `origenes_usuario`; esto es solo comodidad de consulta.

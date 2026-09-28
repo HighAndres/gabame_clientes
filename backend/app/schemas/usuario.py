@@ -22,6 +22,12 @@ class VinculoResumenOut(BaseModel):
     estado: EstadoValidacion
 
 
+class BajaIn(BaseModel):
+    """Por que se va, si quiere decirlo. Es opcional a proposito: nadie tiene que justificarse."""
+
+    motivo: str | None = Field(default=None, max_length=500)
+
+
 class UsuarioOut(BaseModel):
     id: uuid.UUID
     email: str

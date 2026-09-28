@@ -2,6 +2,7 @@ import { Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { EliminarCuenta } from "@/components/admin/eliminar-cuenta";
 import { AccionesUsuario, RolesForm } from "@/components/admin/acciones-usuario";
 import { BitacoraLista } from "@/components/admin/bitacora-lista";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,7 +45,8 @@ export default async function AdminUsuarioPage({ params }: { params: { id: strin
         volver={{ href: "/admin/usuarios", texto: "Usuarios" }}
         estado={
           <>
-            {!u.activo && <Estado tono="rechazado">Inactiva</Estado>}
+            {u.baja_solicitada_en && <Estado tono="rechazado">Baja solicitada</Estado>}
+            {!u.activo && !u.baja_solicitada_en && <Estado tono="rechazado">Inactiva</Estado>}
             {estado && <Estado tono={tonoDeValidacion(estado)} />}
           </>
         }
@@ -57,6 +59,15 @@ export default async function AdminUsuarioPage({ params }: { params: { id: strin
           </>
         }
       />
+
+      {u.baja_solicitada_en && !esYo && (
+        <EliminarCuenta
+          usuarioId={u.id}
+          nombre={`${u.nombre} ${u.apellidos}`}
+          solicitadaEn={u.baja_solicitada_en}
+          motivo={u.baja_motivo}
+        />
+      )}
 
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <Card>

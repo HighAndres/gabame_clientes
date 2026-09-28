@@ -30,11 +30,17 @@ from app.services import publicaciones
 
 class UsuarioAdminOut(UsuarioOut):
     activo: bool
+    # Derecho de cancelacion (ADR-0016): la persona ya pidio su baja y espera el borrado.
+    baja_solicitada_en: datetime | None = None
+    baja_motivo: str | None = None
 
     @classmethod
     def desde_modelo(cls, u: Usuario) -> "UsuarioAdminOut":
         base = UsuarioOut.desde_modelo(u)
-        return cls(**base.model_dump(), activo=u.activo)
+        return cls(
+            **base.model_dump(), activo=u.activo,
+            baja_solicitada_en=u.baja_solicitada_en, baja_motivo=u.baja_motivo,
+        )
 
 
 class PaginaUsuarios(BaseModel):

@@ -31,10 +31,12 @@ export default async function AdminUsuariosPage({
   const rolParam = texto(searchParams.rol);
   const rol = ROLES.includes(rolParam as Rol) ? (rolParam as Rol) : "";
   const pagina = Math.max(1, Number(texto(searchParams.pagina)) || 1);
+  const bajas = texto(searchParams.bajas) === "true";
 
   const params = new URLSearchParams({ limit: String(POR_PAGINA), offset: String((pagina - 1) * POR_PAGINA) });
   if (q) params.set("q", q);
   if (rol) params.set("rol", rol);
+  if (bajas) params.set("bajas", "true");
   const datos = await apiConSesion<PaginaUsuarios>(`/admin/usuarios?${params}`);
   const paginas = Math.max(1, Math.ceil(datos.total / POR_PAGINA));
 
@@ -42,6 +44,7 @@ export default async function AdminUsuariosPage({
     const s = new URLSearchParams();
     if (q) s.set("q", q);
     if (rol) s.set("rol", rol);
+    if (bajas) s.set("bajas", "true");
     s.set("pagina", String(p));
     return `/admin/usuarios?${s}`;
   };
@@ -69,6 +72,15 @@ export default async function AdminUsuariosPage({
             valor: rol,
             opciones: [{ valor: "", texto: "Todos los roles" }, ...ROLES.map((r) => ({ valor: r, texto: NOMBRE_ROL[r] }))],
           },
+          {
+            nombre: "bajas",
+            etiqueta: "Bajas solicitadas",
+            valor: bajas ? "true" : "",
+            opciones: [
+              { valor: "", texto: "Todas las cuentas" },
+              { valor: "true", texto: "Bajas solicitadas" },
+            ],
+          },
         ]}
       />
 
@@ -76,7 +88,7 @@ export default async function AdminUsuariosPage({
         columnas={COLUMNAS}
         cabeceras={["Nombre", "Correo", "Roles", "Estado", "Alta"]}
         cantidad={datos.items.length}
-        vacio={q || rol ? "Nadie coincide con los filtros." : "Sin usuarios en tu alcance."}
+        vacio={q || rol || bajas ? "Nadie coincide con los filtros." : "Sin usuarios en tu alcance."}
         pie={
           <Paginacion
             resumen={`${datos.total} ${datos.total === 1 ? "usuario" : "usuarios"}`}
@@ -94,7 +106,11 @@ export default async function AdminUsuariosPage({
                 <Link href={`/admin/usuarios/${u.id}`} className="truncate font-bold text-heading hover:text-primary">
                   {u.nombre} {u.apellidos}
                 </Link>
-                {!u.activo && <span className="text-xs text-destructive">Cuenta desactivada</span>}
+                {u.baja_solicitada_en ? (
+                  <span className="text-xs text-destructive">Pidió su baja</span>
+                ) : (
+                  !u.activo && <span className="text-xs text-destructive">Cuenta desactivada</span>
+                )}
               </Celda>
               <Celda etiqueta="Correo">
                 <span className="truncate">{u.email}</span>

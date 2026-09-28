@@ -1,5 +1,6 @@
 import { DatosEmpresa } from "@/components/partner/datos-empresa";
 import { Acreditacion } from "@/components/portal/acreditacion";
+import { MisDatos } from "@/components/portal/mis-datos";
 import { PerfilForm } from "@/components/portal/perfil-form";
 import { NOMBRE_ROL } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
@@ -43,6 +44,7 @@ export default async function PerfilPage() {
       <PerfilForm usuario={u} />
       {acreditacion && <Acreditacion inicial={acreditacion} />}
       {partner && <DatosEmpresa partner={partner} />}
+      <MisDatos />
     </div>
   );
 }

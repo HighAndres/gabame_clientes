@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Estado, tonoDeValidacion } from "@/components/ui/estado";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CONTACTO_ACREDITACIONES } from "@/legal/contactos";
 import { fecha } from "@/lib/fechas";
 import { enviarJson, mensajeDeError } from "@/lib/peticion";
 import type { AcreditacionOut } from "@/types/medico";
 
-// Pendiente 0.3 — buzon real de acreditaciones; lo entrega el cliente con el criterio de validacion.
-const CONTACTO = "acreditaciones@gabame.com";
+const CONTACTO = CONTACTO_ACREDITACIONES;
 const LARGA: Intl.DateTimeFormatOptions = { day: "numeric", month: "long", year: "numeric" };
 
 /**

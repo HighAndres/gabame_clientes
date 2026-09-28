@@ -1,4 +1,5 @@
 import { LoginForm } from "@/components/auth/login-form";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { entradaPorTipo, PARAM_TIPO } from "@/lib/entradas";
 import { conservarParams, leerOrigen } from "@/lib/origen";
 import { destinoSeguro } from "@/lib/redirect";
@@ -16,20 +17,32 @@ export default function LoginPage({ searchParams }: { searchParams: Params }) {
   const puerta = entradaPorTipo(params.get(PARAM_TIPO));
   const destino = destinoSeguro(params.get("redirect") ?? puerta?.destino);
   const origen = leerOrigen(params);
+  const baja = params.get("aviso") === "baja";
 
   return (
-    <section className="rounded-lg border bg-card p-7 md:p-9">
-      <div className="mb-6 flex flex-col gap-1.5">
-        {puerta && <p className="text-xs font-bold uppercase tracking-[0.08em] text-primary">{puerta.titulo}</p>}
-        <h1 className="text-[26px] font-bold">Iniciar sesión</h1>
-        <p className="text-sm text-muted-foreground">Entra con tu correo y contraseña.</p>
+    <section className="flex flex-col gap-5">
+      {baja && (
+        <Alert>
+          <AlertTitle>Tu cuenta quedó cerrada</AlertTitle>
+          <AlertDescription>
+            Registramos tu solicitud de baja y cerramos tu acceso. El grupo elimina tu cuenta después de
+            revisarla; si fue un error, escríbenos antes de que eso ocurra.
+          </AlertDescription>
+        </Alert>
+      )}
+      <div className="rounded-lg border bg-card p-7 md:p-9">
+        <div className="mb-6 flex flex-col gap-1.5">
+          {puerta && <p className="text-xs font-bold uppercase tracking-[0.08em] text-primary">{puerta.titulo}</p>}
+          <h1 className="text-[26px] font-bold">Iniciar sesión</h1>
+          <p className="text-sm text-muted-foreground">Entra con tu correo y contraseña.</p>
+        </div>
+        <LoginForm
+          destino={destino}
+          origen={origen}
+          enlaceRegistro={`/registro${conservarParams(params)}`}
+          enlaceRecuperar="/recuperar"
+        />
       </div>
-      <LoginForm
-        destino={destino}
-        origen={origen}
-        enlaceRegistro={`/registro${conservarParams(params)}`}
-        enlaceRecuperar="/recuperar"
-      />
     </section>
   );
 }

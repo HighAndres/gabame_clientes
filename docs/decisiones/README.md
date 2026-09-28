@@ -20,3 +20,4 @@ Una decision no se edita cuando cambia: se escribe un ADR nuevo que la supersede
 | 0013 | PUT/PATCH/DELETE viajan dentro de un POST (el firewall del portal los bloquea); Next llama al backend por red interna | Aceptado |
 | 0014 | El partner vuelve a solicitar tras un rechazo y corrige razon social y RFC; la audiencia pacientes es de GABAME ID | Aceptado (supersede una regla de 0009) |
 | 0015 | Que empresas del grupo existen para cada cuenta: solo el admin del grupo ve las cuatro; el paciente ve aquellas por las que entro | Aceptado |
+| 0016 | La persona descarga sus datos y pide la baja; el acceso se cierra al instante y el borrado lo confirma un admin | Aceptado |

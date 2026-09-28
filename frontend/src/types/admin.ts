@@ -4,6 +4,9 @@ import type { Audiencia, Empresa, EstadoValidacion, Modulo, Producto, Rol, Subti
 
 export interface UsuarioAdminOut extends UsuarioOut {
   activo: boolean;
+  /** La persona pidió la baja de su cuenta y espera el borrado (ADR-0016). */
+  baja_solicitada_en: string | null;
+  baja_motivo: string | null;
 }
 
 export interface PaginaUsuarios {

@@ -55,6 +55,7 @@ from app.schemas.contenido import AreaIn, AreaOut, AreaUpdate, FichaIn, FichaOut
 from app.schemas.partner import DecisionDocumentoIn, DocumentoOut
 from app.services import (
     administracion,
+    baja,
     bitacora,
     contenido,
     documentos,
@@ -175,6 +176,7 @@ def listar_usuarios(
     db: DbSession,
     rol: Rol | None = None,
     q: Annotated[str | None, Query(max_length=120)] = None,
+    bajas: bool = False,
     limit: Annotated[int, Query(ge=1, le=100)] = 25,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> PaginaUsuarios:
@@ -183,6 +185,8 @@ def listar_usuarios(
         base = base.where(Usuario.id.in_(select(UsuarioRol.usuario_id).where(UsuarioRol.rol == rol)))
     if q and q.strip():
         base = base.where(_coincide(_patron_busqueda(q), Usuario.email, Usuario.nombre, Usuario.apellidos))
+    if bajas:
+        base = base.where(Usuario.baja_solicitada_en.is_not(None))
     total = db.scalar(select(func.count()).select_from(base.subquery())) or 0
     items = db.scalars(base.order_by(Usuario.creado_en.desc()).limit(limit).offset(offset)).all()
     return PaginaUsuarios(total=total, items=[UsuarioAdminOut.desde_modelo(u) for u in items])
@@ -452,6 +456,17 @@ def cambiar_activo(
 ) -> UsuarioAdminOut:
     u = _usuario_visible(db, alcance, usuario_id)
     return UsuarioAdminOut.desde_modelo(administracion.cambiar_activo(db, actor, u, datos.activo))
+
+
+@router.delete("/usuarios/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_cuenta(
+    usuario_id: uuid.UUID, alcance: AlcanceCuentas, actor: UsuarioActual, db: DbSession
+) -> None:
+    """Borrado definitivo de una cuenta que pidio su baja (ADR-0016). La bitacora sobrevive."""
+    u = _usuario_visible(db, alcance, usuario_id)
+    if u.id == actor.id:
+        raise _prohibido("No puedes borrar tu propia cuenta desde aqui")
+    baja.eliminar(db, actor, u)
 
 
 @router.post("/usuarios/{usuario_id}/restablecer", status_code=status.HTTP_204_NO_CONTENT)
