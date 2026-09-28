@@ -85,6 +85,8 @@ export interface UsuarioOut {
   /** Agregado de los vinculos; el detalle por empresa va en `vinculos`. */
   estado_partner: EstadoValidacion | null;
   vinculos: VinculoResumenOut[];
+  /** Empresas del grupo que existen para esta cuenta (ADR-0015). El backend vuelve a decidirlo. */
+  empresas: Empresa[];
   creado_en: string;
 }
 

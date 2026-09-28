@@ -13,14 +13,22 @@ import type { EspacioMioOut } from "@/types/espacios";
  * Va como lista y no como tarjetas: son elementos equivalentes que se recorren con la vista, y
  * repetir el logotipo del grupo en cada uno era ruido, no marca. La empresa se dice con su nombre.
  */
-export function Novedades({ espacios, limite = 6 }: { espacios: EspacioMioOut[]; limite?: number }) {
+export function Novedades({
+  espacios,
+  limite = 6,
+  titulo = "Novedades del grupo",
+}: {
+  espacios: EspacioMioOut[];
+  limite?: number;
+  titulo?: string;
+}) {
   const novedades = novedadesDe(espacios, limite);
   if (novedades.length === 0) return null;
 
   return (
     <section className="flex flex-col gap-3">
-      <TituloSeccion href="/espacios" accion="Ver por empresa">
-        Novedades del grupo
+      <TituloSeccion href={espacios.length > 1 ? "/espacios" : undefined} accion="Ver por empresa">
+        {titulo}
       </TituloSeccion>
       <Lista>
         {novedades.map((n) => {

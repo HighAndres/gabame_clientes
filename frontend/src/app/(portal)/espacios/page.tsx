@@ -18,11 +18,13 @@ export default async function EspaciosPage() {
       <EncabezadoArea
         icono={Building2}
         etiqueta="El grupo"
-        titulo="Empresas del grupo"
+        titulo={espacios.length === 1 ? espacios[0].nombre : "Empresas del grupo"}
         descripcion={
-          partner
-            ? "Lo que cada empresa comparte contigo según tu vínculo con ella."
-            : "Lo que cada empresa del grupo comparte contigo."
+          espacios.length === 1
+            ? "Lo que esta empresa comparte contigo."
+            : partner
+              ? "Lo que cada empresa comparte contigo según tu vínculo con ella."
+              : "Lo que cada empresa del grupo comparte contigo."
         }
       />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

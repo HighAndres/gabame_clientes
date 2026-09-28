@@ -76,7 +76,10 @@ export interface ItemNav {
 /** Navegacion principal del portal segun roles. */
 export function navPara(u: UsuarioOut): ItemNav[] {
   const roles = u.roles.map((r) => r.rol);
-  const items: ItemNav[] = [{ href: "/dashboard", texto: "Inicio" }, { href: "/espacios", texto: "Empresas" }];
+  const items: ItemNav[] = [{ href: "/dashboard", texto: "Inicio" }];
+  // Con una sola empresa, "Empresas" es una pantalla de una tarjeta: su contenido ya esta en el
+  // inicio. El enlace aparece cuando hay algo que comparar (ADR-0015).
+  if (u.empresas.length > 1) items.push({ href: "/espacios", texto: "Empresas" });
   if (roles.includes("medico")) items.push({ href: "/medico", texto: "Área médica" });
   if (roles.includes("partner")) items.push({ href: "/partner", texto: "Partners" });
   if (alcanceDe(u).esAdmin) items.push({ href: "/admin", texto: "Administración" });

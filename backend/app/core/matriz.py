@@ -17,6 +17,7 @@ Reglas:
 
 from dataclasses import dataclass, field
 
+from app.core.ecosistema import empresa_de
 from app.core.enums import Empresa, Rol
 from app.models import Usuario
 
@@ -68,6 +69,38 @@ class Alcance:
         """Filtro de vinculos que puede aprobar: None = todas; conjunto = solo esas."""
         return None if self.grupo else self.admin
 
+
+def empresas_visibles(usuario: Usuario) -> frozenset[Empresa]:
+    """Que empresas del grupo existen para esta persona dentro del portal (ADR-0015).
+
+    Solo el administrador del grupo ve las cuatro; cualquier otra cuenta ve unicamente aquellas
+    con las que tiene algo que ver:
+
+    - administradores y editores: las de su alcance;
+    - partner: aquellas con las que tiene vinculo, en el estado que sea (si no, no podria ver
+      en que va su solicitud);
+    - medico: GABAME, duena del area medica y de Farmacias GABAME;
+    - paciente: aquellas por las que entro al portal, segun su historial de origenes. Quien
+      llego directo, sin pasar por ningun sitio del grupo, ve GABAME, que es el sitio ancla.
+
+    No es una regla de secreto —lo que se publica para pacientes es institucional— sino de
+    pertinencia: a un consumidor que llego por Ordan no le habla el espacio de A7.
+    """
+    alcance = alcance_de(usuario)
+    if alcance.es_admin:
+        return alcance.empresas
+
+    visibles: set[Empresa] = {v.empresa for v in usuario.vinculos}
+    if usuario.tiene_rol(Rol.MEDICO):
+        visibles.add(EMPRESA_DUENA_MEDICOS)
+    if usuario.tiene_rol(Rol.PACIENTE):
+        visibles |= {e for e in (empresa_de(o.producto) for o in usuario.origenes) if e is not None}
+        inicial = empresa_de(usuario.origen_inicial)
+        if inicial is not None:
+            visibles.add(inicial)
+        if not visibles:
+            visibles.add(EMPRESA_ANCLA)
+    return frozenset(visibles)
 
 def alcance_de(usuario: Usuario) -> Alcance:
     grupo = usuario.tiene_rol(Rol.ADMIN_GRUPO)

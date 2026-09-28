@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { alcanceDe, navAdmin } from "@/lib/matriz-roles";
+import { alcanceDe, navAdmin, navPara } from "@/lib/matriz-roles";
 import type { UsuarioOut } from "@/types/auth";
 
-function usuario(roles: UsuarioOut["roles"]): UsuarioOut {
+function usuario(roles: UsuarioOut["roles"], empresas: UsuarioOut["empresas"] = []): UsuarioOut {
   return {
     id: "u",
     email: "u@ejemplo.com",
@@ -17,6 +17,7 @@ function usuario(roles: UsuarioOut["roles"]): UsuarioOut {
     estado_medico: null,
     estado_partner: null,
     vinculos: [],
+    empresas,
     creado_en: "2026-01-01T00:00:00Z",
   };
 }
@@ -57,5 +58,18 @@ describe("alcanceDe", () => {
 
   it("un paciente no es admin", () => {
     expect(alcanceDe(usuario([{ rol: "paciente", empresa: null }])).esAdmin).toBe(false);
+  });
+});
+
+describe("navPara", () => {
+  it("con una sola empresa no ofrece la pantalla de Empresas", () => {
+    // Seria una pantalla de una tarjeta: su contenido ya esta en el inicio (ADR-0015).
+    const uno = navPara(usuario([{ rol: "paciente", empresa: null }], ["gabame"]));
+    expect(uno.map((n) => n.texto)).toEqual(["Inicio", "Mi cuenta"]);
+  });
+
+  it("con varias, si", () => {
+    const varias = navPara(usuario([{ rol: "partner", empresa: null }], ["ordan", "a7"]));
+    expect(varias.map((n) => n.texto)).toEqual(["Inicio", "Empresas", "Partners", "Mi cuenta"]);
   });
 });

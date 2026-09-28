@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 
 /**
@@ -22,6 +22,7 @@ export function BloquePrincipal({
   datos = [],
   href,
   accion,
+  externo = false,
 }: {
   etiqueta: string;
   titulo: string;
@@ -30,7 +31,10 @@ export function BloquePrincipal({
   datos?: DatoBloque[];
   href: string;
   accion: string;
+  /** El destino esta fuera del portal (la tienda del grupo): abre en otra pestana. */
+  externo?: boolean;
 }) {
+  const clases = "inline-flex items-center gap-1.5 self-start text-sm font-bold text-primary hover:text-primary-hover";
   return (
     <section className="aparece flex flex-col gap-5 rounded-xl border bg-card p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -61,13 +65,18 @@ export function BloquePrincipal({
         </dl>
       )}
 
-      <Link
-        href={href}
-        className="inline-flex items-center gap-1.5 self-start text-sm font-bold text-primary hover:text-primary-hover"
-      >
-        {accion}
-        <ArrowRight className="h-4 w-4" aria-hidden="true" />
-      </Link>
+      {externo ? (
+        <a href={href} target="_blank" rel="noopener noreferrer" className={clases}>
+          {accion}
+          <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+          <span className="sr-only">se abre en otra pestaña</span>
+        </a>
+      ) : (
+        <Link href={href} className={clases}>
+          {accion}
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
+      )}
     </section>
   );
 }

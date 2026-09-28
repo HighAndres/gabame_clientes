@@ -6,6 +6,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.enums import Empresa, EstadoValidacion, Producto, Realm, Rol, SubtipoPartner
+from app.core.matriz import empresas_visibles
 from app.models import Usuario
 from app.services.vinculos import estado_agregado
 
@@ -36,6 +37,9 @@ class UsuarioOut(BaseModel):
     # Agregado de los vinculos (ADR-0008); el detalle por empresa va en `vinculos`.
     estado_partner: EstadoValidacion | None = None
     vinculos: list[VinculoResumenOut] = []
+    # Empresas del grupo que existen para esta cuenta (ADR-0015). El backend vuelve a decidirlo
+    # en cada peticion; esto es para que el portal sepa que menus y secciones tienen sentido.
+    empresas: list[Empresa] = []
     creado_en: datetime
 
     @classmethod
@@ -52,6 +56,7 @@ class UsuarioOut(BaseModel):
             origen_inicial=u.origen_inicial,
             estado_medico=u.perfil_medico.estado if u.perfil_medico else None,
             estado_partner=estado_agregado(u.vinculos) if u.perfil_partner else None,
+            empresas=sorted(empresas_visibles(u)),
             vinculos=[VinculoResumenOut(empresa=v.empresa, tipo=v.tipo, estado=v.estado) for v in u.vinculos],
             creado_en=u.creado_en,
         )

@@ -7,7 +7,7 @@ import { Fila, Lista, TituloSeccion } from "@/components/ui/lista";
 import { leerAviso, PARAM_AVISO } from "@/lib/avisos-acceso";
 import { alcanceDe, EMPRESA_DUENA_MEDICOS, NOMBRE_EMPRESA } from "@/lib/matriz-roles";
 import { apiConSesion, leerUsuarioActual } from "@/lib/sesion";
-import type { ResumenAdmin } from "@/types/admin";
+import type { PiezaOut, ResumenAdmin } from "@/types/admin";
 import type { UsuarioOut } from "@/types/auth";
 import type { EspacioMioOut } from "@/types/espacios";
 import { TEXTO_VINCULO } from "@/types/partner";
@@ -30,11 +30,17 @@ function resumenEspacio(e: EspacioMioOut): string {
   return partes.join(" · ");
 }
 
-/** Promociones de Farmacias GABAME vigentes para el medico (mismo criterio que el area medica). */
-function promocionesDe(espacios: EspacioMioOut[]): number {
-  const gabame = espacios.find((e) => e.empresa === EMPRESA_DUENA_MEDICOS);
-  if (!gabame) return 0;
-  return gabame.publicaciones.filter((p) => p.audiencia === "medicos" && (p.url_externa || p.vigencia_hasta)).length;
+/** Lo publicado que lleva a la tienda o trae fecha de fin: eso es una promocion (ADR-0012). */
+function promocionesDe(espacios: EspacioMioOut[], audiencia: "medicos" | "pacientes", empresa?: string): number {
+  return espacios
+    .filter((e) => (empresa ? e.empresa === empresa : true))
+    .flatMap((e) => e.publicaciones)
+    .filter((p) => p.audiencia === audiencia && (p.url_externa || p.vigencia_hasta)).length;
+}
+
+/** La tienda que le corresponde a esta persona, si el cliente ya entrego su direccion. */
+function tiendaDe(piezas: PiezaOut[]): PiezaOut | undefined {
+  return piezas.find((p) => p.tipo === "tienda" && p.url);
 }
 
 /**
@@ -42,12 +48,16 @@ function promocionesDe(espacios: EspacioMioOut[]): number {
  * cifras dentro. Uno solo, por orden de urgencia: primero lo que hay que resolver, luego el rol
  * con el que se trabaja. El resto de las secciones sigue en la navegacion, no se duplica aqui.
  */
-async function bloqueDe(u: UsuarioOut, espacios: EspacioMioOut[]) {
+async function bloqueDe(
+  u: UsuarioOut,
+  espacios: EspacioMioOut[],
+  piezas: PiezaOut[],
+): Promise<{ nodo: React.ReactNode; piezaUsada?: string }> {
   const roles = u.roles.map((r) => r.rol);
   const admin = alcanceDe(u);
 
   if (roles.includes("medico") && (u.estado_medico === "pendiente" || u.estado_medico === "rechazado")) {
-    return (
+    const nodo = (
       <BloquePrincipal
         etiqueta="Pendiente"
         titulo="Acreditación profesional"
@@ -57,6 +67,7 @@ async function bloqueDe(u: UsuarioOut, espacios: EspacioMioOut[]) {
         accion={u.estado_medico === "rechazado" ? "Corregir y reenviar" : "Ver mi acreditación"}
       />
     );
+    return { nodo };
   }
 
   if (admin.esAdmin) {
@@ -76,7 +87,7 @@ async function bloqueDe(u: UsuarioOut, espacios: EspacioMioOut[]) {
         datos.push({ valor: r.usuarios_total ?? "—", etiqueta: "Usuarios", href: "/admin/usuarios" });
       }
     }
-    return (
+    const nodo = (
       <BloquePrincipal
         etiqueta="Administración"
         titulo={admin.grupo ? "Todo el grupo" : admin.empresas.map((e) => NOMBRE_EMPRESA[e]).join(", ")}
@@ -86,11 +97,12 @@ async function bloqueDe(u: UsuarioOut, espacios: EspacioMioOut[]) {
         accion="Ir a administración"
       />
     );
+    return { nodo };
   }
 
   if (roles.includes("medico") && u.estado_medico === "validado") {
-    const promociones = promocionesDe(espacios);
-    return (
+    const promociones = promocionesDe(espacios, "medicos", EMPRESA_DUENA_MEDICOS);
+    const nodo = (
       <BloquePrincipal
         etiqueta="Área médica"
         titulo="Portafolio Rx y Farmacias GABAME"
@@ -105,11 +117,12 @@ async function bloqueDe(u: UsuarioOut, espacios: EspacioMioOut[]) {
         accion="Entrar al área médica"
       />
     );
+    return { nodo };
   }
 
   if (roles.includes("partner")) {
     const aprobados = u.vinculos.filter((v) => v.estado === "validado").length;
-    return (
+    const nodo = (
       <BloquePrincipal
         etiqueta="GABAME Partners"
         titulo="Tus empresas y documentos"
@@ -124,9 +137,33 @@ async function bloqueDe(u: UsuarioOut, espacios: EspacioMioOut[]) {
         accion="Ir a Partners"
       />
     );
+    return { nodo };
   }
 
-  return null;
+  // El paciente no tenia bloque: su inicio era para leer y nada mas. Su tienda es lo que usa.
+  const tienda = tiendaDe(piezas);
+  if (tienda?.url) {
+    const promociones = promocionesDe(espacios, "pacientes");
+    const nodo = (
+      <BloquePrincipal
+        etiqueta={tienda.empresa ? NOMBRE_EMPRESA[tienda.empresa] : "El grupo"}
+        titulo={tienda.nombre}
+        descripcion={tienda.descripcion}
+        datos={
+          promociones > 0
+            ? [{ valor: promociones, etiqueta: promociones === 1 ? "promoción vigente" : "promociones vigentes" }]
+            : []
+        }
+        href={tienda.url}
+        accion="Ir a la tienda"
+        externo
+      />
+    );
+    // Ya aparece arriba: no se repite abajo entre las marcas y tiendas.
+    return { nodo, piezaUsada: tienda.producto };
+  }
+
+  return { nodo: null };
 }
 
 /** Inicio por rol (lienzo aprobado). Matriz provisional hasta 0.2. */
@@ -144,8 +181,17 @@ export default async function DashboardPage({
   } catch {
     espacios = [];
   }
+  let piezas: PiezaOut[] = [];
+  try {
+    piezas = await apiConSesion<PiezaOut[]>("/ecosistema");
+  } catch {
+    piezas = [];
+  }
   const conContenido = espacios.filter(tieneAlgoQueVer);
-  const bloque = await bloqueDe(u, espacios);
+  const { nodo: bloque, piezaUsada } = await bloqueDe(u, espacios, piezas);
+  // Con una sola empresa, la lista repetiria lo que ya esta en Novedades y en las tiendas.
+  const variasEmpresas = u.empresas.length > 1;
+  const unica = espacios.length === 1 ? espacios[0].nombre : null;
   const aviso = leerAviso(searchParams[PARAM_AVISO]);
 
   return (
@@ -158,9 +204,9 @@ export default async function DashboardPage({
 
       {bloque}
 
-      <Novedades espacios={espacios} />
+      <Novedades espacios={espacios} titulo={unica ? `Novedades de ${unica}` : "Novedades del grupo"} />
 
-      {conContenido.length > 0 && (
+      {variasEmpresas && conContenido.length > 0 && (
         <section className="flex flex-col gap-3">
           <TituloSeccion href="/espacios" accion="Ver todas">
             Empresas del grupo
@@ -183,7 +229,16 @@ export default async function DashboardPage({
         </section>
       )}
 
-      <Ecosistema titulo={u.realm === "partners" ? "Sitios y canales oficiales" : "Marcas y tiendas del grupo"} />
+      <Ecosistema
+        piezas={piezas.filter((p) => p.producto !== piezaUsada)}
+        titulo={
+          u.realm === "partners"
+            ? "Sitios y canales oficiales"
+            : variasEmpresas
+              ? "Marcas y tiendas del grupo"
+              : "Marcas y tiendas"
+        }
+      />
     </div>
   );
 }

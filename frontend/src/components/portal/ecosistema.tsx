@@ -11,12 +11,21 @@ const TIPO: Record<PiezaOut["tipo"], string> = { sitio: "Sitio", tienda: "Tienda
  * Marcas y tiendas del grupo como ENLACES. Nada mas: esta plataforma no consulta ninguna tienda.
  * Cada pieza aparece con su nombre (y el logo del grupo cuando es GABAME), nunca con su paleta.
  */
-export async function Ecosistema({ titulo = "Marcas y tiendas del grupo" }: { titulo?: string }) {
-  let piezas: PiezaOut[] = [];
-  try {
-    piezas = await apiConSesion<PiezaOut[]>("/ecosistema");
-  } catch {
-    return null;
+export async function Ecosistema({
+  titulo = "Marcas y tiendas del grupo",
+  piezas: recibidas,
+}: {
+  titulo?: string;
+  /** Si quien renderiza ya las pidio (el inicio las usa para su bloque principal), se reusan. */
+  piezas?: PiezaOut[];
+}) {
+  let piezas: PiezaOut[] = recibidas ?? [];
+  if (!recibidas) {
+    try {
+      piezas = await apiConSesion<PiezaOut[]>("/ecosistema");
+    } catch {
+      return null;
+    }
   }
   if (piezas.length === 0) return null;
 
